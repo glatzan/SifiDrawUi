@@ -56,8 +56,8 @@ export class DrawCanvasComponent implements AfterViewInit {
     this.captureEvents(canvasE2);
   }
 
-  public onRightClick() {
-    return false;
+  public onMouseMove(e) {
+    console.log(e);
   }
 
   public draw() {
@@ -82,38 +82,38 @@ export class DrawCanvasComponent implements AfterViewInit {
 // })
   private captureEvents(canvasEl: HTMLCanvasElement) {
 
-    fromEvent(canvasEl, 'mousedown').subscribe( x => console.log('mouse down'));
-    fromEvent(canvasEl, 'mouseup').subscribe( x => console.log('mouse up'));
-    // this will capture all mousedown events from the canvas element
-    fromEvent(canvasEl, 'mousemove').pipe(pairwise()).subscribe((res: [MouseEvent, MouseEvent]) => {
-        const rect = canvasEl.getBoundingClientRect();
-
-        res[1].preventDefault();
-
-        const button = res[1].buttons;
-
-        if (1 === button) {
-          // previous and current position with the offset
-          const prevPos = {
-            x: res[0].clientX - rect.left,
-            y: res[0].clientY - rect.top
-          };
-
-          const currentPos = {
-            x: res[1].clientX - rect.left,
-            y: res[1].clientY - rect.top
-          };
-
-
-          // this method we'll implement soon to do the actual drawing
-          this.drawOnCanvas(prevPos, currentPos);
-        } else if (2 === button) {
-          this.cx2.beginPath();
-          this.cx2.clearRect(res[0].clientX - rect.left - 26, res[0].clientY - rect.top - 26, 52, 52)
-          this.cx2.arc(res[1].clientX - rect.left, res[1].clientY - rect.top, 25, 0, 2 * Math.PI);
-          this.cx2.stroke();
-        }
-      });
+    // fromEvent(canvasEl, 'mousedown').subscribe( x => console.log('mouse down'));
+    // fromEvent(canvasEl, 'mouseup').subscribe( x => console.log('mouse up'));
+    // // this will capture all mousedown events from the canvas element
+    // fromEvent(canvasEl, 'mousemove').pipe(pairwise()).subscribe((res: [MouseEvent, MouseEvent]) => {
+    //     const rect = canvasEl.getBoundingClientRect();
+    //
+    //     res[1].preventDefault();
+    //
+    //     const button = res[1].buttons;
+    //
+    //     if (1 === button) {
+    //       // previous and current position with the offset
+    //       const prevPos = {
+    //         x: res[0].clientX - rect.left,
+    //         y: res[0].clientY - rect.top
+    //       };
+    //
+    //       const currentPos = {
+    //         x: res[1].clientX - rect.left,
+    //         y: res[1].clientY - rect.top
+    //       };
+    //
+    //
+    //       // this method we'll implement soon to do the actual drawing
+    //       this.drawOnCanvas(prevPos, currentPos);
+    //     } else if (2 === button) {
+    //       this.cx2.beginPath();
+    //       this.cx2.clearRect(res[0].clientX - rect.left - 26, res[0].clientY - rect.top - 26, 52, 52)
+    //       this.cx2.arc(res[1].clientX - rect.left, res[1].clientY - rect.top, 25, 0, 2 * Math.PI);
+    //       this.cx2.stroke();
+    //     }
+    //   });
   }
 
   private drawOnCanvas(

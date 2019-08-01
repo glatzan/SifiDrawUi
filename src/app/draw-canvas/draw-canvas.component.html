@@ -1,4 +1,12 @@
 <div style="position: relative;">
-  <canvas #canvas (contextmenu)="onRightClick($event)"  style="position: absolute; left: 0; top: 0; z-index: 0;"></canvas>
-  <canvas #canvas2 (contextmenu)="onRightClick($event)"  style="position: absolute; left: 0; top: 0; z-index: 10;"></canvas>
+  <canvas #canvas   style="position: absolute; left: 0; top: 0; z-index: 0;"></canvas>
+  <canvas #canvas2
+          (mousemove)="onMouseMove($event)"
+          (mousedown)="onMouseMove($event)"
+          (mouseup)="onMouseMove($event)"
+          (blur)="onMouseMove($event)"
+          (keydown)="onMouseMove($event)"
+          (contextmenu)=""
+          style="position: absolute; left: 0; top: 0; z-index: 10;"></canvas>
 </div>
+<!-- (contextmenu)="onRightClick($event)" -->
