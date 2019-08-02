@@ -82,7 +82,7 @@ export class DrawCanvasComponent implements AfterViewInit {
       if (this.mouseButton === 1) {
         this.drawOnCanvas(this.currentLayer, {x: event.clientX, y: event.clientY});
       } else if (this.mouseButton === 2) {
-        this.drawCircle({x: event.clientX, y: event.clientY});
+        this.drawCircle({x: event.clientX, y: event.clientY}, {x: event.client + event.movementX, y: event.clientY + event.movementY});
       }
     }
   }
@@ -118,9 +118,9 @@ export class DrawCanvasComponent implements AfterViewInit {
     }
   }
 
-  private drawCircle(currentPos: { x: number, y: number }) {
+  private drawCircle(currentPos: { x: number, y: number }, lastPos: { x: number, y: number }) {
     this.cx2.beginPath();
-    this.cx2.clearRect(currentPos.x - 26, currentPos.y - 26, 52, 52);
+    this.cx2.clearRect(lastPos.x - 26, lastPos.y - 26, 52, 52);
     this.cx2.arc(currentPos.x, currentPos.y, 25, 0, 2 * Math.PI);
     this.cx2.stroke();
   }
