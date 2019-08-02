@@ -1,6 +1,7 @@
 import {Component, OnInit, Input, ElementRef, AfterViewInit, ViewChild} from '@angular/core';
 import {fromEvent} from 'rxjs';
 import {switchMap, takeUntil, pairwise} from 'rxjs/operators';
+import {Layer} from '../model/layer';
 
 @Component({
   selector: 'app-draw-canvas',
@@ -28,6 +29,14 @@ export class DrawCanvasComponent implements AfterViewInit {
   private cx: CanvasRenderingContext2D;
   private cx2: CanvasRenderingContext2D;
 
+  private event: MouseEvent;
+
+  private mousePressed = false;
+  private mouseButton = 0;
+
+  private layers: Layer[];
+  private currentLayer: Layer;
+
   public ngAfterViewInit() {
     // get the context
     const canvasEl: HTMLCanvasElement = this.canvas.nativeElement;
@@ -50,14 +59,97 @@ export class DrawCanvasComponent implements AfterViewInit {
     this.cx2.lineCap = 'round';
     this.cx2.strokeStyle = '#fff';
 
-    this.imageObj.onload = () => { this.draw(); };
+    this.imageObj.onload = () => {
+      this.draw();
+    };
     this.imageObj.src = this.imageName;
+
+    this.layers = [];
+
     // we'll implement this method to start capturing mouse events
     this.captureEvents(canvasE2);
   }
 
-  public onMouseMove(e) {
-    console.log(e);
+
+  public onMouseMove(event: MouseEvent) {
+    if (this.mousePressed) {
+
+      if (event.ctrlKey) {
+        this.currentLayer.newLine();
+      }
+
+      console.log(this.mouseButton);
+      if (this.mouseButton === 1) {
+        this.drawOnCanvas(this.currentLayer, {x: event.clientX, y: event.clientY});
+      } else if (this.mouseButton === 2) {
+        this.drawCircle({x: event.clientX, y: event.clientY});
+      }
+    }
+  }
+
+
+  public onMouseDown(event: MouseEvent) {
+    this.currentLayer = this.getLayer(1);
+    this.mouseButton = event.buttons;
+    this.mousePressed = true;
+
+    this.onMouseMove(event);
+  }
+
+  public onMouseUp(event: MouseEvent) {
+    this.currentLayer = null;
+    this.mouseButton = 0;
+    this.mousePressed = false;
+  }
+
+  public onEvent(event: MouseEvent): void {
+  }
+
+  private getLayer(layerID: number): Layer {
+    if (this.layers.length === 0) {
+      return this.layers[0] = new Layer(layerID);
+    } else {
+      for (const layer of this.layers) {
+        if (layer.id === layerID) {
+          return layer;
+        }
+      }
+      return this.layers[this.layers.length - 1] = new Layer(layerID);
+    }
+  }
+
+  private drawCircle(currentPos: { x: number, y: number }) {
+    this.cx2.beginPath();
+    this.cx2.clearRect(currentPos.x - 26, currentPos.y - 26, 52, 52);
+    this.cx2.arc(currentPos.x, currentPos.y, 25, 0, 2 * Math.PI);
+    this.cx2.stroke();
+  }
+
+  private drawOnCanvas(layer: Layer, currentPos: { x: number, y: number }) {
+    // incase the context is not set
+    if (!this.cx) {
+      return;
+    }
+
+    layer.line.push({x: currentPos.x, y: currentPos.y});
+
+    if (layer.line.length <= 1) {
+      return;
+    }
+
+    const lastPoint = layer.line[layer.line.length - 2];
+
+    // start our drawing path
+    this.cx.beginPath();
+
+    // sets the start point
+    this.cx.moveTo(lastPoint.x, lastPoint.y); // from
+
+    // draws a line from the start pos until the current position
+    this.cx.lineTo(currentPos.x, currentPos.y);
+
+    // strokes the current path with the styles we set earlier
+    this.cx.stroke();
   }
 
   public draw() {
@@ -65,6 +157,7 @@ export class DrawCanvasComponent implements AfterViewInit {
     this.cx.clearRect(0, 0, this.canvas.nativeElement.width, this.canvas.nativeElement.height);
     this.cx.drawImage(this.imageObj, 0, 0, this.canvas.nativeElement.width, this.canvas.nativeElement.height);
   }
+
 // .pipe(
 //     switchMap((e) => {
 //   // after a mouse down, we'll record all mouse moves
@@ -116,29 +209,6 @@ export class DrawCanvasComponent implements AfterViewInit {
     //   });
   }
 
-  private drawOnCanvas(
-    prevPos: { x: number, y: number },
-    currentPos: { x: number, y: number }
-  ) {
-    // incase the context is not set
-    if (!this.cx) {
-      return;
-    }
 
-    // start our drawing path
-    this.cx.beginPath();
-
-    // we're drawing lines so we need a previous position
-    if (prevPos) {
-      // sets the start point
-      this.cx.moveTo(prevPos.x, prevPos.y); // from
-
-      // draws a line from the start pos until the current position
-      this.cx.lineTo(currentPos.x, currentPos.y);
-
-      // strokes the current path with the styles we set earlier
-      this.cx.stroke();
-    }
-  }
 }
 

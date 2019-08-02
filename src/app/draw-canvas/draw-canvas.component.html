@@ -1,12 +1,17 @@
 <div style="position: relative;">
   <canvas #canvas   style="position: absolute; left: 0; top: 0; z-index: 0;"></canvas>
   <canvas #canvas2
+
+          (mouseenter)="onEvent($event)"
+          (mouseleave)="onEvent($event)"
+          (blur)="onEvent($event)"
+
           (mousemove)="onMouseMove($event)"
-          (mousedown)="onMouseMove($event)"
-          (mouseup)="onMouseMove($event)"
-          (blur)="onMouseMove($event)"
+          (mousedown)="onMouseDown($event)"
+          (mouseup)="onMouseUp($event)"
+
           (keydown)="onMouseMove($event)"
-          (contextmenu)=""
+          (contextmenu)="onEvent($event)"
           style="position: absolute; left: 0; top: 0; z-index: 10;"></canvas>
 </div>
 <!-- (contextmenu)="onRightClick($event)" -->
