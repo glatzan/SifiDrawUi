@@ -1,5 +1,6 @@
-<div style="position: relative;">
-  <canvas #canvas   style="position: absolute; left: 0; top: 0; z-index: 0;"></canvas>
+<div style="height: 700px">
+  <img src="../../assets/92959.jpg">
+  <canvas #canvas style="position: absolute; left: 0; top: 0; z-index: 0;"></canvas>
   <canvas #canvas2
 
           (mouseenter)="onEvent($event)"
@@ -13,5 +14,41 @@
           (keydown)="onMouseMove($event)"
           (contextmenu)="onEvent($event)"
           style="position: absolute; left: 0; top: 0; z-index: 10;"></canvas>
+</div>
+<div style="width: 500px">
+  <div class="p-grid">
+
+    <div class="p-col">Layer</div>
+
+    <div class="p-col">
+      <p-dropdown [options]="layers" [(ngModel)]="currentLayer" optionLabel="id"></p-dropdown>
+    </div>
+
+    <div class="p-col">
+      <p-button icon="pi pi-plus" (onClick)="addLayer($event)"></p-button>
+    </div>
+    <div class="p-col">
+      <p-colorPicker [(ngModel)]="currentLayer.color" (onChange)="redrawLines()"></p-colorPicker>
+    </div>
+
+    <div class="p-col">
+      <span *ngFor="let x of currentLayer.points; let idx = index">
+        <a style="text-decoration: underline" *ngIf="x === currentLayer.line" href="#" (mouseenter)='highLightLine(idx)'
+           (mouseleave)="clearCanvasOverlay()"
+           (click)="selectPoints(idx)">[{{x.length}}]</a>
+        <a *ngIf="x !== currentLayer.line" href="#" (click)="selectPoints(idx)" (mouseenter)='highLightLine(idx)'
+           (mouseleave)="clearCanvasOverlay()">[{{x.length}}]</a>
+      </span>
+    </div>
+
+  </div>
+
+  <div class="p-grid">
+    <div class="p-col">1</div>
+    <div class="p-col">
+      <p-spinner [(ngModel)]="rightClickCircleSize"></p-spinner>
+    </div>
+  </div>
+  {{currentLayer}}
 </div>
 <!-- (contextmenu)="onRightClick($event)" -->

@@ -11,7 +11,24 @@ Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The app w
 Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
 
 ## Build
+Install : <br>
+ <ul>
+    <li> npm install primeflex --save </li>
+    <li> npm install primeng --save </li>
+    <li> npm install primeicons --save </li>
+    <li> npm install @angular/animations  --save </li>
+ </ul>
 
+Add in angular.json: <br>
+<pre>
+        "styles": [
+            "src/styles.css",
+            "node_modules/primeng/resources/primeng.css",
+            "node_modules/primeng/resources/themes/nova-dark/theme.css",
+            "node_modules/primeicons/primeicons.css",
+            "node_modules/primeflex/primeflex.css"
+         ],
+</pre>
 Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory. Use the `--prod` flag for a production build.
 
 ## Running unit tests

@@ -5,11 +5,18 @@ export class Layer {
   points: Point[][];
   line: Point[];
 
+  size: number = 1;
+  color: string = "#ffffff"
+
   constructor(id: number)
   constructor(id: number, points?: Point[][]) {
     this.id = id;
     this.points = points || [];
-    this.line = points && points[points.length - 1] || [];
+    this.line = points && points[(points.length - 1)];
+
+    if (!points) {
+      this.newLine();
+    }
   }
 
   public lastLine() {
@@ -20,7 +27,7 @@ export class Layer {
   }
 
   public newLine() {
-    this.points[this.points.length] = [];
+    this.points.push([]);
     this.line = this.points[this.points.length - 1];
   }
 }

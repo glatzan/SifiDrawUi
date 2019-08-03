@@ -2,6 +2,10 @@ import {Component, OnInit, Input, ElementRef, AfterViewInit, ViewChild} from '@a
 import {fromEvent} from 'rxjs';
 import {switchMap, takeUntil, pairwise} from 'rxjs/operators';
 import {Layer} from '../model/layer';
+import VectorUtils from "../utils/vector-utils";
+import {Point} from "../model/point";
+import vector from "../utils/vector-utils";
+import DrawUtil from "../utils/draw-util";
 
 @Component({
   selector: 'app-draw-canvas',
@@ -11,8 +15,9 @@ import {Layer} from '../model/layer';
 
 export class DrawCanvasComponent implements AfterViewInit {
 
-  imageObj = new Image();
-  imageName = '../../assets/92959.jpg';
+
+  // imageObj = new Image();
+  // imageName = '../../assets/92959.jpg';
 
   constructor() {
   }
@@ -34,10 +39,23 @@ export class DrawCanvasComponent implements AfterViewInit {
   private mousePressed = false;
   private mouseButton = 0;
 
-  private layers: Layer[];
-  private currentLayer: Layer;
+  private layers: Layer[] = [new Layer(1)];
+  private currentLayer = this.layers[0];
+
+  private lastPos: {
+    x: number, y: number
+  }
+
+  private rightClickCircleSize: number;
+
+  ngOnInit() {
+    this.lastPos = {x: 0, y: 0};
+    this.rightClickCircleSize = 15;
+  }
 
   public ngAfterViewInit() {
+
+
     // get the context
     const canvasEl: HTMLCanvasElement = this.canvas.nativeElement;
     const canvasE2: HTMLCanvasElement = this.canvas2.nativeElement;
@@ -54,55 +72,77 @@ export class DrawCanvasComponent implements AfterViewInit {
     this.cx.lineWidth = 1;
     this.cx.lineCap = 'round';
     this.cx.strokeStyle = '#fff';
+    this.cx.fillStyle = "#ff0000";
 
     this.cx2.lineWidth = 1;
     this.cx2.lineCap = 'round';
     this.cx2.strokeStyle = '#fff';
 
-    this.imageObj.onload = () => {
-      this.draw();
-    };
-    this.imageObj.src = this.imageName;
-
-    this.layers = [];
-
-    // we'll implement this method to start capturing mouse events
-    this.captureEvents(canvasE2);
   }
-
 
   public onMouseMove(event: MouseEvent) {
     if (this.mousePressed) {
-
-      if (event.ctrlKey) {
-        this.currentLayer.newLine();
-      }
-
-      console.log(this.mouseButton);
       if (this.mouseButton === 1) {
         this.drawOnCanvas(this.currentLayer, {x: event.clientX, y: event.clientY});
+        console.log(this.currentLayer.line.length)
       } else if (this.mouseButton === 2) {
-        this.drawCircle({x: event.clientX, y: event.clientY}, {x: event.client + event.movementX, y: event.clientY + event.movementY});
+        this.onMouseMoveWithRightClick(event);
       }
     }
   }
 
+  /**
+   * Mouse movement with right mouse button pressed
+   * @param event
+   */
+  public onMouseMoveWithRightClick(event: MouseEvent) {
+
+    let mousePos = {x: event.clientX, y: event.clientY};
+
+    DrawUtil.clearRect(this.cx2, this.width, this.height);
+    DrawUtil.drawCircle(this.cx2, mousePos, this.rightClickCircleSize);
+
+    if (event.ctrlKey) {
+      if (VectorUtils.removeCollidingPointListsOfCircle(this.currentLayer.points, mousePos, this.rightClickCircleSize)) {
+        DrawUtil.clearRect(this.cx, this.width, this.height);
+        DrawUtil.redrawCanvas(this.cx, this.layers);
+      }
+    } else {
+      if (VectorUtils.movePointListsToCircleBoundaries(this.currentLayer.points, mousePos, this.rightClickCircleSize)) {
+        DrawUtil.clearRect(this.cx, this.width, this.height);
+        DrawUtil.redrawCanvas(this.cx, this.layers);
+      }
+    }
+
+  }
+
+  public addLayer(event) {
+    this.layers.push(new Layer(this.layers.length + 1));
+    this.currentLayer = this.layers[this.layers.length - 1];
+  }
+
+  public selectPoints(index: number) {
+    this.currentLayer.line = this.currentLayer.points[index];
+  }
 
   public onMouseDown(event: MouseEvent) {
-    this.currentLayer = this.getLayer(1);
     this.mouseButton = event.buttons;
     this.mousePressed = true;
+
+    if (event.ctrlKey && event.buttons === 1) {
+      this.currentLayer.newLine();
+    }
 
     this.onMouseMove(event);
   }
 
   public onMouseUp(event: MouseEvent) {
-    this.currentLayer = null;
     this.mouseButton = 0;
     this.mousePressed = false;
   }
 
-  public onEvent(event: MouseEvent): void {
+  public onEvent(event: MouseEvent): boolean {
+    return false;
   }
 
   private getLayer(layerID: number): Layer {
@@ -118,12 +158,20 @@ export class DrawCanvasComponent implements AfterViewInit {
     }
   }
 
-  private drawCircle(currentPos: { x: number, y: number }, lastPos: { x: number, y: number }) {
-    this.cx2.beginPath();
-    this.cx2.clearRect(lastPos.x - 26, lastPos.y - 26, 52, 52);
-    this.cx2.arc(currentPos.x, currentPos.y, 25, 0, 2 * Math.PI);
-    this.cx2.stroke();
+  private highLightLine(index: number) {
+    DrawUtil.drawLineOnCanvas(this.cx2, this.currentLayer.points[index], "yellow", 4)
   }
+
+  private clearCanvasOverlay() {
+    DrawUtil.clearRect(this.cx2, this.canvas2.nativeElement.width, this.canvas2.nativeElement.height)
+  }
+
+  private redrawLines() {
+    console.log("redraw")
+    DrawUtil.clearRect(this.cx, this.width, this.height)
+    DrawUtil.redrawCanvas(this.cx, this.layers);
+  }
+
 
   private drawOnCanvas(layer: Layer, currentPos: { x: number, y: number }) {
     // incase the context is not set
@@ -139,76 +187,8 @@ export class DrawCanvasComponent implements AfterViewInit {
 
     const lastPoint = layer.line[layer.line.length - 2];
 
-    // start our drawing path
-    this.cx.beginPath();
+    DrawUtil.drawSingleLineOnCanvas(this.cx, lastPoint, currentPos);
 
-    // sets the start point
-    this.cx.moveTo(lastPoint.x, lastPoint.y); // from
-
-    // draws a line from the start pos until the current position
-    this.cx.lineTo(currentPos.x, currentPos.y);
-
-    // strokes the current path with the styles we set earlier
-    this.cx.stroke();
   }
-
-  public draw() {
-    // clear canvas
-    this.cx.clearRect(0, 0, this.canvas.nativeElement.width, this.canvas.nativeElement.height);
-    this.cx.drawImage(this.imageObj, 0, 0, this.canvas.nativeElement.width, this.canvas.nativeElement.height);
-  }
-
-// .pipe(
-//     switchMap((e) => {
-//   // after a mouse down, we'll record all mouse moves
-//   return fromEvent(canvasEl, 'mousemove')
-// .pipe(
-//     // we'll stop (and unsubscribe) once the user releases the mouse
-//     // this will trigger a 'mouseup' event
-//     takeUntil(fromEvent(canvasEl, 'mouseup')),
-//   // we'll also stop (and unsubscribe) once the mouse leaves the canvas (mouseleave event)
-//   takeUntil(fromEvent(canvasEl, 'mouseleave')),
-//   // pairwise lets us get the previous value to draw a line from
-//   // the previous point to the current point
-//   pairwise()
-// );
-// })
-  private captureEvents(canvasEl: HTMLCanvasElement) {
-
-    // fromEvent(canvasEl, 'mousedown').subscribe( x => console.log('mouse down'));
-    // fromEvent(canvasEl, 'mouseup').subscribe( x => console.log('mouse up'));
-    // // this will capture all mousedown events from the canvas element
-    // fromEvent(canvasEl, 'mousemove').pipe(pairwise()).subscribe((res: [MouseEvent, MouseEvent]) => {
-    //     const rect = canvasEl.getBoundingClientRect();
-    //
-    //     res[1].preventDefault();
-    //
-    //     const button = res[1].buttons;
-    //
-    //     if (1 === button) {
-    //       // previous and current position with the offset
-    //       const prevPos = {
-    //         x: res[0].clientX - rect.left,
-    //         y: res[0].clientY - rect.top
-    //       };
-    //
-    //       const currentPos = {
-    //         x: res[1].clientX - rect.left,
-    //         y: res[1].clientY - rect.top
-    //       };
-    //
-    //
-    //       // this method we'll implement soon to do the actual drawing
-    //       this.drawOnCanvas(prevPos, currentPos);
-    //     } else if (2 === button) {
-    //       this.cx2.beginPath();
-    //       this.cx2.clearRect(res[0].clientX - rect.left - 26, res[0].clientY - rect.top - 26, 52, 52)
-    //       this.cx2.arc(res[1].clientX - rect.left, res[1].clientY - rect.top, 25, 0, 2 * Math.PI);
-    //       this.cx2.stroke();
-    //     }
-    //   });
-  }
-
-
 }
 

@@ -1,8 +1,10 @@
-import { BrowserModule } from '@angular/platform-browser';
-import { NgModule } from '@angular/core';
+import {BrowserModule} from '@angular/platform-browser';
+import {NgModule} from '@angular/core';
 
-import { AppComponent } from './app.component';
-import { DrawCanvasComponent } from './draw-canvas/draw-canvas.component';
+import {AppComponent} from './app.component';
+import {DrawCanvasComponent} from './draw-canvas/draw-canvas.component';
+import {PaginatorModule, SpinnerModule, DropdownModule, ButtonModule, ColorPickerModule} from "primeng/primeng";
+import {BrowserAnimationsModule} from "@angular/platform-browser/animations";
 
 @NgModule({
   declarations: [
@@ -10,9 +12,15 @@ import { DrawCanvasComponent } from './draw-canvas/draw-canvas.component';
     DrawCanvasComponent
   ],
   imports: [
-    BrowserModule
+    BrowserModule,
+    BrowserAnimationsModule,
+    SpinnerModule,
+    PaginatorModule,
+    ButtonModule,
+    ColorPickerModule
   ],
   providers: [],
   bootstrap: [AppComponent]
 })
-export class AppModule { }
+export class AppModule {
+}
