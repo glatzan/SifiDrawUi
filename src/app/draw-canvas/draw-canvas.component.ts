@@ -33,7 +33,7 @@ export class DrawCanvasComponent implements AfterViewInit {
   @Input() public width = 1300;
   @Input() public height = 650;
 
-  private outerStyle = "position: relative; height: " + this.height +" px";
+  private outerStyle = "position: relative; height: " + this.height + " px";
   private cx: CanvasRenderingContext2D;
   private cx2: CanvasRenderingContext2D;
 
@@ -92,7 +92,7 @@ export class DrawCanvasComponent implements AfterViewInit {
       const e = this.canvas.nativeElement.getBoundingClientRect();
       let mousePos = {x: event.clientX - e.left, y: event.clientY - e.top};
 
-      if (this.mouseButton === 1 || this.mouseButton === 0) {
+      if (this.mouseButton === 1) {
         this.drawOnCanvas(this.currentLayer, mousePos);
       } else if (this.mouseButton === 2) {
         this.onMouseMoveWithRightClick(event, mousePos);
@@ -145,6 +145,7 @@ export class DrawCanvasComponent implements AfterViewInit {
   }
 
   public onMouseUp(event: MouseEvent) {
+    console.log("up " + event.buttons + " e")
     this.mouseButton = 0;
     this.mousePressed = false;
   }

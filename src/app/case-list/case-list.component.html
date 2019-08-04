@@ -1,3 +1,5 @@
 <p-scrollPanel [style]="{width: '100%', height: '100hv'}">
-  Contentdsds
+  <div *ngFor="let pD of projectData">
+    {{pD.name}}
+  </div>
 </p-scrollPanel>

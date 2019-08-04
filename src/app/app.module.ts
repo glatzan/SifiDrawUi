@@ -1,5 +1,6 @@
 import {BrowserModule} from '@angular/platform-browser';
 import {NgModule} from '@angular/core';
+import {HttpClientModule, HttpClient} from "@angular/common/http";
 
 import {AppComponent} from './app.component';
 import {DrawCanvasComponent} from './draw-canvas/draw-canvas.component';
@@ -14,6 +15,7 @@ import { CaseListComponent } from './case-list/case-list.component';
     CaseListComponent
   ],
   imports: [
+    HttpClientModule,
     BrowserModule,
     BrowserAnimationsModule,
     SpinnerModule,
