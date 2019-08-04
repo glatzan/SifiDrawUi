@@ -99,7 +99,7 @@ export default class VectorUtils {
       for (let y = lowerBound + 1; y < upperBound; y++) {
         let dist = VectorUtils.distance(points[y - 1], points[y]);
 
-        if (dist < 4) {
+        if (dist < 7) {
           points.splice(y, 1)
           upperBound--;
           indexOffset--;

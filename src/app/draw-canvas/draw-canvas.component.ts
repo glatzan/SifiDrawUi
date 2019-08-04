@@ -26,11 +26,14 @@ export class DrawCanvasComponent implements AfterViewInit {
   @ViewChild('canvas', {static: false}) public canvas: ElementRef;
   // a reference to the canvas element from our template
   @ViewChild('canvas2', {static: false}) public canvas2: ElementRef;
+  // a reference to the canvas element from our template
+  @ViewChild('container', {static: false}) public divContainer: ElementRef;
 
   // setting a width and height for the canvas
   @Input() public width = 1300;
   @Input() public height = 650;
 
+  private outerStyle = "position: relative; height: " + this.height +" px";
   private cx: CanvasRenderingContext2D;
   private cx2: CanvasRenderingContext2D;
 
@@ -68,6 +71,8 @@ export class DrawCanvasComponent implements AfterViewInit {
     canvasE2.width = this.width;
     canvasE2.height = this.height;
 
+    this.divContainer.nativeElement.height = this.height;
+
     // set some default properties about the line
     this.cx.lineWidth = 1;
     this.cx.lineCap = 'round';
@@ -77,16 +82,20 @@ export class DrawCanvasComponent implements AfterViewInit {
     this.cx2.lineWidth = 1;
     this.cx2.lineCap = 'round';
     this.cx2.strokeStyle = '#fff';
-
+    canvasEl
   }
 
   public onMouseMove(event: MouseEvent) {
+    console.log("move" + this.mouseButton)
     if (this.mousePressed) {
-      if (this.mouseButton === 1) {
-        this.drawOnCanvas(this.currentLayer, {x: event.clientX, y: event.clientY});
-        console.log(this.currentLayer.line.length)
+
+      const e = this.canvas.nativeElement.getBoundingClientRect();
+      let mousePos = {x: event.clientX - e.left, y: event.clientY - e.top};
+
+      if (this.mouseButton === 1 || this.mouseButton === 0) {
+        this.drawOnCanvas(this.currentLayer, mousePos);
       } else if (this.mouseButton === 2) {
-        this.onMouseMoveWithRightClick(event);
+        this.onMouseMoveWithRightClick(event, mousePos);
       }
     }
   }
@@ -95,9 +104,7 @@ export class DrawCanvasComponent implements AfterViewInit {
    * Mouse movement with right mouse button pressed
    * @param event
    */
-  public onMouseMoveWithRightClick(event: MouseEvent) {
-
-    let mousePos = {x: event.clientX, y: event.clientY};
+  public onMouseMoveWithRightClick(event: MouseEvent, mousePos: Point) {
 
     DrawUtil.clearRect(this.cx2, this.width, this.height);
     DrawUtil.drawCircle(this.cx2, mousePos, this.rightClickCircleSize);
@@ -126,6 +133,7 @@ export class DrawCanvasComponent implements AfterViewInit {
   }
 
   public onMouseDown(event: MouseEvent) {
+    console.log("down " + event.buttons + " e")
     this.mouseButton = event.buttons;
     this.mousePressed = true;
 

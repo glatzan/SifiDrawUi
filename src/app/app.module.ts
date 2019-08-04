@@ -3,13 +3,15 @@ import {NgModule} from '@angular/core';
 
 import {AppComponent} from './app.component';
 import {DrawCanvasComponent} from './draw-canvas/draw-canvas.component';
-import {PaginatorModule, SpinnerModule, DropdownModule, ButtonModule, ColorPickerModule} from "primeng/primeng";
+import {PaginatorModule, SpinnerModule, DropdownModule, ButtonModule, ScrollPanelModule, ColorPickerModule} from "primeng/primeng";
 import {BrowserAnimationsModule} from "@angular/platform-browser/animations";
+import { CaseListComponent } from './case-list/case-list.component';
 
 @NgModule({
   declarations: [
     AppComponent,
-    DrawCanvasComponent
+    DrawCanvasComponent,
+    CaseListComponent
   ],
   imports: [
     BrowserModule,
@@ -17,7 +19,8 @@ import {BrowserAnimationsModule} from "@angular/platform-browser/animations";
     SpinnerModule,
     PaginatorModule,
     ButtonModule,
-    ColorPickerModule
+    ColorPickerModule,
+    ScrollPanelModule
   ],
   providers: [],
   bootstrap: [AppComponent]

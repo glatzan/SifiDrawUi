@@ -1,37 +1,34 @@
-<div style="height: 700px">
-  <img src="../../assets/92959.jpg">
-  <canvas #canvas style="position: absolute; left: 0; top: 0; z-index: 0;"></canvas>
+<div #container style="position: relative">
+  <img src="../../assets/92959.jpg" style="position: absolute; left: 0; top: 0; z-index: 0;">
+  <canvas #canvas style="position: absolute; left: 0; top: 0; z-index: 5;"></canvas>
   <canvas #canvas2
-
           (mouseenter)="onEvent($event)"
           (mouseleave)="onEvent($event)"
           (blur)="onEvent($event)"
-
           (mousemove)="onMouseMove($event)"
           (mousedown)="onMouseDown($event)"
           (mouseup)="onMouseUp($event)"
-
           (keydown)="onMouseMove($event)"
           (contextmenu)="onEvent($event)"
           style="position: absolute; left: 0; top: 0; z-index: 10;"></canvas>
 </div>
-<div style="width: 500px">
-  <div class="p-grid">
 
-    <div class="p-col">Layer</div>
+<div class="ui-g">
 
-    <div class="p-col">
-      <p-dropdown [options]="layers" [(ngModel)]="currentLayer" optionLabel="id"></p-dropdown>
-    </div>
+  <div class="ui-g-1">Layer</div>
 
-    <div class="p-col">
-      <p-button icon="pi pi-plus" (onClick)="addLayer($event)"></p-button>
-    </div>
-    <div class="p-col">
-      <p-colorPicker [(ngModel)]="currentLayer.color" (onChange)="redrawLines()"></p-colorPicker>
-    </div>
+  <div class="ui-g-2">
+    <p-dropdown [options]="layers" [(ngModel)]="currentLayer" optionLabel="id"></p-dropdown>
+  </div>
 
-    <div class="p-col">
+  <div class="ui-g-1">
+    <p-button icon="pi pi-plus" (onClick)="addLayer($event)"></p-button>
+  </div>
+  <div class="ui-g-1">
+    <p-colorPicker [(ngModel)]="currentLayer.color" (onChange)="redrawLines()"></p-colorPicker>
+  </div>
+
+  <div class="ui-g-6">
       <span *ngFor="let x of currentLayer.points; let idx = index">
         <a style="text-decoration: underline" *ngIf="x === currentLayer.line" href="#" (mouseenter)='highLightLine(idx)'
            (mouseleave)="clearCanvasOverlay()"
@@ -39,9 +36,8 @@
         <a *ngIf="x !== currentLayer.line" href="#" (click)="selectPoints(idx)" (mouseenter)='highLightLine(idx)'
            (mouseleave)="clearCanvasOverlay()">[{{x.length}}]</a>
       </span>
-    </div>
-
   </div>
+
 
   <div class="p-grid">
     <div class="p-col">1</div>
