@@ -7,12 +7,14 @@ import {DrawCanvasComponent} from './draw-canvas/draw-canvas.component';
 import {PaginatorModule, SpinnerModule, DropdownModule, ButtonModule, ScrollPanelModule, ColorPickerModule} from "primeng/primeng";
 import {BrowserAnimationsModule} from "@angular/platform-browser/animations";
 import { CaseListComponent } from './case-list/case-list.component';
+import { ImageListComponent } from './image-list/image-list.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     DrawCanvasComponent,
-    CaseListComponent
+    CaseListComponent,
+    ImageListComponent
   ],
   imports: [
     HttpClientModule,
@@ -28,4 +30,5 @@ import { CaseListComponent } from './case-list/case-list.component';
   bootstrap: [AppComponent]
 })
 export class AppModule {
+
 }

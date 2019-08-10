@@ -1,4 +1,4 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, OnInit, EventEmitter, Output} from '@angular/core';
 import {ProjectData} from "../model/project-data";
 import {ProjectService} from "../service/project.service";
 import {Subscribable} from "rxjs";
@@ -11,6 +11,8 @@ import {Subscribable} from "rxjs";
 export class CaseListComponent implements OnInit {
 
   private projectData: ProjectData[];
+
+  @Output() selectProject = new EventEmitter<String>();
 
   constructor(public projectService: ProjectService) {
     this.loadData();

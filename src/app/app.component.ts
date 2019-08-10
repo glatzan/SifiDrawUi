@@ -7,5 +7,9 @@ import { Component } from '@angular/core';
 })
 export class AppComponent {
   title = 'SifiDrawUi';
+
+
+  onProjectSelect(id: String) {
+  }
 }
 
