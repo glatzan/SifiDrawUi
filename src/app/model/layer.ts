@@ -2,7 +2,7 @@ import {Point} from './point';
 
 export class Layer {
   id: number;
-  points: Point[][];
+  lines: Point[][];
   line: Point[];
 
   size: number = 1;
@@ -11,7 +11,7 @@ export class Layer {
   constructor(id: number)
   constructor(id: number, points?: Point[][]) {
     this.id = id;
-    this.points = points || [];
+    this.lines = points || [];
     this.line = points && points[(points.length - 1)];
 
     if (!points) {
@@ -20,14 +20,14 @@ export class Layer {
   }
 
   public lastLine() {
-    if (this.points.length === 0) {
-      this.points[0] = [];
+    if (this.lines.length === 0) {
+      this.lines[0] = [];
     }
-    this.line = this.points[this.points.length - 1];
+    this.line = this.lines[this.lines.length - 1];
   }
 
   public newLine() {
-    this.points.push([]);
-    this.line = this.points[this.points.length - 1];
+    this.lines.push([]);
+    this.line = this.lines[this.lines.length - 1];
   }
 }

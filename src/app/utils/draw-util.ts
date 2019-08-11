@@ -41,7 +41,7 @@ export default class DrawUtil {
 
   static redrawCanvas(cx: CanvasRenderingContext2D, layers: Layer[], size: number = 1, drawPoint: boolean = true) {
     layers.forEach(x => {
-      this.drawLinesOnCanvas(cx, x.points,x.color,x.size,drawPoint);
+      this.drawLinesOnCanvas(cx, x.lines,x.color,x.size,drawPoint);
     })
   }
 }

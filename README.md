@@ -22,7 +22,7 @@ Install : <br>
 Add in angular.json: <br>
 <pre>
         "styles": [
-            "src/styles.css",
+            "src/styles.scss",
             "node_modules/primeng/resources/primeng.css",
             "node_modules/primeng/resources/themes/nova-dark/theme.css",
             "node_modules/primeicons/primeicons.css",

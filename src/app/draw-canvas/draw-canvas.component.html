@@ -30,7 +30,7 @@
   </div>
 
   <div class="ui-g-6">
-      <span *ngFor="let x of currentLayer.points; let idx = index">
+      <span *ngFor="let x of currentLayer.lines; let idx = index">
         <a style="text-decoration: underline" *ngIf="x === currentLayer.line" href="#" (mouseenter)='highLightLine(idx)'
            (mouseleave)="clearCanvasOverlay()"
            (click)="selectPoints(idx)">[{{x.length}}]</a>

@@ -6,7 +6,7 @@ import {Subscribable} from "rxjs";
 @Component({
   selector: 'app-case-list',
   templateUrl: './case-list.component.html',
-  styleUrls: ['./case-list.component.css']
+  styleUrls: ['./case-list.component.scss']
 })
 export class CaseListComponent implements OnInit {
 
@@ -28,6 +28,10 @@ export class CaseListComponent implements OnInit {
   }
 
   ngOnInit() {
+  }
+
+  private onSelect(event, id) {
+    this.selectProject.emit(id);
   }
 
 }

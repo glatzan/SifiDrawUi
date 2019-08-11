@@ -1,6 +1,6 @@
-<p-scrollPanel [style]="{width: '100%', height: '100hv'}">
+<p-scrollPanel [style]="{width: '100%', height: '90vh'}">
   <div *ngFor="let pD of projectData">
-    {{pD.name}}
-    <p *ngFor="let subProject of pD.subProjects">{{subProject.name}}</p>
+    {{pD.id}}
+    <p *ngFor="let dataset of pD.datasets" (click)="onSelect($event,dataset.id)">{{dataset.id}}</p>
   </div>
 </p-scrollPanel>

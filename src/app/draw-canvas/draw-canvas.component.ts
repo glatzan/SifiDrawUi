@@ -10,7 +10,7 @@ import DrawUtil from "../utils/draw-util";
 @Component({
   selector: 'app-draw-canvas',
   templateUrl: './draw-canvas.component.html',
-  styleUrls: ['./draw-canvas.component.css']
+  styleUrls: ['./draw-canvas.component.scss']
 })
 
 export class DrawCanvasComponent implements AfterViewInit {
@@ -110,12 +110,12 @@ export class DrawCanvasComponent implements AfterViewInit {
     DrawUtil.drawCircle(this.cx2, mousePos, this.rightClickCircleSize);
 
     if (event.ctrlKey) {
-      if (VectorUtils.removeCollidingPointListsOfCircle(this.currentLayer.points, mousePos, this.rightClickCircleSize)) {
+      if (VectorUtils.removeCollidingPointListsOfCircle(this.currentLayer.lines, mousePos, this.rightClickCircleSize)) {
         DrawUtil.clearRect(this.cx, this.width, this.height);
         DrawUtil.redrawCanvas(this.cx, this.layers);
       }
     } else {
-      if (VectorUtils.movePointListsToCircleBoundaries(this.currentLayer.points, mousePos, this.rightClickCircleSize)) {
+      if (VectorUtils.movePointListsToCircleBoundaries(this.currentLayer.lines, mousePos, this.rightClickCircleSize)) {
         DrawUtil.clearRect(this.cx, this.width, this.height);
         DrawUtil.redrawCanvas(this.cx, this.layers);
       }
@@ -129,7 +129,7 @@ export class DrawCanvasComponent implements AfterViewInit {
   }
 
   public selectPoints(index: number) {
-    this.currentLayer.line = this.currentLayer.points[index];
+    this.currentLayer.line = this.currentLayer.lines[index];
   }
 
   public onMouseDown(event: MouseEvent) {
@@ -168,7 +168,7 @@ export class DrawCanvasComponent implements AfterViewInit {
   }
 
   private highLightLine(index: number) {
-    DrawUtil.drawLineOnCanvas(this.cx2, this.currentLayer.points[index], "yellow", 4)
+    DrawUtil.drawLineOnCanvas(this.cx2, this.currentLayer.lines[index], "yellow", 4)
   }
 
   private clearCanvasOverlay() {
