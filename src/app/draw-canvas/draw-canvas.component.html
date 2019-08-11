@@ -9,12 +9,12 @@
         (keydown)="onMouseMove($event)"
         (contextmenu)="onEvent($event)"></canvas>
 
-<div class="ui-g">
+<div class="ui-g" *ngIf="draw">
 
   <div class="ui-g-1">Layer</div>
 
   <div class="ui-g-2">
-    <p-dropdown [options]="layers" [(ngModel)]="currentLayer" optionLabel="id"></p-dropdown>
+    <p-dropdown [options]="image.layers" [(ngModel)]="currentLayer" optionLabel="id"></p-dropdown>
   </div>
 
   <div class="ui-g-1">

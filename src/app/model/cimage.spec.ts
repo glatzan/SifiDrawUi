@@ -1,4 +1,4 @@
-import { Image } from './image';
+import { Image } from './cimage';
 
 describe('Image', () => {
   it('should create an instance', () => {

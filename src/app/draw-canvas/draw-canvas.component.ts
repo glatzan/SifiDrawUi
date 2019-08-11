@@ -9,7 +9,7 @@ import DrawUtil from '../utils/draw-util';
 import {Dataset} from '../model/dataset';
 import {DatasetService} from '../service/dataset.service';
 import {ImageService} from '../service/image.service';
-import {CImage} from '../model/image';
+import {CImage} from '../model/cimage';
 
 @Component({
   selector: 'app-draw-canvas',
@@ -29,7 +29,7 @@ export class DrawCanvasComponent implements AfterViewInit {
    */
   private image: CImage;
 
-  private currentLayer = this.image.layers[0];
+  private currentLayer: Layer
 
   private drawImage = new Image();
 
@@ -45,6 +45,8 @@ export class DrawCanvasComponent implements AfterViewInit {
 
   private mouseButton = 0;
 
+  private draw = false
+
   private lastPos: {
     x: number, y: number
   };
@@ -53,6 +55,7 @@ export class DrawCanvasComponent implements AfterViewInit {
     // draw on load
     this.drawImage.onload = () => {
       this.redrawUI();
+      this.initializeImage();
     };
   }
 
@@ -97,7 +100,19 @@ export class DrawCanvasComponent implements AfterViewInit {
 
   }
 
+  public initializeImage(){
+    this.draw = true;
+    if(this.image.layers.length === 0){
+      this.image.layers.push(new Layer(this.image.layers.length + 1));
+    }
+    this.currentLayer = this.image.layers[0];
+  }
+
   public onMouseMove(event: MouseEvent) {
+
+    if(!this.draw)
+      return;
+
     console.log('move' + this.mouseButton);
     if (this.mousePressed) {
 
@@ -117,7 +132,6 @@ export class DrawCanvasComponent implements AfterViewInit {
    * @param event
    */
   public onMouseMoveWithRightClick(event: MouseEvent, mousePos: Point) {
-
     this.redrawUI();
     DrawUtil.drawCircle(this.cx, mousePos, this.rightClickCircleSize);
 
@@ -145,6 +159,9 @@ export class DrawCanvasComponent implements AfterViewInit {
   }
 
   public onMouseDown(event: MouseEvent) {
+    if(!this.draw)
+      return;
+
     console.log('down ' + event.buttons + ' e');
     this.mouseButton = event.buttons;
     this.mousePressed = true;
@@ -157,6 +174,9 @@ export class DrawCanvasComponent implements AfterViewInit {
   }
 
   public onMouseUp(event: MouseEvent) {
+    if(!this.draw)
+      return;
+
     console.log('up ' + event.buttons + ' e');
     this.mouseButton = 0;
     this.mousePressed = false;

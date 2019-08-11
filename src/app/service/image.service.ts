@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import {HttpClient, HttpHeaders} from '@angular/common/http';
 import {Observable} from 'rxjs';
 import {ProjectData} from '../model/project-data';
-import {Image} from '../model/image';
+import {CImage} from '../model/cimage';
 
 @Injectable({
   providedIn: 'root'
@@ -14,13 +14,13 @@ export class ImageService {
   constructor(private _http: HttpClient) {
   }
 
-  public getImage(id: string): Observable<Image> {
+  public getImage(id: string): Observable<CImage> {
     const httpOptions = {
       headers: new HttpHeaders({
         'Content-Type': 'application/json'
       })
     }
 
-    return this._http.get<Image>(`${this.serverURL}/image/${id}`, httpOptions);
+    return this._http.get<CImage>(`${this.serverURL}/image/${id}`, httpOptions);
   }
 }
