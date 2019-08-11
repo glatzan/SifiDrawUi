@@ -6,7 +6,7 @@ export class Layer {
   line: Point[];
 
   size: number = 1;
-  color: string = "#ffffff"
+  color: string = '#ffffff';
 
   constructor(id: number)
   constructor(id: number, points?: Point[][]) {

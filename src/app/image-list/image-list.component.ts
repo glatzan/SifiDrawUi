@@ -10,15 +10,15 @@ import {ProjectData} from "../model/project-data";
 })
 export class ImageListComponent implements OnInit {
 
-  private _selectedProjectId: String;
+  private _selectedProjectId: string;
   private dataset: Dataset = new Dataset();
-  @Output() selectImage = new EventEmitter<String>();
+  @Output() selectImage = new EventEmitter<string>();
 
   constructor(public datasetService: DatasetService) {
   }
 
   @Input()
-  set selectedProjectId(selectedProjectId: String) {
+  set selectedProjectId(selectedProjectId: string) {
     console.log('prev value: ', this._selectedProjectId);
     console.log('got name: ', selectedProjectId);
     this._selectedProjectId = selectedProjectId;
@@ -28,11 +28,15 @@ export class ImageListComponent implements OnInit {
         this.dataset = data;
       }, error1 => {
         console.log("Fehler beim laden der Dataset Datein")
-        console.error(error1)
-      })
+        console.error(error1);
+      });
   }
 
   ngOnInit() {
+  }
+
+  private onSelect(event, id) {
+    this.selectImage.emit(id);
   }
 
 }

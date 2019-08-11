@@ -1,18 +1,13 @@
-<div #container style="position: relative">
-  <img src="../../assets/92959.jpg" style="position: absolute; left: 0; top: 0; z-index: 0;">
-  <canvas #canvas style="position: absolute; left: 0; top: 0; z-index: 5;"></canvas>
-  <canvas #canvas2
-          (mouseenter)="onEvent($event)"
-          (mouseleave)="onEvent($event)"
-          (blur)="onEvent($event)"
-          (mousemove)="onMouseMove($event)"
-          (mousedown)="onMouseDown($event)"
-          (mouseup)="onMouseUp($event)"
-          (click)="onMouseDown($event)"
-          (keydown)="onMouseMove($event)"
-          (contextmenu)="onEvent($event)"
-          style="position: absolute; left: 0; top: 0; z-index: 10;"></canvas>
-</div>
+<canvas #canvas
+        (mouseenter)="onEvent($event)"
+        (mouseleave)="onEvent($event)"
+        (blur)="onEvent($event)"
+        (mousemove)="onMouseMove($event)"
+        (mousedown)="onMouseDown($event)"
+        (mouseup)="onMouseUp($event)"
+        (click)="onMouseDown($event)"
+        (keydown)="onMouseMove($event)"
+        (contextmenu)="onEvent($event)"></canvas>
 
 <div class="ui-g">
 

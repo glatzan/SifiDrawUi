@@ -9,13 +9,17 @@ import {Dataset} from "./model/dataset";
 export class AppComponent {
   title = 'SifiDrawUi';
 
-  private selectedDatasetId: String;
+  private selectedDatasetId: string;
+  private selectedImageId: string;
 
-  private dataset : Dataset
-
-  onDatasetSelect(id: String) {
+  onDatasetSelect(id: string) {
     console.log(id)
-    this.selectedDatasetId = id
+    this.selectedDatasetId = id;
+  }
+
+  onImageSelect(id: string) {
+    console.log(id)
+    this.selectedImageId = id;
   }
 }
 

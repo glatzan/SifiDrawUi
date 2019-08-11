@@ -5,9 +5,9 @@
     <app-case-list (selectProject)="onDatasetSelect($event)"></app-case-list>
   </div>
   <div class="ui-g-1">
-    <app-image-list [selectedProjectId]="selectedDatasetId"></app-image-list>
+    <app-image-list [selectedProjectId]="selectedDatasetId" (selectImage)="onImageSelect($event)"></app-image-list>
   </div>
-  <!--  <div  class="ui-g-8">-->
-  <!--    <app-draw-canvas></app-draw-canvas>-->
-  <!--  </div>-->
+  <div class="ui-g-8">
+    <app-draw-canvas [selectedImage]="selectedImageId"></app-draw-canvas>
+  </div>
 </div>

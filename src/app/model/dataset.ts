@@ -1,6 +1,7 @@
-import {Image} from "./image";
+import {CImage} from './image';
 
 export class Dataset {
-  public id : String;
-  public images : Image[];
+  public id: string;
+  public name: string;
+  public images: CImage[];
 }
