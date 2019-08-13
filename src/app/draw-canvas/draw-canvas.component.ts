@@ -1,16 +1,12 @@
 import {Component, OnInit, Input, ElementRef, AfterViewInit, ViewChild} from '@angular/core';
-import {fromEvent} from 'rxjs';
-import {switchMap, takeUntil, pairwise} from 'rxjs/operators';
 import {Layer} from '../model/layer';
 import VectorUtils from '../utils/vector-utils';
 import {Point} from '../model/point';
-import vector from '../utils/vector-utils';
 import DrawUtil from '../utils/draw-util';
-import {Dataset} from '../model/dataset';
-import {DatasetService} from '../service/dataset.service';
 import {ImageService} from '../service/image.service';
 import {CImage} from '../model/cimage';
 import CImageUtil from '../utils/cimage-util';
+import {debounceTime} from 'rxjs/operators';
 
 @Component({
   selector: 'app-draw-canvas',
@@ -50,6 +46,8 @@ export class DrawCanvasComponent implements AfterViewInit {
 
   private renderContext = false;
 
+  private currentSaveTimeout: any = undefined;
+
   private lastPos: {
     x: number, y: number
   };
@@ -76,6 +74,12 @@ export class DrawCanvasComponent implements AfterViewInit {
   }
 
   private prepareImage(image: CImage) {
+    // save manually if image should be changed
+    if (this.currentSaveTimeout !== undefined) {
+      this.cancelSaveTimeout();
+      this.save();
+    }
+
     CImageUtil.prepareImage(image);
     this.image = image;
     this.currentLayer = image.layers[0];
@@ -122,6 +126,7 @@ export class DrawCanvasComponent implements AfterViewInit {
 
       if (this.mouseButton === 1) {
         this.newLineOnCanvas(this.currentLayer, mousePos);
+        this.saveContent();
         this.redrawUI();
       } else if (this.mouseButton === 2) {
         this.onMouseMoveWithRightClick(event, mousePos);
@@ -136,9 +141,11 @@ export class DrawCanvasComponent implements AfterViewInit {
 
     if (event.ctrlKey) {
       if (VectorUtils.removeCollidingPointListsOfCircle(this.currentLayer.lines, mousePos, this.rightClickCircleSize)) {
+        this.saveContent();
       }
     } else {
       if (VectorUtils.movePointListsToCircleBoundaries(this.currentLayer.lines, mousePos, this.rightClickCircleSize)) {
+        this.saveContent();
       }
     }
     this.redrawUI();
@@ -164,7 +171,7 @@ export class DrawCanvasComponent implements AfterViewInit {
     this.mousePressed = true;
 
     if (event.ctrlKey && event.buttons === 1) {
-      this.currentLayer.newLine();
+      CImageUtil.newLine(this.currentLayer);
     }
 
     this.onMouseMove(event);
@@ -205,8 +212,20 @@ export class DrawCanvasComponent implements AfterViewInit {
     layer.line.push({x: currentPos.x, y: currentPos.y});
   }
 
-  private saveContent(event) {
-    console.log(this.image.id)
+  private saveContent() {
+    this.cancelSaveTimeout();
+    this.currentSaveTimeout = setTimeout(() => {
+      this.save();
+    }, 1000);
+  }
+
+  private cancelSaveTimeout(): void {
+    clearTimeout(this.currentSaveTimeout);
+    this.currentSaveTimeout = undefined;
+  }
+
+  private save() {
+    console.log(this.image.id);
     this.imageService.setImage(this.image).subscribe(() => {
       console.log('saved');
     }, error1 => {
