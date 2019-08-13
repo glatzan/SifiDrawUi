@@ -9,38 +9,50 @@
         (keydown)="onMouseMove($event)"
         (contextmenu)="onEvent($event)"></canvas>
 
-<div class="ui-g" *ngIf="draw">
-
-  <div class="ui-g-1">Layer</div>
-
-  <div class="ui-g-2">
-    <p-dropdown [options]="image.layers" [(ngModel)]="currentLayer" optionLabel="id"></p-dropdown>
-  </div>
-
-  <div class="ui-g-1">
-    <p-button icon="pi pi-plus" (onClick)="addLayer($event)"></p-button>
-  </div>
-  <div class="ui-g-1">
-    <p-colorPicker [(ngModel)]="currentLayer.color" (onChange)="redrawLines()"></p-colorPicker>
-  </div>
-
-  <div class="ui-g-6">
-      <span *ngFor="let x of currentLayer.lines; let idx = index">
-        <a style="text-decoration: underline" *ngIf="x === currentLayer.line" href="#" (mouseenter)='highLightLine(idx)'
-           (mouseleave)="clearCanvasOverlay()"
-           (click)="selectPoints(idx)">[{{x.length}}]</a>
-        <a *ngIf="x !== currentLayer.line" href="#" (click)="selectPoints(idx)" (mouseenter)='highLightLine(idx)'
-           (mouseleave)="clearCanvasOverlay()">[{{x.length}}]</a>
-      </span>
-  </div>
-
-
-  <div class="p-grid">
-    <div class="p-col">1</div>
-    <div class="p-col">
-      <p-spinner [(ngModel)]="rightClickCircleSize"></p-spinner>
-    </div>
-  </div>
-  {{currentLayer}}
+<div *ngIf="renderContext">
+  <table>
+    <tr>
+      <td>
+        Layer
+      </td>
+      <td>
+        <p-dropdown [options]="image.layers" [(ngModel)]="currentLayer" optionLabel="id"></p-dropdown>
+      </td>
+      <td>
+        <p-button icon="pi pi-plus" (onClick)="addLayer($event)"></p-button>
+      </td>
+      <td>
+        Farbe
+      </td>
+      <td>
+        <p-colorPicker [(ngModel)]="currentLayer.color" (onChange)="redrawUI()"></p-colorPicker>
+      </td>
+      <td>
+        Dicke
+      </td>
+      <td>
+        <p-spinner [(ngModel)]="currentLayer.size" (onChange)="redrawUI()" [min]="1" size="1"></p-spinner>
+      </td>
+      <td>
+            <span *ngFor="let x of currentLayer.lines; let idx = index">
+            <a style="text-decoration: underline" href="#"
+               (mouseenter)='highLightLine(idx)'
+               (mouseleave)="redrawUI()"
+               (click)="selectPoints(idx)">[{{x.length}}]</a>
+          </span>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        Radierer
+      </td>
+      <td>
+        <p-spinner [(ngModel)]="rightClickCircleSize" size="2"></p-spinner>
+      </td>
+      <td colspan="6">
+        (strg: löschen)
+      </td>
+    </tr>
+  </table>
+  <p-button icon="pi pi-plus" (onClick)="saveContent($event)"></p-button>
 </div>
-<!-- (contextmenu)="onRightClick($event)" -->

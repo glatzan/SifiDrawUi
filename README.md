@@ -29,6 +29,13 @@ Add in angular.json: <br>
             "node_modules/primeflex/primeflex.css"
          ],
 </pre>
+
+ 
+ https://material.angular.io/guide/getting-started
+ 
+ npm install --save @angular/material @angular/cdk @angular/animations
+
+
 Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory. Use the `--prod` flag for a production build.
 
 ## Running unit tests

@@ -10,6 +10,7 @@ import {Dataset} from '../model/dataset';
 import {DatasetService} from '../service/dataset.service';
 import {ImageService} from '../service/image.service';
 import {CImage} from '../model/cimage';
+import CImageUtil from '../utils/cimage-util';
 
 @Component({
   selector: 'app-draw-canvas',
@@ -29,7 +30,9 @@ export class DrawCanvasComponent implements AfterViewInit {
    */
   private image: CImage;
 
-  private currentLayer: Layer
+  private currentLayerId = 1;
+
+  private currentLayer: Layer;
 
   private drawImage = new Image();
 
@@ -45,7 +48,7 @@ export class DrawCanvasComponent implements AfterViewInit {
 
   private mouseButton = 0;
 
-  private draw = false
+  private renderContext = false;
 
   private lastPos: {
     x: number, y: number
@@ -55,7 +58,6 @@ export class DrawCanvasComponent implements AfterViewInit {
     // draw on load
     this.drawImage.onload = () => {
       this.redrawUI();
-      this.initializeImage();
     };
   }
 
@@ -64,8 +66,8 @@ export class DrawCanvasComponent implements AfterViewInit {
   set selectedImage(selectedImageId: string) {
     if (selectedImageId !== undefined) {
       this.imageService.getImage(selectedImageId).subscribe((data: CImage) => {
-        this.image = data;
-        this.drawImage.src = 'data:image/png;base64,' + this.image.data;
+        console.log('Image select' + data.name);
+        this.prepareImage(data);
       }, error1 => {
         console.log('Fehler beim laden der Dataset Datein');
         console.error(error1);
@@ -73,15 +75,24 @@ export class DrawCanvasComponent implements AfterViewInit {
     }
   }
 
+  private prepareImage(image: CImage) {
+    CImageUtil.prepareImage(image);
+    this.image = image;
+    this.currentLayer = image.layers[0];
+    this.renderContext = true;
+    this.drawImage.src = 'data:image/png;base64,' + this.image.data;
+  }
+
   private redrawUI() {
     this.cx.drawImage(this.drawImage, 0, 0);
+    DrawUtil.redrawCanvas(this.cx, this.image.layers);
   }
 
   public ngAfterViewInit() {
 
     this.lastPos = {x: 0, y: 0};
 
-    this.rightClickCircleSize = 15;
+    this.rightClickCircleSize = 40;
 
     // get the context
     const canvasEl: HTMLCanvasElement = this.canvas.nativeElement;
@@ -91,7 +102,6 @@ export class DrawCanvasComponent implements AfterViewInit {
     canvasEl.width = this.width;
     canvasEl.height = this.height;
 
-
     // set some default properties about the line
     this.cx.lineWidth = 1;
     this.cx.lineCap = 'round';
@@ -100,27 +110,19 @@ export class DrawCanvasComponent implements AfterViewInit {
 
   }
 
-  public initializeImage(){
-    this.draw = true;
-    if(this.image.layers.length === 0){
-      this.image.layers.push(new Layer(this.image.layers.length + 1));
-    }
-    this.currentLayer = this.image.layers[0];
-  }
-
   public onMouseMove(event: MouseEvent) {
-
-    if(!this.draw)
+    if (!this.drawImage) {
       return;
+    }
 
     console.log('move' + this.mouseButton);
     if (this.mousePressed) {
-
       const e = this.canvas.nativeElement.getBoundingClientRect();
       let mousePos = {x: event.clientX - e.left, y: event.clientY - e.top};
 
       if (this.mouseButton === 1) {
-        this.drawOnCanvas(this.currentLayer, mousePos);
+        this.newLineOnCanvas(this.currentLayer, mousePos);
+        this.redrawUI();
       } else if (this.mouseButton === 2) {
         this.onMouseMoveWithRightClick(event, mousePos);
       }
@@ -129,28 +131,22 @@ export class DrawCanvasComponent implements AfterViewInit {
 
   /**
    * Mouse movement with right mouse button pressed
-   * @param event
    */
   public onMouseMoveWithRightClick(event: MouseEvent, mousePos: Point) {
-    this.redrawUI();
-    DrawUtil.drawCircle(this.cx, mousePos, this.rightClickCircleSize);
 
     if (event.ctrlKey) {
       if (VectorUtils.removeCollidingPointListsOfCircle(this.currentLayer.lines, mousePos, this.rightClickCircleSize)) {
-        DrawUtil.clearRect(this.cx, this.width, this.height);
-        DrawUtil.redrawCanvas(this.cx, this.image.layers);
       }
     } else {
       if (VectorUtils.movePointListsToCircleBoundaries(this.currentLayer.lines, mousePos, this.rightClickCircleSize)) {
-        DrawUtil.clearRect(this.cx, this.width, this.height);
-        DrawUtil.redrawCanvas(this.cx, this.image.layers);
       }
     }
-
+    this.redrawUI();
+    DrawUtil.drawCircle(this.cx, mousePos, this.rightClickCircleSize);
   }
 
   public addLayer(event) {
-    this.image.layers.push(new Layer(this.image.layers.length + 1));
+    this.image.layers = [...this.image.layers, (new Layer(this.image.layers.length + 1))];
     this.currentLayer = this.image.layers[this.image.layers.length - 1];
   }
 
@@ -159,8 +155,9 @@ export class DrawCanvasComponent implements AfterViewInit {
   }
 
   public onMouseDown(event: MouseEvent) {
-    if(!this.draw)
+    if (!this.drawImage) {
       return;
+    }
 
     console.log('down ' + event.buttons + ' e');
     this.mouseButton = event.buttons;
@@ -174,8 +171,9 @@ export class DrawCanvasComponent implements AfterViewInit {
   }
 
   public onMouseUp(event: MouseEvent) {
-    if(!this.draw)
+    if (!this.drawImage) {
       return;
+    }
 
     console.log('up ' + event.buttons + ' e');
     this.mouseButton = 0;
@@ -203,33 +201,18 @@ export class DrawCanvasComponent implements AfterViewInit {
     DrawUtil.drawLineOnCanvas(this.cx, this.currentLayer.lines[index], 'yellow', 4);
   }
 
-  private clearCanvasOverlay() {
-    DrawUtil.clearRect(this.cx, this.canvas.nativeElement.width, this.canvas.nativeElement.height);
-  }
-
-  private redrawLines() {
-    console.log('redraw');
-    DrawUtil.clearRect(this.cx, this.width, this.height);
-    DrawUtil.redrawCanvas(this.cx, this.image.layers);
-  }
-
-
-  private drawOnCanvas(layer: Layer, currentPos: { x: number, y: number }) {
-    // incase the context is not set
-    if (!this.cx) {
-      return;
-    }
-
+  private newLineOnCanvas(layer: Layer, currentPos: { x: number, y: number }) {
     layer.line.push({x: currentPos.x, y: currentPos.y});
+  }
 
-    if (layer.line.length <= 1) {
-      return;
-    }
-
-    const lastPoint = layer.line[layer.line.length - 2];
-
-    DrawUtil.drawSingleLineOnCanvas(this.cx, lastPoint, currentPos);
-
+  private saveContent(event) {
+    console.log(this.image.id)
+    this.imageService.setImage(this.image).subscribe(() => {
+      console.log('saved');
+    }, error1 => {
+      console.log('Fehler beim laden der Dataset Datein');
+      console.error(error1);
+    });
   }
 }
 
