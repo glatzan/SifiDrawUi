@@ -1,9 +1,9 @@
-import {Point} from "../model/point";
-import {Layer} from "../model/layer";
+import {Point} from '../model/point';
+import {Layer} from '../model/layer';
 
 export default class DrawUtil {
 
-  static drawSingleLineOnCanvas(cx: CanvasRenderingContext2D, p1: Point, p2: Point, color: string = "#fff", size: number = 1, drawPoint: boolean = true) {
+  static drawSingleLineOnCanvas(cx: CanvasRenderingContext2D, p1: Point, p2: Point, color: string = '#fff', size: number = 1, drawPoint: boolean = true) {
     cx.strokeStyle = color;
     cx.lineWidth = size;
     cx.beginPath();
@@ -16,7 +16,7 @@ export default class DrawUtil {
     }
   }
 
-  static drawLineOnCanvas(cx: CanvasRenderingContext2D, points: Point[], color: string = "#fff", size: number = 1, drawPoint: boolean = false) {
+  static drawLineOnCanvas(cx: CanvasRenderingContext2D, points: Point[], color: string = '#fff', size: number = 1, drawPoint: boolean = false) {
     for (let i = 0; i < points.length; i++) {
       if (i + 1 >= points.length) {
         return;
@@ -25,7 +25,7 @@ export default class DrawUtil {
     }
   }
 
-  static drawLinesOnCanvas(cx: CanvasRenderingContext2D, points: Point[][], color: string = "#fff", size: number = 1, drawPoint: boolean = false) {
+  static drawLinesOnCanvas(cx: CanvasRenderingContext2D, points: Point[][], color: string = '#fff', size: number = 1, drawPoint: boolean = false) {
     points.forEach(x => DrawUtil.drawLineOnCanvas(cx, x, color, size, drawPoint));
   }
 
@@ -41,7 +41,7 @@ export default class DrawUtil {
 
   static redrawCanvas(cx: CanvasRenderingContext2D, layers: Layer[], size: number = 1, drawPoint: boolean = true) {
     layers.forEach(x => {
-      this.drawLinesOnCanvas(cx, x.lines,x.color,x.size,drawPoint);
-    })
+      this.drawLinesOnCanvas(cx, x.lines, x.color, x.size, drawPoint);
+    });
   }
 }

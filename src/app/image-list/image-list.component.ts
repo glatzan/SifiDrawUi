@@ -1,7 +1,7 @@
 import {Component, OnInit, EventEmitter, Input, Output} from '@angular/core';
-import {Dataset} from "../model/dataset";
-import {DatasetService} from "../service/dataset.service";
-import {ProjectData} from "../model/project-data";
+import {Dataset} from '../model/dataset';
+import {DatasetService} from '../service/dataset.service';
+import {ProjectData} from '../model/project-data';
 
 @Component({
   selector: 'app-image-list',
@@ -23,13 +23,14 @@ export class ImageListComponent implements OnInit {
     console.log('got name: ', selectedProjectId);
     this._selectedProjectId = selectedProjectId;
 
-    if (this._selectedProjectId != undefined)
+    if (this._selectedProjectId !== undefined) {
       this.datasetService.getDataset(selectedProjectId).subscribe((data: Dataset) => {
         this.dataset = data;
       }, error1 => {
-        console.log("Fehler beim laden der Dataset Datein")
+        console.log('Fehler beim laden der Dataset Datein');
         console.error(error1);
       });
+    }
   }
 
   ngOnInit() {

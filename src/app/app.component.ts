@@ -1,5 +1,5 @@
 import {Component} from '@angular/core';
-import {Dataset} from "./model/dataset";
+import {Dataset} from './model/dataset';
 
 @Component({
   selector: 'app-root',
@@ -13,12 +13,12 @@ export class AppComponent {
   private selectedImageId: string;
 
   onDatasetSelect(id: string) {
-    console.log(id)
+    console.log(id);
     this.selectedDatasetId = id;
   }
 
   onImageSelect(id: string) {
-    console.log(id)
+    console.log(id);
     this.selectedImageId = id;
   }
 }

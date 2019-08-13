@@ -1,7 +1,7 @@
 p-scrollPanel {
+
   div {
     margin-bottom: 10px;
-
     p {
       padding-left: 10px;
       cursor: pointer;
@@ -14,3 +14,7 @@ p-scrollPanel {
   }
 }
 
+.ui-scrollpanel{
+  border: 1px solid #c8c8c8 !important;
+  border-radius: 3px;
+}

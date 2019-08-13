@@ -1,7 +1,7 @@
 import {Component, OnInit, EventEmitter, Output} from '@angular/core';
-import {ProjectData} from "../model/project-data";
-import {ProjectService} from "../service/project.service";
-import {Subscribable} from "rxjs";
+import {ProjectData} from '../model/project-data';
+import {ProjectService} from '../service/project.service';
+import {Subscribable} from 'rxjs';
 
 @Component({
   selector: 'app-case-list',
@@ -12,7 +12,7 @@ export class CaseListComponent implements OnInit {
 
   private projectData: ProjectData[];
 
-  @Output() selectProject = new EventEmitter<String>();
+  @Output() selectProject = new EventEmitter<string>();
 
   constructor(public projectService: ProjectService) {
     this.loadData();
@@ -23,8 +23,8 @@ export class CaseListComponent implements OnInit {
     this.projectService.getProjects().subscribe((data: ProjectData[]) => {
       this.projectData = data;
     }, error1 => {
-      console.log("Fehler beim laden der Project Datein")
-    })
+      console.log('Fehler beim laden der Project Datein');
+    });
   }
 
   ngOnInit() {

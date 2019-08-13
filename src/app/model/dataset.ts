@@ -1,4 +1,4 @@
-import {CImage} from './image';
+import {CImage} from './cimage';
 
 export class Dataset {
   public id: string;
