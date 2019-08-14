@@ -59,7 +59,6 @@ export class DrawCanvasComponent implements AfterViewInit {
     };
   }
 
-
   @Input()
   set selectedImage(selectedImageId: string) {
     if (selectedImageId !== undefined) {
