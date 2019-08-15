@@ -1,7 +1,8 @@
-import {Component, OnInit, EventEmitter, Output} from '@angular/core';
+import {Component, OnInit, EventEmitter, Output, Input} from '@angular/core';
 import {ProjectData} from '../model/project-data';
 import {ProjectService} from '../service/project.service';
 import {Subscribable} from 'rxjs';
+import {ExportDialogComponent} from '../export-dialog/export-dialog.component';
 
 @Component({
   selector: 'app-case-list',
@@ -11,6 +12,8 @@ import {Subscribable} from 'rxjs';
 export class CaseListComponent implements OnInit {
 
   private projectData: ProjectData[];
+
+  @Input() exportDialog: ExportDialogComponent;
 
   @Output() selectProject = new EventEmitter<string>();
 
@@ -33,5 +36,5 @@ export class CaseListComponent implements OnInit {
   private onSelect(event, id) {
     this.selectProject.emit(id);
   }
-
 }
+

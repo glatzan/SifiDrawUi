@@ -11,18 +11,20 @@ import {
   ButtonModule,
   ScrollPanelModule,
   ColorPickerModule,
-  FieldsetModule
+  FieldsetModule, DialogModule
 } from 'primeng/primeng';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {CaseListComponent} from './case-list/case-list.component';
 import {ImageListComponent} from './image-list/image-list.component';
+import { ExportDialogComponent } from './export-dialog/export-dialog.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     DrawCanvasComponent,
     CaseListComponent,
-    ImageListComponent
+    ImageListComponent,
+    ExportDialogComponent
   ],
   imports: [
     HttpClientModule,
@@ -33,7 +35,8 @@ import {ImageListComponent} from './image-list/image-list.component';
     ButtonModule,
     ColorPickerModule,
     ScrollPanelModule,
-    FieldsetModule
+    FieldsetModule,
+    DialogModule
   ],
   providers: [],
   bootstrap: [AppComponent]

@@ -121,7 +121,7 @@ export class DrawCanvasComponent implements AfterViewInit {
     console.log('move' + this.mouseButton);
     if (this.mousePressed) {
       const e = this.canvas.nativeElement.getBoundingClientRect();
-      let mousePos = {x: event.clientX - e.left, y: event.clientY - e.top};
+      const mousePos = {x: event.clientX - e.left, y: event.clientY - e.top};
 
       if (this.mouseButton === 1) {
         this.newLineOnCanvas(this.currentLayer, mousePos);

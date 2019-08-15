@@ -1,6 +1,11 @@
 p-scrollPanel {
 
+  i{
+    cursor: pointer;
+  }
+
   div {
+    background-color: aliceblue;
     margin-bottom: 10px;
     p {
       padding-left: 10px;
@@ -14,7 +19,3 @@ p-scrollPanel {
   }
 }
 
-.ui-scrollpanel{
-  border: 1px solid #c8c8c8 !important;
-  border-radius: 3px;
-}

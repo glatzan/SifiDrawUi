@@ -2,7 +2,8 @@
 
 <div class="ui-g" style="height: 90vh">
   <div class="ui-g-1">
-    <app-case-list (selectProject)="onDatasetSelect($event)"></app-case-list>
+    <app-case-list (selectProject)="onDatasetSelect($event)" [exportDialog]="exportDialog"></app-case-list>
+    <app-export-dialog #exportDialog></app-export-dialog>
   </div>
   <div class="ui-g-1">
     <app-image-list [selectedProjectId]="selectedDatasetId" (selectImage)="onImageSelect($event)"></app-image-list>
