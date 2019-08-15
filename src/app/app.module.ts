@@ -11,7 +11,7 @@ import {
   ButtonModule,
   ScrollPanelModule,
   ColorPickerModule,
-  FieldsetModule, DialogModule
+  FieldsetModule, DialogModule, CheckboxModule, InputTextModule, ProgressSpinnerModule
 } from 'primeng/primeng';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {CaseListComponent} from './case-list/case-list.component';
@@ -36,7 +36,10 @@ import { ExportDialogComponent } from './export-dialog/export-dialog.component';
     ColorPickerModule,
     ScrollPanelModule,
     FieldsetModule,
-    DialogModule
+    DialogModule,
+    CheckboxModule,
+    InputTextModule,
+    ProgressSpinnerModule
   ],
   providers: [],
   bootstrap: [AppComponent]

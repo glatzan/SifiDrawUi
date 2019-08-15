@@ -1,0 +1,19 @@
+:host >>> .ui-colorpicker-preview {
+  padding: 0px !important;
+  width: 1.4em;
+}
+
+:host >>> .ui-spinner-input {
+  padding: 1px;
+}
+
+:host >>> .ui-dropdown {
+}
+
+.oddBackGround {
+  background-color: aliceblue;
+}
+
+i {
+  cursor: pointer;
+}
