@@ -1,12 +1,13 @@
 import {Component, OnInit} from '@angular/core';
-import {ProjectData} from "../model/project-data";
-import {ProjectService} from "../service/project.service";
-import {Dataset} from "../model/dataset";
-import {Layer} from "../model/layer";
-import {DatasetService} from "../service/dataset.service";
-import {delay} from "rxjs/operators";
-import {ImageService} from "../service/image.service";
-import {CImage} from "../model/cimage";
+import {ProjectData} from '../model/project-data';
+import {ProjectService} from '../service/project.service';
+import {Dataset} from '../model/dataset';
+import {Layer} from '../model/layer';
+import {DatasetService} from '../service/dataset.service';
+import {delay} from 'rxjs/operators';
+import {ImageService} from '../service/image.service';
+import {CImage} from '../model/cimage';
+import DrawUtil from '../utils/draw-util';
 
 @Component({
   selector: 'app-export-dialog',
@@ -51,11 +52,11 @@ export class ExportDialogComponent implements OnInit {
 
   public showExportDialog(id: string) {
     this.showDialog = true;
-    this.name = "";
-    this.background = "#000000"
+    this.name = '';
+    this.background = '#000000';
     this.backgroundImage = false;
-    this.layers = []
-    this.layers.push({selected: false, layer: new Layer(1)})
+    this.layers = [];
+    this.layers.push({selected: false, layer: new Layer(1)});
     this.projects = [];
     this.layerSettings = false;
     this.showProgressDialog = false;
@@ -64,7 +65,7 @@ export class ExportDialogComponent implements OnInit {
     this.projectService.getProjects().subscribe((data: ProjectData[]) => {
       this.projects = data;
       this.projects.forEach(x => {
-          console.log(x.id + " " + id)
+          console.log(x.id + ' ' + id);
           if (x.id === id) {
             this.project = x;
             this.datasets = x.datasets;
@@ -74,41 +75,54 @@ export class ExportDialogComponent implements OnInit {
             }
           }
         }
-      )
+      );
     }, error1 => {
       console.log('Fehler beim laden der Project Datein');
     });
   }
 
   private addLayer() {
-    this.layers.push({selected: false, layer: new Layer(this.layers.length + 1)})
+    this.layers.push({selected: false, layer: new Layer(this.layers.length + 1)});
   }
 
   private abort() {
     this.showDialog = false;
   }
 
-  private create() {
+  private async create() {
+
+    //this.datasetService.
+    const canvas = document.createElement('canvas');
+    const cx = canvas.getContext('2d');
+
     this.showProgressDialog = true;
-    this.datasetService.getDataset(this.dataset.id).subscribe((data: Dataset) => {
-      this.todoProgress = data.images.length;
+    this.currentProgress = 0;
+    const c = await this.datasetService.getDataset(this.dataset.id).toPromise();
+    this.todoProgress = c.images.length;
 
-      data.images.forEach((x, index) => {
-        this.imageService.getImage(x.id).subscribe((data: CImage) => {
-          this.currentProgress = index + 1;
-          console.log('Image select' + data.name);
-        }, error1 => {
-          console.log('Fehler beim laden der Dataset Datein');
-          console.error(error1);
-        });
-
-      })
+    for (const img of c.images) {
+      const image = await this.imageService.getImage(img.id).toPromise();
+      this.currentProgress++;
+      console.log(image.id);
+      DrawUtil.drawCanvas(cx, image, this.backgroundImage, this.background, this.layerSettings, this.layers.filter(y => y.selected).map(f => f.layer));
+    }
 
 
-    }, error1 => {
-      console.log('Fehler beim laden der Dataset Datein');
-      console.error(error1);
-    });
+    // => {
+    // this.todoProgress = data.images.length;
+    // this.currentProgress = 0;
+    //
+    //
+    // data.images.forEach((x, index) => {
+    //   const t = await this.imageService.getImageSynced(x.id);
+    //   his.timageService.getImageSynced(x.id).then(image => {
+    //     console.log(image.id);
+    //     //DrawUtil.drawCanvas(cx, image, this.backgroundImage, this.background, this.layerSettings, this.layers.filter(y => y.selected).map(f => f.layer));
+    //     this.currentProgress++;
+    //   });
+    // });
+
 
   }
+
 }

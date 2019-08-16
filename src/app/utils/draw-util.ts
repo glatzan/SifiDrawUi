@@ -1,5 +1,7 @@
 import {Point} from '../model/point';
 import {Layer} from '../model/layer';
+import {CImage} from '../model/cimage';
+import {Observable, fromEvent} from 'rxjs';
 
 export default class DrawUtil {
 
@@ -43,5 +45,26 @@ export default class DrawUtil {
     layers.forEach(x => {
       this.drawLinesOnCanvas(cx, x.lines, x.color, x.size, drawPoint);
     });
+  }
+
+  static drawCanvas(cx: CanvasRenderingContext2D, image: CImage, drawImage: boolean, background: string, useLayerSettings: boolean, layers: Layer[]) {
+    const img = new Image();
+    img.src = 'data:image/png;base64,' + image.data;
+    img.onload = () => {
+      const width = img.width;
+      const height = img.height;
+      console.log(width + ' ' + height);
+      if (background) {
+        cx.fillRect(0, 0, width, height);
+      }
+
+      if (drawImage) {
+        cx.drawImage(img, 0, 0);
+      }
+
+
+    };
+
+
   }
 }
