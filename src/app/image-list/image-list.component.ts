@@ -26,7 +26,7 @@ export class ImageListComponent implements OnInit {
       this.datasetService.getDataset(selectedProjectId).subscribe((data: Dataset) => {
         this.dataset = data;
         if (data.images.length > 0)
-          this.selectImage.emit(data.images[0].id);
+          this.onSelect("", data.images[0].id);
       }, error1 => {
         console.log('Fehler beim laden der Dataset Datein');
         console.error(error1);
