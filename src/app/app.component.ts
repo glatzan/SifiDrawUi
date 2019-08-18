@@ -18,7 +18,7 @@ export class AppComponent {
   }
 
   onImageSelect(id: string) {
-    console.log(id);
+    console.log(`Select Image ${id}`);
     this.selectedImageId = id;
   }
 }
