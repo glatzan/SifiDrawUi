@@ -1,1 +1,20 @@
 /* You can add global styles to this file, and also import other style files */
+.ui-colorpicker-preview {
+  padding: 3px 1px !important;
+  width: 1.4em;
+}
+
+.ui-spinner-input {
+  padding-top: 4px !important;
+  padding-bottom: 4px !important;
+}
+
+.ui-dropdown .ui-dropdown-label {
+  padding-top: 1px !important;
+  padding-bottom: 1px !important;
+}
+
+.ui-button.ui-button-icon-only .ui-button-text{
+  padding: 5px 2px !important;
+}
+

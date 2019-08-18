@@ -32,12 +32,13 @@ export class ImageService {
     return this._http.put<CImage>(`${this.serverURL}/image`, image, httpOptions);
   }
 
-  getImageSynced(id: string): Promise<CImage> {
+  public createImage(image: CImage): Observable<any> {
     const httpOptions = {
       headers: new HttpHeaders({})
     };
-    const result = this._http.get<CImage>(`${this.serverURL}/image/${id}`, httpOptions).toPromise();
-    return result;
+    console.log(`${this.serverURL}/image`);
+    return this._http.post<CImage>(`${this.serverURL}/image`, image, httpOptions);
   }
+
 
 }

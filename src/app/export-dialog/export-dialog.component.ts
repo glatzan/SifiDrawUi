@@ -12,7 +12,7 @@ import DrawUtil from '../utils/draw-util';
 @Component({
   selector: 'app-export-dialog',
   templateUrl: './export-dialog.component.html',
-  styleUrls: ['./export-dialog.component.css']
+  styleUrls: ['./export-dialog.component.scss']
 })
 export class ExportDialogComponent implements OnInit {
 
@@ -33,6 +33,8 @@ export class ExportDialogComponent implements OnInit {
   private backgroundImage: boolean;
 
   private layerSettings: boolean;
+
+  private copyLayers: boolean;
 
   private layers: { selected: boolean, layer: Layer }[];
 
@@ -100,11 +102,37 @@ export class ExportDialogComponent implements OnInit {
     const c = await this.datasetService.getDataset(this.dataset.id).toPromise();
     this.todoProgress = c.images.length;
 
+    const newDatasetID = `${this.project.id}_|_${this.name}`
+
+    await this.datasetService.createDataset(newDatasetID).toPromise()
+
     for (const img of c.images) {
       const image = await this.imageService.getImage(img.id).toPromise();
       this.currentProgress++;
       console.log(image.id);
-      DrawUtil.drawCanvas(cx, image, this.backgroundImage, this.background, this.layerSettings, this.layers.filter(y => y.selected).map(f => f.layer));
+
+      DrawUtil.drawCanvas(canvas, image, this.backgroundImage, this.background, this.layerSettings, this.layers.filter(y => y.selected).map(f => f.layer));
+
+      const newIMG = new CImage();
+      newIMG.id = img.id.replace(this.dataset.id, newDatasetID)
+
+      const imgData = canvas.toDataURL()
+      newIMG.data = imgData.substr(imgData.indexOf(',')+1);
+      newIMG.name = img.name;
+
+      if(this.copyLayers){
+        newIMG.layers = image.layers
+      }
+
+      // console.log(newIMG.data)
+      this.imageService.createImage(newIMG).subscribe(() => {
+        console.log('saved');
+      }, error1 => {
+        console.log('Fehler beim laden der Dataset Datein');
+        console.error(error1);
+      });
+
+      console.log()
     }
 
 

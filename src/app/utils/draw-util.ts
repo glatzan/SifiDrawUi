@@ -2,6 +2,7 @@ import {Point} from '../model/point';
 import {Layer} from '../model/layer';
 import {CImage} from '../model/cimage';
 import {Observable, fromEvent} from 'rxjs';
+import {promise} from "selenium-webdriver";
 
 export default class DrawUtil {
 
@@ -47,24 +48,32 @@ export default class DrawUtil {
     });
   }
 
-  static drawCanvas(cx: CanvasRenderingContext2D, image: CImage, drawImage: boolean, background: string, useLayerSettings: boolean, layers: Layer[]) {
-    const img = new Image();
-    img.src = 'data:image/png;base64,' + image.data;
-    img.onload = () => {
-      const width = img.width;
-      const height = img.height;
-      console.log(width + ' ' + height);
-      if (background) {
-        cx.fillRect(0, 0, width, height);
-      }
+  static async drawCanvas(canvas: HTMLCanvasElement, image: CImage, drawImage: boolean, background: string, useLayerSettings: boolean, layers: Layer[]) {
+    const img = await DrawUtil.loadImage(image.data)
 
-      if (drawImage) {
-        cx.drawImage(img, 0, 0);
-      }
+    const width = img.width;
+    const height = img.height;
 
+    canvas.width = width;
+    canvas.height = height;
 
-    };
+    const cx = canvas.getContext('2d');
 
+    if (background) {
+      cx.fillRect(0, 0, width, height);
+    }
 
+    if (drawImage) {
+      cx.drawImage(img, 0, 0);
+    }
+  }
+
+  static loadImage(src): Promise<any> {
+    return new Promise((resolve, reject) => {
+      let img = new Image()
+      img.onload = () => resolve(img)
+      img.onerror = reject
+      img.src = 'data:image/png;base64,' + src;
+    })
   }
 }
