@@ -13,6 +13,8 @@ export class CaseListComponent implements OnInit {
 
   private projectData: ProjectData[];
 
+  private selectedProjectId: string;
+
   @Input() exportDialog: ExportDialogComponent;
 
   @Output() selectProject = new EventEmitter<string>();
@@ -34,6 +36,7 @@ export class CaseListComponent implements OnInit {
   }
 
   private onSelect(event, id) {
+    this.selectedProjectId = id
     this.selectProject.emit(id);
   }
 }

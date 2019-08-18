@@ -1,3 +1,5 @@
+<div *ngIf="renderContext" class="headline">Dataset {{image.name}}</div>
+
 <canvas #canvas
         (mouseenter)="onEvent($event)"
         (mouseleave)="onEvent($event)"

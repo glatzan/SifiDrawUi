@@ -10,8 +10,10 @@ import {ProjectData} from '../model/project-data';
 })
 export class ImageListComponent implements OnInit {
 
-  private _selectedProjectId: string;
   private dataset: Dataset = new Dataset();
+
+  private selectedImageId: string
+
   @Output() selectImage = new EventEmitter<string>();
 
   constructor(public datasetService: DatasetService) {
@@ -19,13 +21,12 @@ export class ImageListComponent implements OnInit {
 
   @Input()
   set selectedProjectId(selectedProjectId: string) {
-    console.log('prev value: ', this._selectedProjectId);
-    console.log('got name: ', selectedProjectId);
-    this._selectedProjectId = selectedProjectId;
 
-    if (this._selectedProjectId !== undefined) {
+    if (selectedProjectId !== undefined) {
       this.datasetService.getDataset(selectedProjectId).subscribe((data: Dataset) => {
         this.dataset = data;
+        if (data.images.length > 0)
+          this.selectImage.emit(data.images[0].id);
       }, error1 => {
         console.log('Fehler beim laden der Dataset Datein');
         console.error(error1);
@@ -37,6 +38,7 @@ export class ImageListComponent implements OnInit {
   }
 
   private onSelect(event, id) {
+    this.selectedImageId = id;
     this.selectImage.emit(id);
   }
 
