@@ -66,6 +66,14 @@ export default class DrawUtil {
     if (drawImage) {
       cx.drawImage(img, 0, 0);
     }
+
+    layers.forEach(x => {
+      image.layers.forEach(y => {
+        if (x.id == y.id) {
+          this.drawLinesOnCanvas(cx, y.lines, useLayerSettings ? y.color : x.color, useLayerSettings ? y.size : x.size, false);
+        }
+      });
+    });
   }
 
   static loadImage(src): Promise<any> {

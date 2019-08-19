@@ -96,7 +96,7 @@ export class ExportDialogComponent implements OnInit {
     //this.datasetService.
     const canvas = document.createElement('canvas');
     const cx = canvas.getContext('2d');
-
+    canvas.toDataURL()
     this.showProgressDialog = true;
     this.currentProgress = 0;
     const c = await this.datasetService.getDataset(this.dataset.id).toPromise();
@@ -111,7 +111,7 @@ export class ExportDialogComponent implements OnInit {
       this.currentProgress++;
       console.log(image.id);
 
-      DrawUtil.drawCanvas(canvas, image, this.backgroundImage, this.background, this.layerSettings, this.layers.filter(y => y.selected).map(f => f.layer));
+      await DrawUtil.drawCanvas(canvas, image, this.backgroundImage, this.background, this.layerSettings, this.layers.filter(y => y.selected).map(f => f.layer));
 
       const newIMG = new CImage();
       newIMG.id = img.id.replace(this.dataset.id, newDatasetID)
@@ -131,8 +131,6 @@ export class ExportDialogComponent implements OnInit {
         console.log('Fehler beim laden der Dataset Datein');
         console.error(error1);
       });
-
-      console.log()
     }
 
 
