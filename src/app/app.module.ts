@@ -17,6 +17,7 @@ import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {CaseListComponent} from './case-list/case-list.component';
 import {ImageListComponent} from './image-list/image-list.component';
 import { ExportDialogComponent } from './export-dialog/export-dialog.component';
+import { FilterListComponent } from './filter-list/filter-list.component';
 
 @NgModule({
   declarations: [
@@ -24,7 +25,8 @@ import { ExportDialogComponent } from './export-dialog/export-dialog.component';
     DrawCanvasComponent,
     CaseListComponent,
     ImageListComponent,
-    ExportDialogComponent
+    ExportDialogComponent,
+    FilterListComponent
   ],
   imports: [
     HttpClientModule,

@@ -7,6 +7,8 @@
   </div>
   <div class="ui-g-1">
     <app-image-list [selectedProjectId]="selectedDatasetId" (selectImage)="onImageSelect($event)"></app-image-list>
+    <div style="height: 10px"></div>
+    <app-filter-list></app-filter-list>
   </div>
   <div class="ui-g-8">
     <app-draw-canvas [selectedImage]="selectedImageId"></app-draw-canvas>
