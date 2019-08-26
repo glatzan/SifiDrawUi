@@ -1,6 +1,6 @@
-import {Dataset} from "./dataset";
+import {Dataset} from './dataset';
 
 export class ProjectData {
-  public id : string;
-  public datasets : Dataset[]
+  public id: string;
+  public datasets: Dataset[];
 }

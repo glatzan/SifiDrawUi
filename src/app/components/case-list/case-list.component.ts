@@ -1,8 +1,9 @@
 import {Component, OnInit, EventEmitter, Output, Input} from '@angular/core';
-import {ProjectData} from '../model/project-data';
-import {ProjectService} from '../service/project.service';
+import {ProjectData} from '../../model/project-data';
+import {ProjectService} from '../../service/project.service';
 import {Subscribable} from 'rxjs';
 import {ExportDialogComponent} from '../export-dialog/export-dialog.component';
+import {MatDialog} from '@angular/material';
 
 @Component({
   selector: 'app-case-list',
@@ -15,11 +16,10 @@ export class CaseListComponent implements OnInit {
 
   private selectedProjectId: string;
 
-  @Input() exportDialog: ExportDialogComponent;
-
   @Output() selectProject = new EventEmitter<string>();
 
-  constructor(public projectService: ProjectService) {
+  constructor(public projectService: ProjectService,
+              public dialog: MatDialog) {
     this.loadData();
   }
 
@@ -27,6 +27,7 @@ export class CaseListComponent implements OnInit {
     this.projectData = [];
     this.projectService.getProjects().subscribe((data: ProjectData[]) => {
       this.projectData = data;
+      console.log('Loading data ' + data.length);
     }, error1 => {
       console.log('Fehler beim laden der Project Datein');
     });
@@ -36,8 +37,20 @@ export class CaseListComponent implements OnInit {
   }
 
   private onSelect(event, id) {
-    this.selectedProjectId = id
+    this.selectedProjectId = id;
     this.selectProject.emit(id);
+  }
+
+  openDialog(id: string): void {
+    const dialogRef = this.dialog.open(ExportDialogComponent, {
+      height: '500px',
+      width: '250px',
+      data: {id}
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      console.log('The dialog was closed');
+    });
   }
 }
 

@@ -2,15 +2,14 @@
 
 <div class="ui-g" style="height: 90vh">
   <div class="ui-g-1">
-    <app-case-list (selectProject)="onDatasetSelect($event)" [exportDialog]="exportDialog"></app-case-list>
-    <app-export-dialog #exportDialog></app-export-dialog>
+    <app-case-list #caseListComponent (selectProject)="onDatasetSelect($event)"></app-case-list>
   </div>
   <div class="ui-g-1">
-    <app-image-list [selectedProjectId]="selectedDatasetId" (selectImage)="onImageSelect($event)"></app-image-list>
-    <div style="height: 10px"></div>
-    <app-filter-list></app-filter-list>
+<!--    <app-image-list #imageListComponent [selectedProjectId]="selectedDatasetId" (selectImage)="onImageSelect($event)"></app-image-list>-->
+<!--    <div style="height: 10px"></div>-->
+<!--    <app-filter-list></app-filter-list>-->
   </div>
   <div class="ui-g-8">
-    <app-draw-canvas [selectedImage]="selectedImageId"></app-draw-canvas>
+<!--    <app-draw-canvas #drawCanvasComponent [selectedImage]="selectedImageId"></app-draw-canvas>-->
   </div>
 </div>

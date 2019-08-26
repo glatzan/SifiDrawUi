@@ -3,21 +3,15 @@ import {NgModule} from '@angular/core';
 import {HttpClientModule, HttpClient} from '@angular/common/http';
 
 import {AppComponent} from './app.component';
-import {DrawCanvasComponent} from './draw-canvas/draw-canvas.component';
-import {
-  PaginatorModule,
-  SpinnerModule,
-  DropdownModule,
-  ButtonModule,
-  ScrollPanelModule,
-  ColorPickerModule,
-  FieldsetModule, DialogModule, CheckboxModule, InputTextModule, ProgressSpinnerModule
-} from 'primeng/primeng';
+import {DrawCanvasComponent} from './components/draw-canvas/draw-canvas.component';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
-import {CaseListComponent} from './case-list/case-list.component';
-import {ImageListComponent} from './image-list/image-list.component';
-import { ExportDialogComponent } from './export-dialog/export-dialog.component';
-import { FilterListComponent } from './filter-list/filter-list.component';
+import {CaseListComponent} from './components/case-list/case-list.component';
+import {ImageListComponent} from './components/image-list/image-list.component';
+import { ExportDialogComponent } from './components/export-dialog/export-dialog.component';
+import { FilterListComponent } from './components/filter-list/filter-list.component';
+import { FilterDialogComponent } from './components/filter-dialog/filter-dialog.component';
+import {ScrollingModule} from '@angular/cdk/scrolling';
+import {MatDialogModule, MatDividerModule, MatIconModule} from '@angular/material';
 
 @NgModule({
   declarations: [
@@ -26,22 +20,17 @@ import { FilterListComponent } from './filter-list/filter-list.component';
     CaseListComponent,
     ImageListComponent,
     ExportDialogComponent,
-    FilterListComponent
+    FilterListComponent,
+    FilterDialogComponent
   ],
   imports: [
     HttpClientModule,
     BrowserModule,
     BrowserAnimationsModule,
-    SpinnerModule,
-    PaginatorModule,
-    ButtonModule,
-    ColorPickerModule,
-    ScrollPanelModule,
-    FieldsetModule,
-    DialogModule,
-    CheckboxModule,
-    InputTextModule,
-    ProgressSpinnerModule
+    ScrollingModule,
+    MatDialogModule,
+    MatDividerModule,
+    MatIconModule
   ],
   providers: [],
   bootstrap: [AppComponent]

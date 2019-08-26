@@ -1,0 +1,59 @@
+<div *ngIf="renderContext" class="headline">Dataset {{image.name}}</div>
+
+<canvas #canvas
+        (mouseenter)="onEvent($event)"
+        (mouseleave)="onEvent($event)"
+        (blur)="onEvent($event)"
+        (mousemove)="onMouseMove($event)"
+        (mousedown)="onMouseDown($event)"
+        (mouseup)="onMouseUp($event)"
+        (click)="onMouseDown($event)"
+        (keydown)="onMouseMove($event)"
+        (contextmenu)="onEvent($event)"></canvas>
+
+<div *ngIf="renderContext">
+<!--  <table>-->
+<!--    <tr>-->
+<!--      <td>-->
+<!--        Layer-->
+<!--      </td>-->
+<!--      <td>-->
+<!--        <p-dropdown [options]="image.layers" [(ngModel)]="currentLayer" optionLabel="id"></p-dropdown>-->
+<!--      </td>-->
+<!--      <td>-->
+<!--        <p-button icon="pi pi-plus" (onClick)="addLayer($event)"></p-button>-->
+<!--      </td>-->
+<!--      <td>-->
+<!--        Farbe-->
+<!--      </td>-->
+<!--      <td>-->
+<!--        <p-colorPicker [(ngModel)]="currentLayer.color" (onChange)="redrawUI()"></p-colorPicker>-->
+<!--      </td>-->
+<!--      <td>-->
+<!--        Dicke-->
+<!--      </td>-->
+<!--      <td>-->
+<!--        <p-spinner [(ngModel)]="currentLayer.size" (onChange)="redrawUI()" [min]="1" size="1"></p-spinner>-->
+<!--      </td>-->
+<!--      <td>-->
+<!--            <span *ngFor="let x of currentLayer.lines; let idx = index">-->
+<!--            <a style="text-decoration: underline" href="#"-->
+<!--               (mouseenter)='highLightLine(idx)'-->
+<!--               (mouseleave)="redrawUI()"-->
+<!--               (click)="selectPoints(idx)">[{{x.length}}]</a>-->
+<!--          </span>-->
+<!--      </td>-->
+<!--    </tr>-->
+<!--    <tr>-->
+<!--      <td>-->
+<!--        Radierer-->
+<!--      </td>-->
+<!--      <td>-->
+<!--        <p-spinner [(ngModel)]="rightClickCircleSize" size="2"></p-spinner>-->
+<!--      </td>-->
+<!--      <td colspan="6">-->
+<!--        (strg: löschen)-->
+<!--      </td>-->
+<!--    </tr>-->
+<!--  </table>-->
+</div>

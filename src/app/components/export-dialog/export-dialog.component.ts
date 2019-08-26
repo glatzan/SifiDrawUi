@@ -1,13 +1,14 @@
-import {Component, OnInit} from '@angular/core';
-import {ProjectData} from '../model/project-data';
-import {ProjectService} from '../service/project.service';
-import {Dataset} from '../model/dataset';
-import {Layer} from '../model/layer';
-import {DatasetService} from '../service/dataset.service';
+import {Component, Inject, OnInit} from '@angular/core';
+import {ProjectData} from '../../model/project-data';
+import {ProjectService} from '../../service/project.service';
+import {Dataset} from '../../model/dataset';
+import {Layer} from '../../model/layer';
+import {DatasetService} from '../../service/dataset.service';
 import {delay} from 'rxjs/operators';
-import {ImageService} from '../service/image.service';
-import {CImage} from '../model/cimage';
-import DrawUtil from '../utils/draw-util';
+import {ImageService} from '../../service/image.service';
+import {CImage} from '../../model/cimage';
+import DrawUtil from '../../utils/draw-util';
+import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material';
 
 @Component({
   selector: 'app-export-dialog',
@@ -44,7 +45,9 @@ export class ExportDialogComponent implements OnInit {
 
   private todoProgress = 0;
 
-  constructor(public projectService: ProjectService,
+  constructor(public dialogRef: MatDialogRef<ExportDialogComponent>,
+              @Inject(MAT_DIALOG_DATA) public data: string,
+              public projectService: ProjectService,
               public datasetService: DatasetService,
               public imageService: ImageService) {
   }
@@ -151,4 +154,7 @@ export class ExportDialogComponent implements OnInit {
 
   }
 
+  closeDialog() {
+    this.dialogRef.close('');
+  }
 }

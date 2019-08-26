@@ -1,0 +1,11 @@
+<cdk-virtual-scroll-viewport itemSize="30" class="example-viewport">
+  <div *cdkVirtualFor="let pD of projectData">
+    <p>{{pD.id}} <i class="pi pi-external-link" style="font-size: 0.8em"
+                    (click)="openDialog(pD.id)"></i>
+    </p>
+    <mat-icon class="mat-icon-rtl-mirror" svgIcon="thumb-up"></mat-icon>
+    <p *ngFor="let dataset of pD.datasets" (click)="onSelect($event,dataset.id)"
+       [ngClass]="selectedProjectId === dataset.id ? 'selectedProject' : ''">{{dataset.name}}</p>
+    <mat-divider></mat-divider>
+  </div>
+</cdk-virtual-scroll-viewport>

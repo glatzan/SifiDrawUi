@@ -1,11 +1,11 @@
 import {Component, OnInit, Input, ElementRef, AfterViewInit, ViewChild} from '@angular/core';
-import {Layer} from '../model/layer';
-import VectorUtils from '../utils/vector-utils';
-import {Point} from '../model/point';
-import DrawUtil from '../utils/draw-util';
-import {ImageService} from '../service/image.service';
-import {CImage} from '../model/cimage';
-import CImageUtil from '../utils/cimage-util';
+import {Layer} from '../../model/layer';
+import VectorUtils from '../../utils/vector-utils';
+import {Point} from '../../model/point';
+import DrawUtil from '../../utils/draw-util';
+import {ImageService} from '../../service/image.service';
+import {CImage} from '../../model/cimage';
+import CImageUtil from '../../utils/cimage-util';
 import {debounceTime} from 'rxjs/operators';
 
 @Component({
