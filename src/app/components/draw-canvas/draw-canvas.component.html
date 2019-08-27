@@ -11,9 +11,25 @@
         (contextmenu)="onEvent($event)"></canvas>
 
 <div *ngIf="renderContext">
-  <table>
+  <mat-grid-list cols="3" rowHeight="30px">
+    <mat-grid-tile>
+      <mat-label>Label</mat-label>
+    </mat-grid-tile>
+    <mat-grid-tile>
+      <mat-form-field>
+        <mat-select>
+          <mat-option *ngFor="let layer of image.layers" [value]="currentLayer">
+            {{layer.id}}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+    </mat-grid-tile>
+    <mat-grid-tile>
+      <mat-icon class="mat-icon" svgIcon="add" (onClick)="addLayer($event)"></mat-icon>
+    </mat-grid-tile>
+    <mat-grid-tile>4</mat-grid-tile>
+  </mat-grid-list>
 
-  </table>
 
   <!--  <table>-->
   <!--    <tr>-->
@@ -24,7 +40,7 @@
   <!--        <p-dropdown [options]="image.layers" [(ngModel)]="currentLayer" optionLabel="id"></p-dropdown>-->
   <!--      </td>-->
   <!--      <td>-->
-  <!--        <p-button icon="pi pi-plus" (onClick)="addLayer($event)"></p-button>-->
+  <!--        <p-button icon="pi pi-plus" ></p-button>-->
   <!--      </td>-->
   <!--      <td>-->
   <!--        Farbe-->

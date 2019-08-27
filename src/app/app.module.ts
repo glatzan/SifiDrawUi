@@ -11,7 +11,15 @@ import {ExportDialogComponent} from './components/export-dialog/export-dialog.co
 import {FilterListComponent} from './components/filter-list/filter-list.component';
 import {FilterDialogComponent} from './components/filter-dialog/filter-dialog.component';
 import {ScrollingModule} from '@angular/cdk/scrolling';
-import {MatButtonModule, MatDialogModule, MatDividerModule, MatIconModule, MatIconRegistry} from '@angular/material';
+import {
+  MatButtonModule,
+  MatDialogModule,
+  MatDividerModule,
+  MatFormFieldModule,
+  MatGridListModule,
+  MatIconModule,
+  MatIconRegistry, MatSelectModule
+} from '@angular/material';
 
 @NgModule({
   declarations: [
@@ -31,7 +39,10 @@ import {MatButtonModule, MatDialogModule, MatDividerModule, MatIconModule, MatIc
     MatDialogModule,
     MatDividerModule,
     MatIconModule,
-    MatButtonModule
+    MatButtonModule,
+    MatGridListModule,
+    MatFormFieldModule,
+    MatSelectModule
   ],
   entryComponents: [ExportDialogComponent],
   providers: [],
