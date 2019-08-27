@@ -2,6 +2,7 @@ import {Component, OnInit, EventEmitter, Input, Output} from '@angular/core';
 import {Dataset} from '../../model/dataset';
 import {DatasetService} from '../../service/dataset.service';
 import {ProjectData} from '../../model/project-data';
+import {DrawCanvasComponent} from '../draw-canvas/draw-canvas.component';
 
 @Component({
   selector: 'app-image-list',
@@ -12,32 +13,36 @@ export class ImageListComponent implements OnInit {
 
   private dataset: Dataset = new Dataset();
 
-  private selectedImageId: string
+  private datasetSelected = false;
 
-  @Output() selectImage = new EventEmitter<string>();
+  private selectedImageId: string;
+
+  @Input() drawCanvasComponent: DrawCanvasComponent;
 
   constructor(public datasetService: DatasetService) {
-  }
-
-  @Input()
-  set selectedProjectId(selectedProjectId: string) {
-    if (selectedProjectId !== undefined) {
-      this.datasetService.getDataset(selectedProjectId).subscribe((data: Dataset) => {
-        this.dataset = data;
-        if (data.images.length > 0)
-          this.onSelect("", data.images[0].id);
-      }, error1 => {
-        console.log('Fehler beim laden der Dataset Datein');
-        console.error(error1);
-      });
-    }
   }
 
   ngOnInit() {
   }
 
-  private onSelect(event, id) {
+  public onDatasetSelection(id: string) {
+    if (id !== undefined) {
+      this.datasetService.getDataset(id).subscribe((data: Dataset) => {
+        this.dataset = data;
+        if (data.images.length > 0) {
+          this.onSelectImage('', data.images[0].id);
+        }
+        this.datasetSelected = true;
+      }, error1 => {
+        console.log('Fehler beim laden der Dataset Datein');
+        console.error(error1);
+        this.datasetSelected = false;
+      });
+    }
+  }
+
+  private onSelectImage($event, id) {
     this.selectedImageId = id;
-    this.selectImage.emit(id);
+    this.drawCanvasComponent.onSelectImage(id);
   }
 }

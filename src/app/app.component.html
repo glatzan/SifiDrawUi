@@ -1,15 +1,15 @@
 <!--The content below is only a placeholder and can be replaced.-->
 
-<div class="ui-g" style="height: 90vh">
-  <div class="ui-g-1">
-    <app-case-list #caseListComponent (selectProject)="onDatasetSelect($event)"></app-case-list>
+<div>
+  <div class="box">
+    <app-case-list #caseListComponent [imageListComponent]="imageListComponent"></app-case-list>
   </div>
-  <div class="ui-g-1">
-<!--    <app-image-list #imageListComponent [selectedProjectId]="selectedDatasetId" (selectImage)="onImageSelect($event)"></app-image-list>-->
-<!--    <div style="height: 10px"></div>-->
-<!--    <app-filter-list></app-filter-list>-->
+  <div class="box">
+    <app-image-list #imageListComponent [drawCanvasComponent]="drawCanvasComponent"></app-image-list>
+    <!--    <div style="height: 10px"></div>-->
+    <!--    <app-filter-list></app-filter-list>-->
   </div>
-  <div class="ui-g-8">
-<!--    <app-draw-canvas #drawCanvasComponent [selectedImage]="selectedImageId"></app-draw-canvas>-->
+  <div class="box">
+    <app-draw-canvas #drawCanvasComponent ></app-draw-canvas>
   </div>
 </div>

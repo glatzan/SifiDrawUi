@@ -1,4 +1,4 @@
-import {BrowserModule} from '@angular/platform-browser';
+import {BrowserModule, DomSanitizer} from '@angular/platform-browser';
 import {NgModule} from '@angular/core';
 import {HttpClientModule, HttpClient} from '@angular/common/http';
 
@@ -7,11 +7,11 @@ import {DrawCanvasComponent} from './components/draw-canvas/draw-canvas.componen
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {CaseListComponent} from './components/case-list/case-list.component';
 import {ImageListComponent} from './components/image-list/image-list.component';
-import { ExportDialogComponent } from './components/export-dialog/export-dialog.component';
-import { FilterListComponent } from './components/filter-list/filter-list.component';
-import { FilterDialogComponent } from './components/filter-dialog/filter-dialog.component';
+import {ExportDialogComponent} from './components/export-dialog/export-dialog.component';
+import {FilterListComponent} from './components/filter-list/filter-list.component';
+import {FilterDialogComponent} from './components/filter-dialog/filter-dialog.component';
 import {ScrollingModule} from '@angular/cdk/scrolling';
-import {MatDialogModule, MatDividerModule, MatIconModule} from '@angular/material';
+import {MatButtonModule, MatDialogModule, MatDividerModule, MatIconModule, MatIconRegistry} from '@angular/material';
 
 @NgModule({
   declarations: [
@@ -30,11 +30,15 @@ import {MatDialogModule, MatDividerModule, MatIconModule} from '@angular/materia
     ScrollingModule,
     MatDialogModule,
     MatDividerModule,
-    MatIconModule
+    MatIconModule,
+    MatButtonModule
   ],
+  entryComponents: [ExportDialogComponent],
   providers: [],
   bootstrap: [AppComponent]
 })
 export class AppModule {
-
+  constructor(matIconRegistry: MatIconRegistry, domSanitizer: DomSanitizer) {
+    matIconRegistry.addSvgIconSet(domSanitizer.bypassSecurityTrustResourceUrl('./assets/mdi.svg'));
+  }
 }

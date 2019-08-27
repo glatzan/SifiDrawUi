@@ -1,22 +1,27 @@
-div.headline {
-  font-weight: bold;
-  margin-bottom: 10px;
-}
+.imageList {
+  height: 60vh;
+  width: 200px;
+  border: 1px solid LightGray;
+  border-radius: 3px;
 
-.selectedProject {
-  font-weight: bold;
-}
+  ul {
+    padding-left: 20px;
+    list-style-type: none;
+    li {
+      list-style-image: none;
+    }
+  }
 
-
-p-scrollPanel {
-  div {
-    background-color: aliceblue;
-    cursor: pointer;
-
+  .clickAble{
     &:hover {
       text-decoration: underline;
+      cursor: pointer;
     }
+  }
 
+  .selectedElement{
+    font-weight: bold;
   }
 }
+
 

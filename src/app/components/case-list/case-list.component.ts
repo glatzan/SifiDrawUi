@@ -4,6 +4,7 @@ import {ProjectService} from '../../service/project.service';
 import {Subscribable} from 'rxjs';
 import {ExportDialogComponent} from '../export-dialog/export-dialog.component';
 import {MatDialog} from '@angular/material';
+import {ImageListComponent} from '../image-list/image-list.component';
 
 @Component({
   selector: 'app-case-list',
@@ -16,7 +17,7 @@ export class CaseListComponent implements OnInit {
 
   private selectedProjectId: string;
 
-  @Output() selectProject = new EventEmitter<string>();
+  @Input() imageListComponent: ImageListComponent;
 
   constructor(public projectService: ProjectService,
               public dialog: MatDialog) {
@@ -36,9 +37,9 @@ export class CaseListComponent implements OnInit {
   ngOnInit() {
   }
 
-  private onSelect(event, id) {
+  private onSelectDataset(event, id) {
     this.selectedProjectId = id;
-    this.selectProject.emit(id);
+    this.imageListComponent.onDatasetSelection(id);
   }
 
   openDialog(id: string): void {

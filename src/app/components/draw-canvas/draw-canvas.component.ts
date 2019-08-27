@@ -59,8 +59,7 @@ export class DrawCanvasComponent implements AfterViewInit {
     };
   }
 
-  @Input()
-  set selectedImage(selectedImageId: string) {
+  public onSelectImage(selectedImageId: string) {
     if (selectedImageId !== undefined) {
       this.imageService.getImage(selectedImageId).subscribe((data: CImage) => {
         console.log('Image select' + data.name);
