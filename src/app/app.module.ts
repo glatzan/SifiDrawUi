@@ -18,8 +18,11 @@ import {
   MatFormFieldModule,
   MatGridListModule,
   MatIconModule,
-  MatIconRegistry, MatSelectModule
+  MatIconRegistry, MatInputModule, MatSelectModule
 } from '@angular/material';
+import {FormsModule} from "@angular/forms";
+import {MatColorPickerModule} from "mat-color-picker";
+import {MccColorPickerModule} from "material-community-components";
 
 @NgModule({
   declarations: [
@@ -42,7 +45,11 @@ import {
     MatButtonModule,
     MatGridListModule,
     MatFormFieldModule,
-    MatSelectModule
+    MatSelectModule,
+    MatInputModule,
+    FormsModule,
+    MatColorPickerModule,
+    MccColorPickerModule
   ],
   entryComponents: [ExportDialogComponent],
   providers: [],

@@ -1,6 +1,6 @@
 <h4>Dataset {{dataset.name}}</h4>
 
-<cdk-virtual-scroll-viewport itemSize="200" class="imageList">
+<cdk-virtual-scroll-viewport itemSize="1" class="imageList">
   <ul>
     <li *cdkVirtualFor="let img of dataset.images" (click)="onSelectImage($event, img.id)" class="clickAble"
         [ngClass]="selectedImageId === img.id ? 'selectedElement' : ''">

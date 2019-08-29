@@ -13,32 +13,13 @@ Run `ng generate component component-name` to generate a new component. You can 
 ## Build
 Install : <br>
 
-https://material.angular.io/guide/getting-started
+https://material.angular.io/guide/getting-started <br>
+
+npm install material-community-components <br>
+npm install rxjs-compat
 
 
- <ul>
-    <li> npm install primeflex --save </li>
-    <li> npm install primeng --save </li>
-    <li> npm install primeicons --save </li>
-    <li> npm install @angular/animations  --save </li>
- </ul>
-
-Add in angular.json: <br>
-<pre>
-        "styles": [
-            "src/styles.scss",
-            "node_modules/primeng/resources/primeng.css",
-            "node_modules/primeng/resources/themes/nova-dark/theme.css",
-            "node_modules/primeicons/primeicons.css",
-            "node_modules/primeflex/primeflex.css"
-         ],
-</pre>
-
- 
- https://material.angular.io/guide/getting-started
- 
- npm install --save @angular/material @angular/cdk @angular/animations
-
+npm install --save @angular/material @angular/cdk @angular/animations
 
 Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory. Use the `--prod` flag for a production build.
 

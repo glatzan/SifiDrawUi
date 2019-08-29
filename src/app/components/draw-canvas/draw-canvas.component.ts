@@ -28,7 +28,7 @@ export class DrawCanvasComponent implements AfterViewInit {
 
   private currentLayerId = 1;
 
-  private currentLayer: Layer;
+  currentLayer: Layer;
 
   private drawImage = new Image();
 

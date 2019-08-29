@@ -1,24 +1,26 @@
 @import "~@angular/material/prebuilt-themes/indigo-pink.css";
-/* You can add global styles to this file, and also import other style files */
-.ui-colorpicker-preview {
-  padding: 3px 1px !important;
-  width: 1.4em;
-}
+@import '~@angular/material/theming';
+@import '~material-community-components/theming';
 
-.ui-spinner-input {
-  padding-top: 4px !important;
-  padding-bottom: 4px !important;
-}
+@include mat-core();
 
-.ui-dropdown .ui-dropdown-label {
-  padding-top: 1px !important;
-  padding-bottom: 1px !important;
-}
+// Define the palettes for your theme using the Material Design palettes available in palette.scss
+// (imported above). For each palette, you can optionally specify a default, lighter, and darker
+// hue. Available color palettes: https://material.io/design/color/
+$demo-primary: mat-palette($mat-green);
+$demo-accent: mat-palette($mat-pink, A200, A100, A400);
 
-.ui-button.ui-button-icon-only .ui-button-text{
-  padding: 5px 2px !important;
-}
+// The warn palette is optional (defaults to red).
+$demo-warn: mat-palette($mat-red);
 
+// Create the theme object (a Sass map containing all of the palettes).
+$demo-theme: mat-light-theme($demo-primary, $demo-accent, $demo-warn);
+
+// build angular material theme
+@include angular-material-theme($demo-theme);
+
+// pass angular material theme to material community components
+@include mcc-theme($demo-theme);
 
 
 /* mat icons */

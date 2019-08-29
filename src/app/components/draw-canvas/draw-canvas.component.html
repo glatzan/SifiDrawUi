@@ -11,68 +11,56 @@
         (contextmenu)="onEvent($event)"></canvas>
 
 <div *ngIf="renderContext">
-  <mat-grid-list cols="3" rowHeight="30px">
-    <mat-grid-tile>
-      <mat-label>Label</mat-label>
-    </mat-grid-tile>
-    <mat-grid-tile>
-      <mat-form-field>
-        <mat-select>
-          <mat-option *ngFor="let layer of image.layers" [value]="currentLayer">
-            {{layer.id}}
-          </mat-option>
-        </mat-select>
-      </mat-form-field>
-    </mat-grid-tile>
-    <mat-grid-tile>
-      <mat-icon class="mat-icon" svgIcon="add" (onClick)="addLayer($event)"></mat-icon>
-    </mat-grid-tile>
-    <mat-grid-tile>4</mat-grid-tile>
-  </mat-grid-list>
 
-
-  <!--  <table>-->
-  <!--    <tr>-->
-  <!--      <td>-->
-  <!--        Layer-->
-  <!--      </td>-->
-  <!--      <td>-->
-  <!--        <p-dropdown [options]="image.layers" [(ngModel)]="currentLayer" optionLabel="id"></p-dropdown>-->
-  <!--      </td>-->
-  <!--      <td>-->
-  <!--        <p-button icon="pi pi-plus" ></p-button>-->
-  <!--      </td>-->
-  <!--      <td>-->
-  <!--        Farbe-->
-  <!--      </td>-->
-  <!--      <td>-->
-  <!--        <p-colorPicker [(ngModel)]="currentLayer.color" (onChange)="redrawUI()"></p-colorPicker>-->
-  <!--      </td>-->
-  <!--      <td>-->
-  <!--        Dicke-->
-  <!--      </td>-->
-  <!--      <td>-->
-  <!--        <p-spinner [(ngModel)]="currentLayer.size" (onChange)="redrawUI()" [min]="1" size="1"></p-spinner>-->
-  <!--      </td>-->
-  <!--      <td>-->
-  <!--            <span *ngFor="let x of currentLayer.lines; let idx = index">-->
-  <!--            <a style="text-decoration: underline" href="#"-->
-  <!--               (mouseenter)='highLightLine(idx)'-->
-  <!--               (mouseleave)="redrawUI()"-->
-  <!--               (click)="selectPoints(idx)">[{{x.length}}]</a>-->
-  <!--          </span>-->
-  <!--      </td>-->
-  <!--    </tr>-->
-  <!--    <tr>-->
-  <!--      <td>-->
-  <!--        Radierer-->
-  <!--      </td>-->
-  <!--      <td>-->
-  <!--        <p-spinner [(ngModel)]="rightClickCircleSize" size="2"></p-spinner>-->
-  <!--      </td>-->
-  <!--      <td colspan="6">-->
-  <!--        (strg: löschen)-->
-  <!--      </td>-->
-  <!--    </tr>-->
-  <!--  </table>-->
+  <table style="width:500px;">
+    <tr>
+      <td>
+        <mat-form-field>
+          <mat-select [(ngModel)]="currentLayer" placeholder="Label">
+            <mat-option *ngFor="let layer of image.layers" [value]="layer">
+              {{layer.id}}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+      </td>
+      <td>
+        <button mat-icon-button color="primary" (click)="addLayer($event)">
+          <mat-icon>playlist_add</mat-icon>
+        </button>
+      </td>
+      <td>
+        <mat-form-field>
+          <input matInput [(ngModel)]="currentLayer.color" placeholder="Farbe" (change)="redrawUI()"
+                 type="color"/>
+        </mat-form-field>
+      </td>
+      <td>
+        <mat-form-field>
+          <input matInput [(ngModel)]="currentLayer.size" placeholder="Dicke"
+                 type="number" min="1"
+                 id="myNumber"/>
+        </mat-form-field>
+      </td>
+      <td>
+         <span *ngFor="let x of currentLayer.lines; let idx = index">
+                       <a style="text-decoration: underline" href="#"
+                          (mouseenter)='highLightLine(idx)'
+                          (mouseleave)="redrawUI()"
+                          (click)="selectPoints(idx)">[{{x.length}}]</a>
+                     </span>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <mat-form-field>
+          <input matInput [(ngModel)]="rightClickCircleSize" placeholder="Radierer"
+                 type="number" min="1"
+          />
+        </mat-form-field>
+      </td>
+      <td colspan="2">
+        <label>(strg: löschen)</label>
+      </td>
+    </tr>
+  </table>
 </div>
