@@ -1,41 +1,58 @@
-canvas {
-  border: 1px solid LightGray;
-  border-radius: 3px;
-}
+.content {
+  height: 90vh;
 
+  canvas {
+    border: 1px solid LightGray;
+    border-radius: 3px;
+  }
 
-div {
-  table {
-    width: 100%;
+  .optionContainer {
+    .settings {
+      float: left;
+      width: 49.5%;
+      border: 1px solid LightGray;
+      border-radius: 3px;
+      height: 400px;
 
-    tr {
-      td:nth-child(1) {
-        width: 100px;
+      table.input {
+        width: 99%;
+        flex-grow: 1;
+
+        tr {
+          td:nth-child(1) {
+            width: 100px;
+          }
+
+          td:nth-child(2) {
+            width: 200px;
+          }
+
+          td:nth-child(3) {
+            width: 50px;
+          }
+
+          td:nth-child(4) {
+            width: 50px;
+          }
+
+          td:nth-child(5) {
+            width: 50px;
+          }
+        }
       }
+    }
 
-      td:nth-child(2) {
-        width: 200px;
-      }
+    .filter {
+      height: 400px;
+      width: 50%;
+      float: right;
+      border: 1px solid LightGray;
+      border-radius: 3px;
 
-      td:nth-child(3) {
-        width: 50px;
-      }
-
-      td:nth-child(4) {
-        width: 50px;
-      }
-
-      td:nth-child(5) {
-        width: 50px;
-      }
-
-      td:nth-child(6) {
-        width: 50px;
-      }
-
-      td:nth-child(7) {
-        width: 75px;
+      .inputText{
+        width:70%;
       }
     }
   }
+
 }

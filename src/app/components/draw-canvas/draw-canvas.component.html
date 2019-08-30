@@ -1,66 +1,86 @@
 <h4>Bild {{image !== undefined ? image.name : ""}}</h4>
-<canvas #canvas
-        (mouseenter)="onEvent($event)"
-        (mouseleave)="onEvent($event)"
-        (blur)="onEvent($event)"
-        (mousemove)="onMouseMove($event)"
-        (mousedown)="onMouseDown($event)"
-        (mouseup)="onMouseUp($event)"
-        (click)="onMouseDown($event)"
-        (keydown)="onMouseMove($event)"
-        (contextmenu)="onEvent($event)"></canvas>
-
-<div *ngIf="renderContext">
-
-  <table style="width:500px;">
-    <tr>
-      <td>
-        <mat-form-field>
-          <mat-select [(ngModel)]="currentLayer" placeholder="Label">
-            <mat-option *ngFor="let layer of image.layers" [value]="layer">
-              {{layer.id}}
-            </mat-option>
-          </mat-select>
-        </mat-form-field>
-      </td>
-      <td>
-        <button mat-icon-button color="primary" (click)="addLayer($event)">
-          <mat-icon>playlist_add</mat-icon>
-        </button>
-      </td>
-      <td>
-        <mat-form-field>
-          <input matInput [(ngModel)]="currentLayer.color" placeholder="Farbe" (change)="redrawUI()"
-                 type="color"/>
-        </mat-form-field>
-      </td>
-      <td>
-        <mat-form-field>
-          <input matInput [(ngModel)]="currentLayer.size" placeholder="Dicke"
-                 type="number" min="1"
-                 id="myNumber"/>
-        </mat-form-field>
-      </td>
-      <td>
-         <span *ngFor="let x of currentLayer.lines; let idx = index">
+<div class="content">
+  <canvas #canvas
+          (mouseenter)="onEvent($event)"
+          (mouseleave)="onEvent($event)"
+          (blur)="onEvent($event)"
+          (mousemove)="onMouseMove($event)"
+          (mousedown)="onMouseDown($event)"
+          (mouseup)="onMouseUp($event)"
+          (click)="onMouseDown($event)"
+          (keydown)="onMouseMove($event)"
+          (contextmenu)="onEvent($event)"></canvas>
+  <div *ngIf="renderContext" class="optionContainer">
+    <div class="settings">
+      <table class="input">
+        <tr>
+          <td>
+            <mat-form-field>
+              <mat-select [(ngModel)]="currentLayer" placeholder="Label">
+                <mat-option *ngFor="let layer of image.layers" [value]="layer">
+                  {{layer.id}}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </td>
+          <td>
+            <button mat-icon-button color="primary" (click)="addLayer($event)">
+              <mat-icon>playlist_add</mat-icon>
+            </button>
+          </td>
+          <td>
+            <mat-form-field>
+              <input matInput [(ngModel)]="currentLayer.color" placeholder="Farbe" (change)="redrawUI()"
+                     type="color"/>
+            </mat-form-field>
+          </td>
+          <td>
+            <mat-form-field>
+              <input matInput [(ngModel)]="currentLayer.size" placeholder="Dicke"
+                     type="number" min="1"
+                     id="myNumber"/>
+            </mat-form-field>
+          </td>
+        </tr>
+        <tr>
+          <td colspan="4">
+            <mat-form-field floatLabel="always" appearance="legacy">
+              <mat-label>Linien</mat-label>
+              <span *ngFor="let x of currentLayer.lines; let idx = index">
                        <a style="text-decoration: underline" href="#"
                           (mouseenter)='highLightLine(idx)'
                           (mouseleave)="redrawUI()"
                           (click)="selectPoints(idx)">[{{x.length}}]</a>
                      </span>
-      </td>
-    </tr>
-    <tr>
-      <td>
-        <mat-form-field>
-          <input matInput [(ngModel)]="rightClickCircleSize" placeholder="Radierer"
-                 type="number" min="1"
-          />
-        </mat-form-field>
-      </td>
-      <td colspan="2">
-        <label>(strg: löschen)</label>
-      </td>
-    </tr>
-  </table>
+              <input matInput style="display: none"/>
+            </mat-form-field>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <mat-form-field>
+              <input matInput [(ngModel)]="rightClickCircleSize" placeholder="Radierer"
+                     type="number" min="1"
+              />
+            </mat-form-field>
+          </td>
+          <td colspan="2">
+            <label>(strg: löschen)</label>
+          </td>
+        </tr>
+      </table>
+    </div>
+    <div class="filter">
+      <table style="width: 100%">
+        <tr>
+          <td>
+            <mat-form-field floatLabel="always" class="inputText">
+              <textarea matInput placeholder="Filter" rows="20" c style="white-space: nowrap;"></textarea>
+            </mat-form-field>
+          </td>
+        </tr>
+      </table>
+
+    </div>
+  </div>
 </div>

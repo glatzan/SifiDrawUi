@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 
 @Component({
   selector: 'app-filter-list',
@@ -7,7 +7,29 @@ import { Component, OnInit } from '@angular/core';
 })
 export class FilterListComponent implements OnInit {
 
-  constructor() { }
+  public filter = [
+    {
+      category: "Split", filter: [
+        {
+          name: "Split-Filter",
+          description: "Ausplitten des Filterbaumes",
+          command: "const split = new SplitFilter(img);"
+        }
+      ]
+    },
+    {
+      category: "Merge", filter: [
+        {
+          name: "Img-Merge-Filter",
+          description: "Ausplitten des Filterbaumes",
+          command: "const merge = new IMGMergeFilter(imgs, colors);"
+        }
+      ]
+    }
+  ]
+
+  constructor() {
+  }
 
   ngOnInit() {
   }
