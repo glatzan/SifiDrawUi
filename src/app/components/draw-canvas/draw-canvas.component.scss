@@ -9,10 +9,11 @@
   .optionContainer {
     .settings {
       float: left;
-      width: 49.5%;
+      width: 49%;
       border: 1px solid LightGray;
       border-radius: 3px;
       height: 400px;
+      padding-left: 2px;
 
       table.input {
         width: 99%;
@@ -20,23 +21,23 @@
 
         tr {
           td:nth-child(1) {
-            width: 100px;
+            width: 70px;
           }
 
           td:nth-child(2) {
-            width: 200px;
+            width: 100px;
           }
 
           td:nth-child(3) {
-            width: 50px;
+            width: 70px;
           }
 
           td:nth-child(4) {
-            width: 50px;
+            width: 70px;
           }
 
           td:nth-child(5) {
-            width: 50px;
+            width: auto;
           }
         }
       }
@@ -48,9 +49,10 @@
       float: right;
       border: 1px solid LightGray;
       border-radius: 3px;
+      padding-left: 2px;
 
-      .inputText{
-        width:70%;
+      .inputText {
+        width: 70%;
       }
     }
   }

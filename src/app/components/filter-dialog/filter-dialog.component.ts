@@ -1,5 +1,5 @@
 import {Component, OnInit} from '@angular/core';
-import {Filter} from '../../model/filter/filter';
+import {Filter} from '../../filter/filter';
 import {FilterService} from '../../service/filter.service';
 
 @Component({

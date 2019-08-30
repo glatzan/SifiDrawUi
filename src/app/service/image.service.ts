@@ -21,6 +21,8 @@ export class ImageService {
       })
     };
 
+    console.log(`${this.serverURL}/image/${id}`)
+
     return this._http.get<CImage>(`${this.serverURL}/image/${id}`, httpOptions);
   }
 
