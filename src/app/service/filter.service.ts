@@ -18,13 +18,13 @@ export class FilterService {
     return new Array<Filter>();
   }
 
-  public getNewMagicFilter(parentFilter: ImageFilter, command: string) {
-    const m = new ImageMagicFilter(parentFilter, command);
+  public getNewMagicFilter(command: string, parentFilter?: ImageFilter) {
+    const m = new ImageMagicFilter(parentFilter || undefined, command);
     m.imageMagicService = this.imageMagicService;
     return m;
   }
 
-  public getNewEventFilter(parentFilter: ImageFilter, callBack: (image: CImage) => any, bind : any, origImage: CImage){
-    return new ImageEventFilter(parentFilter, callBack.bind(bind), origImage)
+  public getNewEventFilter(callBack: (image: CImage) => any, bind: any, origImage: CImage, parentFilter: ImageFilter) {
+    return new ImageEventFilter(parentFilter || undefined, callBack.bind(bind), origImage)
   }
 }

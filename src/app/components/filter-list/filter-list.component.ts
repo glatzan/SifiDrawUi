@@ -10,6 +10,7 @@ import DrawUtil from "../../utils/draw-util";
 import {FilterService} from "../../service/filter.service";
 import {ImageEventFilter} from "../../filter/image-event-filter";
 import {HttpClient} from "@angular/common/http";
+import {logger} from "codelyzer/util/logger";
 
 @Component({
   selector: 'app-filter-list',
@@ -22,9 +23,11 @@ export class FilterListComponent implements OnInit {
   private filterValue: string;
   private _cImage: CImage;
   private resetTriggered = false
+  private doNotResetFilter = false
 
   @Input() set cImage(cImage: CImage) {
     this._cImage = cImage;
+    console.log("Loading Image")
     this._http.get('assets/defaultFilterValue.txt', {responseType: 'text' as 'json'}).subscribe(x => {
       this.filterValue = x.toString();
     })
@@ -64,16 +67,21 @@ export class FilterListComponent implements OnInit {
         me.filterIsRunning = false;
         return
       }
-      const endFilter = this.filterService.getNewEventFilter(end, this.filterCallBack, me, me._cImage);
+
+      if (end === undefined)
+        end = start;
+
+      const endFilter = this.filterService.getNewEventFilter(this.filterCallBack, me, me._cImage, end);
       start.doFilter(img, undefined);
       console.log("end");
     })
   }
 
-  public resetFilter(event) {
+  public resetFilter() {
     this.resetTriggered = this.filterIsRunning;
-    this.imageService.getImage(this._cImage.id).subscribe( x =>{
-      this.filterOutput.emit(x)
+    this.imageService.getImage(this._cImage.id).subscribe(x => {
+      this._cImage.data = x.data
+      this.filterOutput.emit(this._cImage)
     })
   }
 
