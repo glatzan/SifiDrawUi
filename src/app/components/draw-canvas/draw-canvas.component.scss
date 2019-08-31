@@ -1,60 +1,52 @@
 .content {
   height: 90vh;
+  display: grid;
+  grid-template-columns: 50% 50%;
+  grid-template-rows: auto 400px;
+  grid-row-gap: 5px;
+  grid-column-gap: 5px;
+  grid-template-areas: "canvas canvas" "settings filter";
+  min-width: 1300px;
 
   canvas {
     border: 1px solid LightGray;
     border-radius: 3px;
+    grid-area: canvas;
   }
 
-  .optionContainer {
-    .settings {
-      float: left;
-      width: 49%;
-      border: 1px solid LightGray;
-      border-radius: 3px;
-      height: 400px;
-      padding-left: 2px;
 
-      table.input {
-        width: 99%;
-        flex-grow: 1;
+  .settings {
+    border: 1px solid LightGray;
+    border-radius: 3px;
+    border-spacing: 0px;
+    padding: 5px;
+    grid-area: settings;
 
-        tr {
-          td:nth-child(1) {
-            width: 70px;
-          }
+    display: grid;
+    grid-template-columns: 150px 150px 150px 150px;
+    grid-template-rows: 50px 50px 50px;
+    grid-row-gap: 10px;
+    grid-column-gap: 10px;
 
-          td:nth-child(2) {
-            width: 100px;
-          }
-
-          td:nth-child(3) {
-            width: 70px;
-          }
-
-          td:nth-child(4) {
-            width: 70px;
-          }
-
-          td:nth-child(5) {
-            width: auto;
-          }
-        }
-      }
+    .addButton {
+      align-self: center;
     }
 
-    .filter {
-      height: 400px;
-      width: 50%;
-      float: right;
-      border: 1px solid LightGray;
-      border-radius: 3px;
-      padding-left: 2px;
+    .lines {
+      grid-column: 1/5;
+      width: 99%;
+    }
 
-      .inputText {
-        width: 70%;
-      }
+    .deleteLabel {
+      align-self: center;
     }
   }
 
+  .filter {
+    padding: 5px;
+    border: 1px solid LightGray;
+    border-radius: 3px;
+    border-spacing: 0px;
+    grid-area: filter;
+  }
 }

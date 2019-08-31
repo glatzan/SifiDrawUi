@@ -1,0 +1,7 @@
+// Filter factory: f.getSomeFilter
+// Start filter: start = f.getSomeFiler()
+// End filter: end = f.getSomeFilter(parentFilter)
+// Example
+  start = f.getNewMagicFilter(undefined, "-resize 1000x1000");
+  const f1 = f.getNewMagicFilter(start, "-level 25%,75%");
+  end = f.getNewMagicFilter(f1, "+level-colors green,gold");

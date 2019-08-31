@@ -9,6 +9,7 @@ import {ImageMagicFilter} from "../../filter/image-magic-filter";
 import DrawUtil from "../../utils/draw-util";
 import {FilterService} from "../../service/filter.service";
 import {ImageEventFilter} from "../../filter/image-event-filter";
+import {HttpClient} from "@angular/common/http";
 
 @Component({
   selector: 'app-filter-list',
@@ -17,37 +18,24 @@ import {ImageEventFilter} from "../../filter/image-event-filter";
 })
 export class FilterListComponent implements OnInit {
 
-  @Input() cImage: CImage;
-  @Output() filterOutput = new EventEmitter<CImage>();
-
   private filterIsRunning = false;
-
-  public filter = [
-    {
-      category: "Split", filter: [
-        {
-          name: "Split-Filter",
-          description: "Ausplitten des Filterbaumes",
-          command: "const split = new SplitFilter(img);"
-        }
-      ]
-    },
-    {
-      category: "Merge", filter: [
-        {
-          name: "Img-Merge-Filter",
-          description: "Ausplitten des Filterbaumes",
-          command: "const merge = new IMGMergeFilter(imgs, colors);"
-        }
-      ]
-    }
-  ]
-
   private filterValue: string;
+  private _cImage: CImage;
+  private resetTriggered = false
+
+  @Input() set cImage(cImage: CImage) {
+    this._cImage = cImage;
+    this._http.get('assets/defaultFilterValue.txt', {responseType: 'text' as 'json'}).subscribe(x => {
+      this.filterValue = x.toString();
+    })
+  }
+
+  @Output() filterOutput = new EventEmitter<CImage>();
 
   constructor(public imageMagicService: ImageMagicService,
               private imageService: ImageService,
-              private filterService: FilterService) {
+              private filterService: FilterService,
+              private _http: HttpClient) {
   }
 
   ngOnInit() {
@@ -59,53 +47,66 @@ export class FilterListComponent implements OnInit {
       console.log(this.filterValue + "---")
       return;
     }
-
-
     const me = this;
-    console.log(this);
-    this.filterIsRunning = true;
-    const cImage = await this.imageService.getImage(this.cImage.id).toPromise();
+    me.filterIsRunning = true;
+    const cImage = await this.imageService.getImage(this._cImage.id).toPromise();
     DrawUtil.loadImageFromBase64(cImage.data, img => {
       const f = me.filterService;
       let end = undefined;
       let start = undefined;
-      eval(me.filterValue);
-      const endFilter = this.filterService.getNewEventFilter(end, this.filterCallBack, me, me.cImage);
+      try {
+        eval(me.filterValue);
+      } catch (e) {
+        if (e instanceof SyntaxError) {
+          alert(e);
+        }
+        alert(e);
+        me.filterIsRunning = false;
+        return
+      }
+      const endFilter = this.filterService.getNewEventFilter(end, this.filterCallBack, me, me._cImage);
       start.doFilter(img, undefined);
       console.log("end");
+    })
+  }
 
-    //   let code = `({
-    // Run: ()=> {
-    //      const f = me.filterService;
-    //     ${me.filterValue}
-    //     const endFilter = this.filterService.getNewEventFilter(end, this.filterCallBack, me, me.cImage)
-    //     start.doFilter(img, undefined)
-    //      console.log("end");
-    //     }
-    // })`;
-    //   let result = ts.transpile(code);
-    //   let runnalbe: any = eval(result);
-    //   runnalbe.Run();
-
-
-      // start = f.getNewMagicFilter(undefined, "-resize 128x128");
-      // const f1 = f.getNewMagicFilter(start, "-level 25%,75%");
-      // end = tf.getNewMagicFilter(f1, "+level-colors green,gold");
-
-      /*
-
-      start = f.getNewMagicFilter(undefined, "-resize 128x128");
-      const f1 = f.getNewMagicFilter(start, "-level 25%,75%");
-      end = f.getNewMagicFilter(f1, "+level-colors green,gold");
-
-       */
+  public resetFilter(event) {
+    this.resetTriggered = this.filterIsRunning;
+    this.imageService.getImage(this._cImage.id).subscribe( x =>{
+      this.filterOutput.emit(x)
     })
   }
 
   public filterCallBack(image: CImage) {
     this.filterIsRunning = false;
-    this.filterOutput.emit(image)
+
+    if (!this.resetTriggered)
+      this.filterOutput.emit(image)
+    else
+      this.resetTriggered = false;
   }
 
 
 }
+
+
+// public filter = [
+//   {
+//     category: "Split", filter: [
+//       {
+//         name: "Split-Filter",
+//         description: "Ausplitten des Filterbaumes",
+//         command: "const split = new SplitFilter(img);"
+//       }
+//     ]
+//   },
+//   {
+//     category: "Merge", filter: [
+//       {
+//         name: "Img-Merge-Filter",
+//         description: "Ausplitten des Filterbaumes",
+//         command: "const merge = new IMGMergeFilter(imgs, colors);"
+//       }
+//     ]
+//   }
+// ]

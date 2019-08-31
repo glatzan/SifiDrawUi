@@ -10,78 +10,51 @@
           (click)="onMouseDown($event)"
           (keydown)="onMouseMove($event)"
           (contextmenu)="onEvent($event)"></canvas>
-  <div *ngIf="renderContext" class="optionContainer">
-    <div class="settings">
-      <table class="input">
-        <tr>
-          <td>
-            <mat-form-field style="width: 50px;">
-              <mat-select [(ngModel)]="currentLayer" placeholder="Label">
-                <mat-option *ngFor="let layer of image.layers" [value]="layer">
-                  {{layer.id}}
-                </mat-option>
-              </mat-select>
-            </mat-form-field>
-          </td>
-          <td>
-            <button mat-icon-button color="primary" (click)="addLayer($event)">
-              <mat-icon>playlist_add</mat-icon>
-            </button>
-          </td>
-          <td>
-            <mat-form-field style="width: 50px">
-              <input matInput [(ngModel)]="currentLayer.color" placeholder="Farbe" (change)="redrawUI()"
-                     type="color"/>
-            </mat-form-field>
-          </td>
-          <td>
-            <mat-form-field style="width: 40px">
-              <input matInput [(ngModel)]="currentLayer.size" placeholder="Dicke"
-                     type="number" min="1"
-                     id="myNumber"/>
-            </mat-form-field>
-          </td>
-          <td width="*">
+  <div class="settings" *ngIf="renderContext">
 
-          </td>
-        </tr>
-        <tr>
-          <td colspan="5">
-            <mat-form-field floatLabel="always" style="width: 99%;">
-              <mat-label>Linien</mat-label>
-              <span *ngFor="let x of currentLayer.lines; let idx = index">
+    <mat-form-field>
+      <mat-select [(ngModel)]="currentLayer" placeholder="Label">
+        <mat-option *ngFor="let layer of image.layers" [value]="layer">
+          {{layer.id}}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <button mat-icon-button color="primary" class="addButton" (click)="addLayer($event)">
+      <mat-icon>playlist_add</mat-icon>
+    </button>
+
+    <mat-form-field>
+      <input matInput [(ngModel)]="currentLayer.color" placeholder="Farbe" (change)="redrawUI()"
+             type="color"/>
+    </mat-form-field>
+
+    <mat-form-field>
+      <input matInput [(ngModel)]="currentLayer.size" placeholder="Dicke"
+             type="number" min="1"
+             id="myNumber"/>
+    </mat-form-field>
+
+
+    <mat-form-field floatLabel="always" class="lines">
+      <mat-label>Linien</mat-label>
+      <span *ngFor="let x of currentLayer.lines; let idx = index">
                        <a style="text-decoration: underline" href="#"
                           (mouseenter)='highLightLine(idx)'
                           (mouseleave)="redrawUI()"
                           (click)="selectPoints(idx)">[{{x.length}}]</a>
                      </span>
-              <input matInput style="display: none"/>
-            </mat-form-field>
-          </td>
-        </tr>
-        <tr>
-          <td>
-            <mat-form-field style="width: 50px">
-              <input matInput [(ngModel)]="rightClickCircleSize" placeholder="Radierer"
-                     type="number" min="1"
-              />
-            </mat-form-field>
-          </td>
-          <td colspan="4">
-            <label>(strg: löschen)</label>
-          </td>
-        </tr>
-      </table>
-    </div>
-    <div class="filter">
-      <table style="width: 100%">
-        <tr>
-          <td>
-            <app-filter-list [cImage]="image" (filterOutput)="onFilterCompleted($event)" ></app-filter-list>
-          </td>
-        </tr>
-      </table>
+      <input matInput style="display: none"/>
+    </mat-form-field>
 
-    </div>
+    <mat-form-field>
+      <input matInput [(ngModel)]="rightClickCircleSize" placeholder="Radierer"
+             type="number" min="1"
+      />
+    </mat-form-field>
+    <label class="deleteLabel">(strg: löschen)</label>
+  </div>
+  <div class="filter" *ngIf="renderContext">
+    <app-filter-list [cImage]="image" (filterOutput)="onFilterCompleted($event)"></app-filter-list>
   </div>
 </div>
