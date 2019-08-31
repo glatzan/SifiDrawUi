@@ -1,4 +1,5 @@
 import {ImageFilter} from "./image-filter";
+import {Filter} from "./filter";
 
 export class ImageSplitFilter extends ImageFilter {
 

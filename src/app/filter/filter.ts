@@ -1,4 +1,4 @@
-abstract class Filter {
+export class Filter {
 
   public name: string;
 
@@ -6,10 +6,13 @@ abstract class Filter {
   public childFilter: Filter;
 
   protected constructor(filter: Filter) {
-    filter.registerChildFilter(this);
+    if (filter !== undefined)
+      filter.registerChildFilter(this);
   }
 
-  abstract doFilter(data, parentFilter: Filter);
+  doFilter(data, parentFilter: Filter) {
+
+  }
 
   public registerChildFilter(filter: Filter) {
     this.childFilter = filter;

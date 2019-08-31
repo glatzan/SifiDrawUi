@@ -1,4 +1,5 @@
 import {ImageFilter} from "./image-filter";
+import {Filter} from "./filter";
 
 export class ImageMergeFilter extends ImageFilter {
 

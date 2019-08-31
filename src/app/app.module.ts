@@ -9,7 +9,6 @@ import {CaseListComponent} from './components/case-list/case-list.component';
 import {ImageListComponent} from './components/image-list/image-list.component';
 import {ExportDialogComponent} from './components/export-dialog/export-dialog.component';
 import {FilterListComponent} from './components/filter-list/filter-list.component';
-import {FilterDialogComponent} from './components/filter-dialog/filter-dialog.component';
 import {ScrollingModule} from '@angular/cdk/scrolling';
 import {
   MatButtonModule,
@@ -18,7 +17,7 @@ import {
   MatFormFieldModule,
   MatGridListModule,
   MatIconModule,
-  MatIconRegistry, MatInputModule, MatSelectModule
+  MatIconRegistry, MatInputModule, MatProgressSpinnerModule, MatSelectModule
 } from '@angular/material';
 import {FormsModule} from "@angular/forms";
 import {MatColorPickerModule} from "mat-color-picker";
@@ -31,8 +30,7 @@ import {MccColorPickerModule} from "material-community-components";
     CaseListComponent,
     ImageListComponent,
     ExportDialogComponent,
-    FilterListComponent,
-    FilterDialogComponent
+    FilterListComponent
   ],
   imports: [
     HttpClientModule,
@@ -49,7 +47,8 @@ import {MccColorPickerModule} from "material-community-components";
     MatInputModule,
     FormsModule,
     MatColorPickerModule,
-    MccColorPickerModule
+    MccColorPickerModule,
+    MatProgressSpinnerModule
   ],
   entryComponents: [ExportDialogComponent],
   providers: [],

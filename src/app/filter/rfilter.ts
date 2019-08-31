@@ -1,5 +1,6 @@
-import {Filter} from './filter';
+import {Filter} from "./filter";
 
-export class RFilter extends Filter {
-
+export class RFilter{
+  doFilter(data: HTMLImageElement, parentFilter: Filter) {
+  }
 }

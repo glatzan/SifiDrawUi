@@ -1,2 +1,6 @@
-<div class="headline">Filter</div>
+<mat-form-field floatLabel="always" class="inputText">
+  <textarea matInput placeholder="Filter" rows="20" c style="white-space: nowrap;" [(ngModel)]="filterValue"></textarea>
+</mat-form-field>
 
+<button mat-stroked-button (click)="runFilter()">Filtern</button>
+<mat-spinner *ngIf="filterIsRunning"></mat-spinner>

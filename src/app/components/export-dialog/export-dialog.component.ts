@@ -99,13 +99,12 @@ export class ExportDialogComponent implements OnInit {
     //this.datasetService.
     const canvas = document.createElement('canvas');
     const cx = canvas.getContext('2d');
-    canvas.toDataURL()
     this.showProgressDialog = true;
     this.currentProgress = 0;
     const c = await this.datasetService.getDataset(this.dataset.id).toPromise();
     this.todoProgress = c.images.length;
 
-    const newDatasetID = `${this.project.id}_|_${this.name}`
+    const newDatasetID = btoa(`${this.project.id}/${this.name}`);
 
     await this.datasetService.createDataset(newDatasetID).toPromise()
 
@@ -120,10 +119,10 @@ export class ExportDialogComponent implements OnInit {
       newIMG.id = img.id.replace(this.dataset.id, newDatasetID)
 
       const imgData = canvas.toDataURL()
-      newIMG.data = imgData.substr(imgData.indexOf(',')+1);
+      newIMG.data = imgData.substr(imgData.indexOf(',') + 1);
       newIMG.name = img.name;
 
-      if(this.copyLayers){
+      if (this.copyLayers) {
         newIMG.layers = image.layers
       }
 

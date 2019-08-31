@@ -76,12 +76,42 @@ export default class DrawUtil {
     });
   }
 
-  static loadImage(src): Promise<any> {
+  static loadImage(src): Promise<HTMLImageElement> {
     return new Promise((resolve, reject) => {
       let img = new Image()
       img.onload = () => resolve(img)
       img.onerror = reject
       img.src = 'data:image/png;base64,' + src;
     })
+  }
+
+  static imgToBase64(src, callback) {
+    const canvas = document.createElement('canvas');
+    const cx = canvas.getContext('2d');
+    canvas.height = src.naturalHeight;
+    canvas.width = src.naturalWidth;
+    cx.drawImage(src, 0, 0);
+    const result = canvas.toDataURL()
+    callback(result.substr(result.indexOf(',') + 1));
+  }
+
+  static loadImageToCanvas(src, callback) {
+    DrawUtil.loadImageFromBase64(src, x => {
+      const canvas = document.createElement('canvas');
+      const cx = canvas.getContext('2d');
+      canvas.height = x.naturalHeight;
+      canvas.width = x.naturalWidth;
+      cx.drawImage(x, 0, 0);
+      callback(canvas)
+    })
+  }
+
+  static loadImageFromBase64(src, callback) {
+    const img = new Image();
+    img.crossOrigin = 'Anonymous';
+    img.onload = function () {
+      callback(img)
+    }
+    img.src = 'data:image/png;base64,' + src;
   }
 }

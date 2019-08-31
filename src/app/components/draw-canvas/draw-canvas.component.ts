@@ -30,7 +30,7 @@ export class DrawCanvasComponent implements AfterViewInit {
 
   currentLayer: Layer;
 
-  private drawImage = new Image();
+  public drawImage = new Image();
 
   public width = 1300;
 
@@ -86,6 +86,8 @@ export class DrawCanvasComponent implements AfterViewInit {
   }
 
   private redrawUI() {
+    this.canvas.nativeElement.width = this.drawImage.width;
+    this.canvas.nativeElement.height = this.drawImage.height;
     this.cx.drawImage(this.drawImage, 0, 0);
     DrawUtil.redrawCanvas(this.cx, this.image.layers);
   }
@@ -230,6 +232,10 @@ export class DrawCanvasComponent implements AfterViewInit {
       console.log('Fehler beim laden der Dataset Datein');
       console.error(error1);
     });
+  }
+
+  private onFilterCompleted(image: CImage){
+    this.prepareImage(image);
   }
 }
 

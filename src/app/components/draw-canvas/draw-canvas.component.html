@@ -77,9 +77,7 @@
       <table style="width: 100%">
         <tr>
           <td>
-            <mat-form-field floatLabel="always" class="inputText">
-              <textarea matInput placeholder="Filter" rows="20" c style="white-space: nowrap;"></textarea>
-            </mat-form-field>
+            <app-filter-list [cImage]="image" (filterOutput)="onFilterCompleted($event)" ></app-filter-list>
           </td>
         </tr>
       </table>
