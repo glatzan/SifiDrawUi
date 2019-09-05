@@ -7,6 +7,8 @@ import {ImageService} from '../../service/image.service';
 import {CImage} from '../../model/cimage';
 import CImageUtil from '../../utils/cimage-util';
 import {debounceTime} from 'rxjs/operators';
+import {logger} from 'codelyzer/util/logger';
+import {PointTracker} from '../../utils/point-tracker';
 
 @Component({
   selector: 'app-draw-canvas',
@@ -19,7 +21,9 @@ export class DrawCanvasComponent implements AfterViewInit {
   // a reference to the canvas element from our template
   @ViewChild('canvas', {static: false}) public canvas: ElementRef;
 
-  private cx: CanvasRenderingContext2D;
+  private cx; // CanvasRenderingContext2D
+
+  private pointTracker: PointTracker;
 
   /**
    * Image Data from Backend
@@ -48,6 +52,10 @@ export class DrawCanvasComponent implements AfterViewInit {
 
   private currentSaveTimeout: any = undefined;
 
+  private scaleFactor = 1.1;
+
+  private lastMousePoint = new Point();
+
   private lastPos: {
     x: number, y: number
   };
@@ -57,6 +65,83 @@ export class DrawCanvasComponent implements AfterViewInit {
     this.drawImage.onload = () => {
       this.redrawUI();
     };
+  }
+
+  public ngAfterViewInit() {
+
+    console.log('Image load');
+
+    const me = this;
+
+    this.lastPos = {x: 0, y: 0};
+
+    this.rightClickCircleSize = 40;
+
+    // set the width and height
+    this.canvas.nativeElement.width = this.width;
+    this.canvas.nativeElement.height = this.height;
+
+    this.cx = this.canvas.nativeElement.getContext('2d');
+
+    this.pointTracker = new PointTracker(this.cx);
+
+    // set some default properties about the line
+    this.cx.lineWidth = 1;
+    this.cx.lineCap = 'round';
+    this.cx.strokeStyle = '#fff';
+    this.cx.fillStyle = '#ff0000';
+
+    let dragStart = null;
+    let dragged = false;
+
+    const scroll = ($event) => {
+      console.log('scroll');
+      const delta = $event.wheelDelta ? $event.wheelDelta / 40 : $event.detail ? -$event.detail : 0;
+      if (delta) {
+        this.zoom(delta);
+      }
+      return $event.preventDefault() && false;
+    };
+
+    const lastPoint = (evt) => {
+      me.lastMousePoint.x = evt.offsetX || (evt.pageX - me.canvas.nativeElement.offsetLeft);
+      me.lastMousePoint.y = evt.offsetY || (evt.pageY - me.canvas.nativeElement.offsetTop);
+    };
+    this.canvas.nativeElement.addEventListener('DOMMouseScroll', scroll, false);
+    this.canvas.nativeElement.addEventListener('mousewheel', scroll, false);
+
+    this.canvas.nativeElement.addEventListener('mousemove', (evt) => {
+      console.log("moved")
+      lastPoint(evt);
+
+      dragged = true;
+
+      if (dragStart !== null) {
+        console.log("Draged")
+        const pt = me.cx.transformedPoint(me.lastMousePoint);
+        console.log(pt.x - dragStart.x)
+        console.log(pt.y - dragStart.y)
+        me.cx.translatePoint( new Point(pt.x - dragStart.x, pt.y - dragStart.y));
+        me.redrawUI();
+      }
+    }, false);
+
+    this.canvas.nativeElement.addEventListener('mousedown', (evt) => {
+      console.log("clicked")
+      lastPoint(evt);
+      dragStart = me.cx.transformedPoint(me.lastMousePoint);
+      console.log(dragStart.x + " " + dragStart.y)
+      dragged = false;
+    }, false);
+
+    this.canvas.nativeElement.addEventListener('mouseup', (evt) => {
+      dragStart = null;
+
+      if (!dragged && evt.altKey) {
+        me.zoom(evt.ctrlKey ? -1 : 1);
+      }
+    }, false);
+
   }
 
   public onSelectImage(selectedImageId: string) {
@@ -86,33 +171,35 @@ export class DrawCanvasComponent implements AfterViewInit {
   }
 
   private redrawUI() {
-    this.canvas.nativeElement.width = this.drawImage.width;
-    this.canvas.nativeElement.height = this.drawImage.height;
+    this.clearCanvas();
     this.cx.drawImage(this.drawImage, 0, 0);
     DrawUtil.redrawCanvas(this.cx, this.image.layers);
   }
 
-  public ngAfterViewInit() {
 
-    this.lastPos = {x: 0, y: 0};
-
-    this.rightClickCircleSize = 40;
-
-    // get the context
-    const canvasEl: HTMLCanvasElement = this.canvas.nativeElement;
-
-    this.cx = canvasEl.getContext('2d');
-    // set the width and height
-    canvasEl.width = this.width;
-    canvasEl.height = this.height;
-
-    // set some default properties about the line
-    this.cx.lineWidth = 1;
-    this.cx.lineCap = 'round';
-    this.cx.strokeStyle = '#fff';
-    this.cx.fillStyle = '#ff0000';
-
+  private zoom(clicks) {
+    console.log("zoom")
+    const pt = this.cx.transformedPoint(this.lastMousePoint);
+    this.cx.translatePoint(pt);
+    const factor = Math.pow(this.scaleFactor, clicks);
+    this.cx.scale(factor, factor);
+    this.cx.translate(-pt.x, -pt.y);
+    this.redrawUI();
   }
+
+  private clearCanvas() {
+    this.cx.save();
+    this.cx.setTransform(1, 0, 0, 1, 0, 0);
+    this.cx.clearRect(0, 0, this.canvas.nativeElement.width, this.canvas.nativeElement.height);
+    this.cx.restore();
+  }
+
+  // private transform(x,y){
+  //   const pt = this.svg.createSVGPoint();
+  //   pt.x = x;
+  //   pt.y = y;
+  //   return pt.matrixTransform(this.sv)
+  // }
 
   public onMouseMove(event: MouseEvent) {
     if (!this.drawImage) {
@@ -234,7 +321,7 @@ export class DrawCanvasComponent implements AfterViewInit {
     });
   }
 
-  private onFilterCompleted(image: CImage){
+  private onFilterCompleted(image: CImage) {
     this.prepareImage(image);
   }
 }
