@@ -121,6 +121,7 @@ export class DrawCanvasComponent implements AfterViewInit {
         const pt = me.cx.transformedPoint(me.lastMousePoint);
         console.log(pt.x - dragStart.x)
         console.log(pt.y - dragStart.y)
+        this.cx.setTransform(1, 0, 0, 1, 0, 0);
         me.cx.translatePoint( new Point(pt.x - dragStart.x, pt.y - dragStart.y));
         me.redrawUI();
       }

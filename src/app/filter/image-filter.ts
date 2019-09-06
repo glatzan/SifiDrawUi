@@ -6,6 +6,9 @@ export class ImageFilter extends Filter {
 
   constructor(parentFilter: ImageFilter) {
     super(parentFilter);
+    this.name = "Image Filter";
+    this.inputType = "img";
+    this.outputType = "img";
   }
 
   doFilter(data: HTMLImageElement, parentFilter: Filter) {

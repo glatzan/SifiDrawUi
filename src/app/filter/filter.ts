@@ -5,6 +5,9 @@ export class Filter {
   public parentFilter: Filter;
   public childFilter: Filter;
 
+  public inputType : string;
+  public outputType : string;
+
   protected constructor(filter: Filter) {
     if (filter !== undefined)
       filter.registerChildFilter(this);
