@@ -107,6 +107,7 @@ export class DrawCanvasComponent implements AfterViewInit {
       me.lastMousePoint.x = evt.offsetX || (evt.pageX - me.canvas.nativeElement.offsetLeft);
       me.lastMousePoint.y = evt.offsetY || (evt.pageY - me.canvas.nativeElement.offsetTop);
     };
+
     this.canvas.nativeElement.addEventListener('DOMMouseScroll', scroll, false);
     this.canvas.nativeElement.addEventListener('mousewheel', scroll, false);
 
@@ -116,23 +117,49 @@ export class DrawCanvasComponent implements AfterViewInit {
 
       dragged = true;
 
-      if (dragStart !== null) {
+      if (evt.altKey && dragStart !== null) {
         console.log("Draged")
-        const pt = me.cx.transformedPoint(me.lastMousePoint);
+        const pt = me.cx.transformedPoint(me.lastMousePoint.x, me.lastMousePoint.y);
         console.log(pt.x - dragStart.x)
         console.log(pt.y - dragStart.y)
-        this.cx.setTransform(1, 0, 0, 1, 0, 0);
-        me.cx.translatePoint( new Point(pt.x - dragStart.x, pt.y - dragStart.y));
+        //this.cx.setTransform(1, 0, 0, 1, 0, 0);
+        me.cx.translate(pt.x - dragStart.x, pt.y - dragStart.y);
         me.redrawUI();
+      } else {
+        console.log('move' + this.mouseButton);
+        if (this.mousePressed) {
+          const e = this.canvas.nativeElement.getBoundingClientRect();
+          //const mousePos = {x: evt.clientX - e.left, y: evt.clientY - e.top};
+          const mousePos1 = me.cx.transformedPoint(me.lastMousePoint.x, me.lastMousePoint.y);
+          const mousePos = new Point(mousePos1.x, mousePos1.y);
+
+          if (this.mouseButton === 1) {
+            this.newLineOnCanvas(this.currentLayer, mousePos);
+            this.saveContent();
+            this.redrawUI();
+          } else if (this.mouseButton === 2) {
+            this.onMouseMoveWithRightClick(evt, mousePos);
+          }
+        }
       }
+
+
     }, false);
 
     this.canvas.nativeElement.addEventListener('mousedown', (evt) => {
       console.log("clicked")
       lastPoint(evt);
-      dragStart = me.cx.transformedPoint(me.lastMousePoint);
-      console.log(dragStart.x + " " + dragStart.y)
+
+      if (evt.altKey) {
+        dragStart = me.cx.transformedPoint(me.lastMousePoint.x, me.lastMousePoint.y);
+        console.log(dragStart.x + " " + dragStart.y)
+      } else {
+        this.mouseButton = evt.buttons;
+        this.mousePressed = true;
+      }
+
       dragged = false;
+
     }, false);
 
     this.canvas.nativeElement.addEventListener('mouseup', (evt) => {
@@ -140,7 +167,12 @@ export class DrawCanvasComponent implements AfterViewInit {
 
       if (!dragged && evt.altKey) {
         me.zoom(evt.ctrlKey ? -1 : 1);
+      }else{
+        console.log('up ' + evt.buttons + ' e');
+        this.mouseButton = 0;
+        this.mousePressed = false;
       }
+
     }, false);
 
   }
@@ -180,8 +212,8 @@ export class DrawCanvasComponent implements AfterViewInit {
 
   private zoom(clicks) {
     console.log("zoom")
-    const pt = this.cx.transformedPoint(this.lastMousePoint);
-    this.cx.translatePoint(pt);
+    const pt = this.cx.transformedPoint(this.lastMousePoint.x, this.lastMousePoint.y);
+    this.cx.translate(pt.x, pt.y);
     const factor = Math.pow(this.scaleFactor, clicks);
     this.cx.scale(factor, factor);
     this.cx.translate(-pt.x, -pt.y);
@@ -207,19 +239,7 @@ export class DrawCanvasComponent implements AfterViewInit {
       return;
     }
 
-    console.log('move' + this.mouseButton);
-    if (this.mousePressed) {
-      const e = this.canvas.nativeElement.getBoundingClientRect();
-      const mousePos = {x: event.clientX - e.left, y: event.clientY - e.top};
 
-      if (this.mouseButton === 1) {
-        this.newLineOnCanvas(this.currentLayer, mousePos);
-        this.saveContent();
-        this.redrawUI();
-      } else if (this.mouseButton === 2) {
-        this.onMouseMoveWithRightClick(event, mousePos);
-      }
-    }
   }
 
   /**

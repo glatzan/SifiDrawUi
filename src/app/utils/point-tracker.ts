@@ -79,11 +79,10 @@ export class PointTracker {
     };
 
     const pt = this.svg.createSVGPoint();
-    this.cx.transformedPoint = (p: Point) => {
-      pt.x = p.x;
-      pt.y = p.y;
-      pt.matrixTransform(me.form.inverse());
-      return new Point(pt.x, pt.y);
+    this.cx.transformedPoint = (x,y) => {
+      pt.x = x;
+      pt.y = y;
+      return pt.matrixTransform(me.form.inverse());
     };
 
   }
