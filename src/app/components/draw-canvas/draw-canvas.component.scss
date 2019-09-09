@@ -1,17 +1,46 @@
+@import "../../../styles.scss";
+
 .content {
   height: 90vh;
   display: grid;
   grid-template-columns: 50% 50%;
-  grid-template-rows: auto 400px;
+  grid-template-rows: fit-content(650px) 30px auto;
   grid-row-gap: 5px;
   grid-column-gap: 5px;
-  grid-template-areas: "canvas canvas" "settings filter";
+  grid-template-areas: "canvas canvas" ". canvasinfo" "settings filter";
   min-width: 1300px;
 
   canvas {
     border: 1px solid LightGray;
     border-radius: 3px;
     grid-area: canvas;
+    width: 1300px;
+    height: 700px;
+  }
+
+  .canvasInfo{
+    grid-area: canvasinfo;
+    display: grid;
+    grid-template-columns: auto 10% 10%;
+    width: 100%;
+    grid-template-areas: ". zoom resetBtn";
+
+    .zoom{
+      justify-self: right;
+      grid-area: zoom;
+      align-self: center;
+      white-space: nowrap;
+    }
+
+    .resetBtn{
+      grid-area: resetBtn;
+      justify-self: center;
+      align-self: center;
+      &:hover{
+        cursor: pointer;
+        color: $dark-focused;
+      }
+    }
   }
 
 

@@ -6,8 +6,17 @@
           (blur)="onEvent($event)"
           (keydown)="onMouseMove($event)"
           (contextmenu)="onEvent($event)"></canvas>
-  <div class="settings" *ngIf="renderContext">
 
+  <div class="canvasInfo">
+    <span class="zoom">
+      Zoom {{currentZoomRounded}} %
+    </span>
+    <i class="material-icons resetBtn" (click)="canvasResetZoom()" title="Bild zurücksetzten">
+      control_camera
+    </i>
+  </div>
+
+  <div class="settings" *ngIf="renderContext">
     <mat-form-field>
       <mat-select [(ngModel)]="currentLayer" placeholder="Label">
         <mat-option *ngFor="let layer of image.layers" [value]="layer">
@@ -21,7 +30,7 @@
     </button>
 
     <mat-form-field>
-      <input matInput [(ngModel)]="currentLayer.color" placeholder="Farbe" (change)="redrawUI()"
+      <input matInput [(ngModel)]="currentLayer.color" placeholder="Farbe" (change)="canvasRedraw()"
              type="color"/>
     </mat-form-field>
 
@@ -37,7 +46,7 @@
       <span *ngFor="let x of currentLayer.lines; let idx = index">
                        <a style="text-decoration: underline" href="#"
                           (mouseenter)='highLightLine(idx)'
-                          (mouseleave)="redrawUI()"
+                          (mouseleave)="canvasRedraw()"
                           (click)="selectPoints(idx)">[{{x.length}}]</a>
                      </span>
       <input matInput style="display: none"/>

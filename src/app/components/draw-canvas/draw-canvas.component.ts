@@ -21,6 +21,9 @@ export class DrawCanvasComponent implements AfterViewInit {
   // a reference to the canvas element from our template
   @ViewChild('canvas', {static: false}) public canvas: ElementRef;
 
+  readonly MOUSE_LEFT_BTN = 1;
+  readonly MOUSE_RIGHT_BTN = 2;
+
   private cx; // CanvasRenderingContext2D
 
   private pointTracker: PointTracker;
@@ -44,38 +47,35 @@ export class DrawCanvasComponent implements AfterViewInit {
 
   private event: MouseEvent;
 
-  private mousePressed = false;
-
-  private mouseButton = 0;
-
   private renderContext = false;
 
   private currentSaveTimeout: any = undefined;
 
-  private scaleFactor = 1.1;
+  /**
+   * Scalefactor for zooming, constant
+   */
+  private scaleFactor = 1.05;
 
-  private lastMousePoint = new Point();
-
-  private lastPos: {
-    x: number, y: number
-  };
+  /**
+   * Current canvasZoom rounded for ui
+   */
+  private currentZoomRounded = 100;
 
   constructor(public imageService: ImageService) {
     // draw on load
     this.drawImage.onload = () => {
-      this.redrawUI();
+      this.canvasRedraw();
     };
   }
 
   public ngAfterViewInit() {
 
     console.log('Image load');
-
-    const me = this;
-
-    this.lastPos = {x: 0, y: 0};
-
-    this.rightClickCircleSize = 40;
+    // set some default properties about the line
+    this.cx.lineWidth = 1;
+    this.cx.lineCap = 'round';
+    this.cx.strokeStyle = '#fff';
+    this.cx.fillStyle = '#ff0000';
 
     // set the width and height
     this.canvas.nativeElement.width = this.width;
@@ -83,98 +83,166 @@ export class DrawCanvasComponent implements AfterViewInit {
 
     this.cx = this.canvas.nativeElement.getContext('2d');
 
+    this.rightClickCircleSize = 40;
+
+    this.initializeCanvas();
+  }
+
+  private initializeCanvas() {
+    const me = this;
+
+    // last point of the mouse
+    const lastMousePoint = new Point(0, 0);
+    // start position for canvas drag
+    let dragStartPos = null;
+    // true if the canvas is dragged
+    let dragged = false;
+    // true if alt btn was pressed while the mouse was clicked
+    let btnAlt = false;
+    // true if ctrl btn was pressed while the mouse was clicked
+    let btnCtrl = false;
+    // true if the mouse was clicked
+    let mouseClicked = false;
+    // number of the mouse btn
+    let mouseBtn = -1;
+    // current canvas zoom
+    let currentZoom = 100;
+
     this.pointTracker = new PointTracker(this.cx);
 
-    // set some default properties about the line
-    this.cx.lineWidth = 1;
-    this.cx.lineCap = 'round';
-    this.cx.strokeStyle = '#fff';
-    this.cx.fillStyle = '#ff0000';
-
-    let dragStart = null;
-    let dragged = false;
+    const zoomFunction = (clicks) => {
+      const pt = me.cx.transformedPoint(lastMousePoint.x, lastMousePoint.y);
+      me.cx.translate(pt.x, pt.y);
+      const factor = Math.pow(me.scaleFactor, clicks);
+      currentZoom = currentZoom * factor;
+      me.currentZoomRounded = Math.round(currentZoom);
+      me.cx.scale(factor, factor);
+      me.cx.translate(-pt.x, -pt.y);
+      me.canvasRedraw();
+    };
 
     const scroll = ($event) => {
       console.log('scroll');
       const delta = $event.wheelDelta ? $event.wheelDelta / 40 : $event.detail ? -$event.detail : 0;
       if (delta) {
-        this.zoom(delta);
+        zoomFunction(delta);
       }
       return $event.preventDefault() && false;
     };
 
-    const lastPoint = (evt) => {
-      me.lastMousePoint.x = evt.offsetX || (evt.pageX - me.canvas.nativeElement.offsetLeft);
-      me.lastMousePoint.y = evt.offsetY || (evt.pageY - me.canvas.nativeElement.offsetTop);
+    const setLastPoint = (evt) => {
+      lastMousePoint.x = evt.offsetX || (evt.pageX - me.canvas.nativeElement.offsetLeft);
+      lastMousePoint.y = evt.offsetY || (evt.pageY - me.canvas.nativeElement.offsetTop);
     };
 
     this.canvas.nativeElement.addEventListener('DOMMouseScroll', scroll, false);
     this.canvas.nativeElement.addEventListener('mousewheel', scroll, false);
 
-    this.canvas.nativeElement.addEventListener('mousemove', (evt) => {
-      console.log("moved")
-      lastPoint(evt);
+    /**
+     * Event for mouse down
+     */
+    this.canvas.nativeElement.addEventListener('mousedown', (evt) => {
+      setLastPoint(evt);
+      btnAlt = evt.altKey;
+      btnCtrl = evt.ctrlKey;
+      mouseClicked = true;
+      mouseBtn = evt.mouseButton;
 
-      dragged = true;
-
-      if (evt.altKey && dragStart !== null) {
-        console.log("Draged")
-        const pt = me.cx.transformedPoint(me.lastMousePoint.x, me.lastMousePoint.y);
-        console.log(pt.x - dragStart.x)
-        console.log(pt.y - dragStart.y)
-        //this.cx.setTransform(1, 0, 0, 1, 0, 0);
-        me.cx.translate(pt.x - dragStart.x, pt.y - dragStart.y);
-        me.redrawUI();
+      // dragging or zooming via click
+      if (btnAlt) {
+        btnAlt = true;
+        dragged = false;
+        dragStartPos = me.cx.transformedPoint(lastMousePoint.x, lastMousePoint.y);
+        // alternate mode
+      } else if (btnCtrl) {
+        if (mouseBtn === me.MOUSE_LEFT_BTN) {
+          CImageUtil.newLine(me.currentLayer);
+        }
       } else {
-        console.log('move' + this.mouseButton);
-        if (this.mousePressed) {
-          const e = this.canvas.nativeElement.getBoundingClientRect();
-          //const mousePos = {x: evt.clientX - e.left, y: evt.clientY - e.top};
-          const mousePos1 = me.cx.transformedPoint(me.lastMousePoint.x, me.lastMousePoint.y);
-          const mousePos = new Point(mousePos1.x, mousePos1.y);
+      }
+    }, false);
 
-          if (this.mouseButton === 1) {
-            this.newLineOnCanvas(this.currentLayer, mousePos);
-            this.saveContent();
-            this.redrawUI();
-          } else if (this.mouseButton === 2) {
-            this.onMouseMoveWithRightClick(evt, mousePos);
+    /**
+     * Event for mouse move
+     */
+    this.canvas.nativeElement.addEventListener('mousemove', (evt) => {
+      setLastPoint(evt);
+
+      if (mouseClicked) {
+        // move
+        if (btnAlt) {
+          if (dragStartPos === null) {
+            return;
+          }
+          dragged = true;
+          const pt = me.cx.transformedPoint(lastMousePoint.x, lastMousePoint.y);
+          me.cx.translate(pt.x - dragStartPos.x, pt.y - dragStartPos.y);
+          me.canvasRedraw();
+        } else {
+          // draw
+          switch (mouseBtn) {
+            case me.MOUSE_LEFT_BTN:
+              me.newLineOnCanvas(this.currentLayer, lastMousePoint);
+              me.saveContent();
+              me.canvasRedraw();
+              break;
+            case me.MOUSE_RIGHT_BTN:
+              if (btnCtrl) {
+                if (VectorUtils.removeCollidingPointListsOfCircle(me.currentLayer.lines, lastMousePoint, me.rightClickCircleSize)) {
+                  this.saveContent();
+                }
+              } else {
+                if (VectorUtils.movePointListsToCircleBoundaries(me.currentLayer.lines, lastMousePoint, me.rightClickCircleSize)) {
+                  this.saveContent();
+                }
+              }
+              me.canvasRedraw();
+              DrawUtil.drawCircle(this.cx, lastMousePoint, this.rightClickCircleSize);
+              break;
           }
         }
       }
-
-
     }, false);
 
-    this.canvas.nativeElement.addEventListener('mousedown', (evt) => {
-      console.log("clicked")
-      lastPoint(evt);
-
-      if (evt.altKey) {
-        dragStart = me.cx.transformedPoint(me.lastMousePoint.x, me.lastMousePoint.y);
-        console.log(dragStart.x + " " + dragStart.y)
-      } else {
-        this.mouseButton = evt.buttons;
-        this.mousePressed = true;
-      }
-
-      dragged = false;
-
-    }, false);
-
+    /**
+     * Event for mouse up
+     */
     this.canvas.nativeElement.addEventListener('mouseup', (evt) => {
-      dragStart = null;
+      mouseClicked = false;
 
-      if (!dragged && evt.altKey) {
-        me.zoom(evt.ctrlKey ? -1 : 1);
-      }else{
-        console.log('up ' + evt.buttons + ' e');
-        this.mouseButton = 0;
-        this.mousePressed = false;
+      // zooming on click
+      if (btnAlt && !dragged) {
+        zoomFunction(btnCtrl ? -1 : 1);
       }
 
     }, false);
+  }
 
+  /**
+   * Redraws the canvas
+   */
+  private canvasRedraw() {
+    this.clearCanvas();
+    this.cx.drawImage(this.drawImage, 0, 0);
+    DrawUtil.redrawCanvas(this.cx, this.image.layers);
+  }
+
+  /**
+   * Resets the canvas transformations
+   */
+  public canvasResetZoom() {
+    this.cx.setTransform(1, 0, 0, 1, 0, 0);
+    this.canvasRedraw();
+  }
+
+  /**
+   * Clears the whole canvas
+   */
+  private clearCanvas() {
+    this.cx.save();
+    this.cx.setTransform(1, 0, 0, 1, 0, 0);
+    this.cx.clearRect(0, 0, this.canvas.nativeElement.width, this.canvas.nativeElement.height);
+    this.cx.restore();
   }
 
   public onSelectImage(selectedImageId: string) {
@@ -203,61 +271,12 @@ export class DrawCanvasComponent implements AfterViewInit {
     this.drawImage.src = 'data:image/png;base64,' + this.image.data;
   }
 
-  private redrawUI() {
-    this.clearCanvas();
-    this.cx.drawImage(this.drawImage, 0, 0);
-    DrawUtil.redrawCanvas(this.cx, this.image.layers);
-  }
-
-
-  private zoom(clicks) {
-    console.log("zoom")
-    const pt = this.cx.transformedPoint(this.lastMousePoint.x, this.lastMousePoint.y);
-    this.cx.translate(pt.x, pt.y);
-    const factor = Math.pow(this.scaleFactor, clicks);
-    this.cx.scale(factor, factor);
-    this.cx.translate(-pt.x, -pt.y);
-    this.redrawUI();
-  }
-
-  private clearCanvas() {
-    this.cx.save();
-    this.cx.setTransform(1, 0, 0, 1, 0, 0);
-    this.cx.clearRect(0, 0, this.canvas.nativeElement.width, this.canvas.nativeElement.height);
-    this.cx.restore();
-  }
-
-  // private transform(x,y){
-  //   const pt = this.svg.createSVGPoint();
-  //   pt.x = x;
-  //   pt.y = y;
-  //   return pt.matrixTransform(this.sv)
-  // }
-
-  public onMouseMove(event: MouseEvent) {
-    if (!this.drawImage) {
-      return;
-    }
-
-
-  }
 
   /**
    * Mouse movement with right mouse button pressed
    */
   public onMouseMoveWithRightClick(event: MouseEvent, mousePos: Point) {
 
-    if (event.ctrlKey) {
-      if (VectorUtils.removeCollidingPointListsOfCircle(this.currentLayer.lines, mousePos, this.rightClickCircleSize)) {
-        this.saveContent();
-      }
-    } else {
-      if (VectorUtils.movePointListsToCircleBoundaries(this.currentLayer.lines, mousePos, this.rightClickCircleSize)) {
-        this.saveContent();
-      }
-    }
-    this.redrawUI();
-    DrawUtil.drawCircle(this.cx, mousePos, this.rightClickCircleSize);
   }
 
   public addLayer(event) {
@@ -269,31 +288,6 @@ export class DrawCanvasComponent implements AfterViewInit {
     this.currentLayer.line = this.currentLayer.lines[index];
   }
 
-  public onMouseDown(event: MouseEvent) {
-    if (!this.drawImage) {
-      return;
-    }
-
-    console.log('down ' + event.buttons + ' e');
-    this.mouseButton = event.buttons;
-    this.mousePressed = true;
-
-    if (event.ctrlKey && event.buttons === 1) {
-      CImageUtil.newLine(this.currentLayer);
-    }
-
-    this.onMouseMove(event);
-  }
-
-  public onMouseUp(event: MouseEvent) {
-    if (!this.drawImage) {
-      return;
-    }
-
-    console.log('up ' + event.buttons + ' e');
-    this.mouseButton = 0;
-    this.mousePressed = false;
-  }
 
   public onEvent(event: MouseEvent): boolean {
     return false;
