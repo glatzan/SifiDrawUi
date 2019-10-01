@@ -9,6 +9,8 @@ import CImageUtil from '../../utils/cimage-util';
 import {debounceTime} from 'rxjs/operators';
 import {logger} from 'codelyzer/util/logger';
 import {PointTracker} from '../../utils/point-tracker';
+import {MatSnackBar} from "@angular/material";
+import {ImageListComponent} from "../image-list/image-list.component";
 
 @Component({
   selector: 'app-draw-canvas',
@@ -20,6 +22,8 @@ export class DrawCanvasComponent implements AfterViewInit {
 
   // a reference to the canvas element from our template
   @ViewChild('canvas', {static: false}) public canvas: ElementRef;
+
+  @Input() imageListComponent: ImageListComponent;
 
   readonly MOUSE_LEFT_BTN = 0;
   readonly MOUSE_RIGHT_BTN = 2;
@@ -71,7 +75,8 @@ export class DrawCanvasComponent implements AfterViewInit {
    */
   private hideLines = false;
 
-  constructor(public imageService: ImageService) {
+  constructor(public imageService: ImageService,
+              private snackBar: MatSnackBar) {
     // draw on load
     this.drawImage.onload = () => {
       this.canvasRedraw();
@@ -145,8 +150,39 @@ export class DrawCanvasComponent implements AfterViewInit {
     this.canvas.nativeElement.addEventListener('DOMMouseScroll', scroll, false);
     this.canvas.nativeElement.addEventListener('mousewheel', scroll, false);
 
-    this.canvas.nativeElement.addEventListener('keyPress', (evt) => {
-      console.log(evt.key);
+    this.canvas.nativeElement.addEventListener('keydown', ($event) => {
+      console.log($event.key);
+      console.log("hallo")
+      return $event.preventDefault() && false;
+    }, false);
+
+    window.addEventListener('keydown', ($event) => {
+      if (me.renderContext) {
+        if ($event.key == " " || $event.key == "ArrowDown") {
+          // next image
+          if (this.imageListComponent.onSelectNextImage() != null)
+            this.snackBar.open("Nächstes Bild");
+        } else if ($event.key == "ArrowUp") {
+          // previouse image
+          if (this.imageListComponent.onSelectPrevImage() != null)
+            this.snackBar.open("Vorheriges Bild");
+        } else if (!isNaN(Number($event.key))) {
+          const layer = CImageUtil.findLayer(this.image, $event.key);
+          if (layer != null) {
+            this.currentLayer = layer;
+            this.snackBar.open(`Layer ${layer.id} ausgewählt`);
+          } else
+            this.snackBar.open(`Layer ${$event.key} nicht vorhanden`);
+        } else if ($event.key == "h") {
+          this.hideLines = !this.hideLines;
+          this.snackBar.open(`Linien ${this.hideLines ? 'ausgeblendet' : 'eingeblendet'}`);
+          this.canvasRedraw();
+        } else if ($event.key == "r") {
+          this.canvasResetZoom();
+        } else {
+          console.log($event.key)
+        }
+      }
     }, false);
 
     /**
@@ -169,9 +205,15 @@ export class DrawCanvasComponent implements AfterViewInit {
         // alternate mode
       } else if (btnCtrl) {
         if (mouseBtn === me.MOUSE_LEFT_BTN) {
-          CImageUtil.newLine(me.currentLayer);
+          CImageUtil.addLine(me.currentLayer);
         }
       } else {
+        if (mouseBtn == me.MOUSE_LEFT_BTN) {
+          const pt = me.cx.transformedPoint(lastMousePoint.x, lastMousePoint.y);
+          CImageUtil.addPointToCurrentLine(this.currentLayer, pt.x, pt.y);
+          me.saveContent();
+          me.canvasRedraw();
+        }
       }
     }, false);
 
@@ -198,7 +240,7 @@ export class DrawCanvasComponent implements AfterViewInit {
           switch (mouseBtn) {
             case me.MOUSE_LEFT_BTN:
               if (me.pointMode === 'false') {
-                me.newLineOnCanvas(this.currentLayer, new Point(pt.x, pt.y));
+                CImageUtil.addPointToCurrentLine(this.currentLayer, pt.x, pt.y);
                 me.saveContent();
                 me.canvasRedraw();
               }
@@ -269,7 +311,8 @@ export class DrawCanvasComponent implements AfterViewInit {
   public onSelectImage(selectedImageId: string) {
     if (selectedImageId !== undefined) {
       this.imageService.getImage(selectedImageId).subscribe((data: CImage) => {
-        console.log('Image select' + data.name);
+        console.log('Image select');
+        console.log(data)
         this.prepareImage(data);
       }, error1 => {
         console.log('Fehler beim laden der Dataset Datein');
@@ -299,8 +342,7 @@ export class DrawCanvasComponent implements AfterViewInit {
   }
 
   public addLayer(event) {
-    this.image.layers = [...this.image.layers, (new Layer(this.image.layers.length + 1))];
-    this.currentLayer = this.image.layers[this.image.layers.length - 1];
+    this.currentLayer = CImageUtil.addLayer(this.image);
   }
 
   public selectLine($event, index: number) {
@@ -319,25 +361,8 @@ export class DrawCanvasComponent implements AfterViewInit {
     return false;
   }
 
-  private getLayer(layerID: number): Layer {
-    if (this.image.layers.length === 0) {
-      return this.image.layers[0] = new Layer(layerID);
-    } else {
-      for (const layer of this.image.layers) {
-        if (layer.id === layerID) {
-          return layer;
-        }
-      }
-      return this.image.layers[this.image.layers.length - 1] = new Layer(layerID);
-    }
-  }
-
   private highLightLine(index: number) {
     DrawUtil.drawLineOnCanvas(this.cx, this.currentLayer.lines[index], 'yellow', 4);
-  }
-
-  private newLineOnCanvas(layer: Layer, currentPos: { x: number, y: number }) {
-    layer.line.push({x: currentPos.x, y: currentPos.y});
   }
 
   private saveContent() {

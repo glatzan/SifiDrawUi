@@ -45,4 +45,50 @@ export class ImageListComponent implements OnInit {
     this.selectedImageId = id;
     this.drawCanvasComponent.onSelectImage(id);
   }
+
+  /**
+   * Selects the next image. If no image is selected the first image will be selected
+   * @param $event
+   */
+  public onSelectNextImage(): string {
+    if (this.dataset.images == undefined || this.dataset.images.length == 0) {
+      return;
+    }
+
+    for (let i = 0; i < this.dataset.images.length; i++) {
+      if (this.dataset.images[i].id == this.selectedImageId) {
+        if (i + 1 < this.dataset.images.length) {
+          this.onSelectImage(NaN, this.dataset.images[i + 1].id)
+          return this.dataset.images[i + 1].id;
+        } else
+          return null;
+      }
+    }
+
+    this.onSelectImage(NaN, this.dataset.images[0].id);
+    return this.dataset.images[0].id;
+  }
+
+  /**
+   * Selected the previous image. If no image is selected the first image will be selected
+   * @param $event
+   */
+  public onSelectPrevImage() {
+    if (this.dataset.images == undefined || this.dataset.images.length == 0) {
+      return;
+    }
+
+    for (let i = 0; i < this.dataset.images.length; i++) {
+      if (this.dataset.images[i].id == this.selectedImageId) {
+        if (i - 1 >= 0) {
+          this.onSelectImage(NaN, this.dataset.images[i - 1].id);
+          return this.dataset.images[i + 1].id;
+        } else
+          return null;
+      }
+    }
+
+    this.onSelectImage(NaN, this.dataset.images[0].id);
+    return this.dataset.images[0].id;
+  }
 }

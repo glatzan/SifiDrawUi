@@ -11,17 +11,20 @@ import {ExportDialogComponent} from './components/export-dialog/export-dialog.co
 import {FilterListComponent} from './components/filter-list/filter-list.component';
 import {ScrollingModule} from '@angular/cdk/scrolling';
 import {
+  MAT_SNACK_BAR_DEFAULT_OPTIONS,
   MatButtonModule, MatButtonToggleModule, MatCheckboxModule,
   MatDialogModule,
   MatDividerModule,
   MatFormFieldModule,
   MatGridListModule,
   MatIconModule,
-  MatIconRegistry, MatInputModule, MatProgressSpinnerModule, MatSelectModule
+  MatIconRegistry, MatInputModule, MatMenuModule, MatProgressSpinnerModule, MatSelectModule
 } from '@angular/material';
 import {FormsModule} from "@angular/forms";
 import {MatColorPickerModule} from "mat-color-picker";
 import {MccColorPickerModule} from "material-community-components";
+import { ImportDialogComponent } from './components/import-dialog/import-dialog.component';
+import {MatSnackBarModule} from '@angular/material';
 
 @NgModule({
   declarations: [
@@ -30,7 +33,8 @@ import {MccColorPickerModule} from "material-community-components";
     CaseListComponent,
     ImageListComponent,
     ExportDialogComponent,
-    FilterListComponent
+    FilterListComponent,
+    ImportDialogComponent
   ],
   imports: [
     HttpClientModule,
@@ -50,10 +54,12 @@ import {MccColorPickerModule} from "material-community-components";
     MccColorPickerModule,
     MatProgressSpinnerModule,
     MatButtonToggleModule,
-    MatCheckboxModule
+    MatCheckboxModule,
+    MatSnackBarModule,
+    MatMenuModule
   ],
-  entryComponents: [ExportDialogComponent],
-  providers: [],
+  entryComponents: [ExportDialogComponent, ImportDialogComponent],
+  providers: [{provide: MAT_SNACK_BAR_DEFAULT_OPTIONS, useValue: {duration: 500}}],
   bootstrap: [AppComponent]
 })
 export class AppModule {

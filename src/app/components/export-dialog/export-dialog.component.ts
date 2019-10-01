@@ -61,7 +61,7 @@ export class ExportDialogComponent implements OnInit {
     this.background = '#000000';
     this.backgroundImage = false;
     this.layers = [];
-    this.layers.push({selected: false, layer: new Layer(1)});
+    this.layers.push({selected: false, layer: new Layer("1")});
     this.projects = [];
     this.layerSettings = false;
     this.showProgressDialog = false;
@@ -84,10 +84,6 @@ export class ExportDialogComponent implements OnInit {
     }, error1 => {
       console.log('Fehler beim laden der Project Datein');
     });
-  }
-
-  private addLayer() {
-    this.layers.push({selected: false, layer: new Layer(this.layers.length + 1)});
   }
 
   private abort() {

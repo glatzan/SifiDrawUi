@@ -5,6 +5,7 @@ import {Subscribable} from 'rxjs';
 import {ExportDialogComponent} from '../export-dialog/export-dialog.component';
 import {MatDialog} from '@angular/material';
 import {ImageListComponent} from '../image-list/image-list.component';
+import {ImportDialogComponent} from "../import-dialog/import-dialog.component";
 
 @Component({
   selector: 'app-case-list',
