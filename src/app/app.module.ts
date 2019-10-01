@@ -11,7 +11,7 @@ import {ExportDialogComponent} from './components/export-dialog/export-dialog.co
 import {FilterListComponent} from './components/filter-list/filter-list.component';
 import {ScrollingModule} from '@angular/cdk/scrolling';
 import {
-  MatButtonModule,
+  MatButtonModule, MatButtonToggleModule, MatCheckboxModule,
   MatDialogModule,
   MatDividerModule,
   MatFormFieldModule,
@@ -48,7 +48,9 @@ import {MccColorPickerModule} from "material-community-components";
     FormsModule,
     MatColorPickerModule,
     MccColorPickerModule,
-    MatProgressSpinnerModule
+    MatProgressSpinnerModule,
+    MatButtonToggleModule,
+    MatCheckboxModule
   ],
   entryComponents: [ExportDialogComponent],
   providers: [],

@@ -1,5 +1,6 @@
 import {CImage} from '../model/cimage';
 import {Layer} from '../model/layer';
+import {Point} from '../model/point';
 
 export default class CImageUtil {
   static prepareImage(image: CImage) {
@@ -37,4 +38,25 @@ export default class CImageUtil {
     layer.lines.push([]);
     layer.line = layer.lines[layer.lines.length - 1];
   }
+
+  static removeLine(layer: Layer, line: Point[]) {
+
+    if (layer.lines.length === 1) {
+      return;
+    }
+
+    let i = 0;
+    for (const ll of layer.lines) {
+      if (ll === line) {
+        layer.lines.splice(i, 1);
+        break;
+      }
+      i++;
+    }
+
+    if (layer.line === line) {
+      layer.line = layer.lines[i - 1];
+    }
+  }
+
 }

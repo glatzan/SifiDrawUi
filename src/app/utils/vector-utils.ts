@@ -1,4 +1,4 @@
-import {Point} from "../model/point";
+import {Point} from '../model/point';
 
 export default class VectorUtils {
 
@@ -32,7 +32,7 @@ export default class VectorUtils {
     let removed = false;
     poinst.forEach((x, index) => {
       removed = removed || VectorUtils.removeCollidingPointsOfCircle(x, origin, radius);
-    })
+    });
     return removed;
   }
 
@@ -40,21 +40,21 @@ export default class VectorUtils {
     let removed = false;
     poinst.forEach((x, index) => {
       if (this.distance(x, origin) < radius) {
-        poinst.splice(index, 1)
+        poinst.splice(index, 1);
         removed = true;
       }
-    })
+    });
 
     return removed;
   }
 
   static movePointListsToCircleBoundaries(points: Point[][], origin: Point, radius: number): boolean {
-    let changed = false
+    let changed = false;
     for (let i = 0; i < points.length; i++) {
-      let result = this.movePointsToCircleBoundaries(points[i], origin, radius)
+      let result = this.movePointsToCircleBoundaries(points[i], origin, radius);
 
       if (result != null && result.length > 0) {
-        VectorUtils.updatePoints(points[i], result)
+        VectorUtils.updatePoints(points[i], result);
         changed = true;
       }
     }
@@ -63,14 +63,14 @@ export default class VectorUtils {
   }
 
   static movePointsToCircleBoundaries(points: Point[], origin: Point, radius: number): { index: number, point: Point }[] {
-    let movedPoints: { index: number, point: Point }[] = []
+    let movedPoints: { index: number, point: Point }[] = [];
     points.forEach((x, index, object) => {
       const res = VectorUtils.calculateNewPoint(origin, x, radius);
       if (res != null) {
         object[index] = res;
         movedPoints.push({index: index, point: res});
       }
-    })
+    });
 
     return movedPoints;
   }
@@ -85,7 +85,7 @@ export default class VectorUtils {
         sections[currentIndex].end = movedPoints[i].index;
       } else {
         currentIndex++;
-        sections[currentIndex] = {start: movedPoints[i].index, end: movedPoints[i].index}
+        sections[currentIndex] = {start: movedPoints[i].index, end: movedPoints[i].index};
       }
     }
 
@@ -100,13 +100,13 @@ export default class VectorUtils {
         let dist = VectorUtils.distance(points[y - 1], points[y]);
 
         if (dist < 7) {
-          points.splice(y, 1)
+          points.splice(y, 1);
           upperBound--;
           indexOffset--;
           change = true;
         } else if (dist > 15) {
           const dirVec = VectorUtils.directionVector(points[y - 1], points[y]);
-          const newPoint = VectorUtils.calculatePoint(points[y - 1], dirVec, 0.5)
+          const newPoint = VectorUtils.calculatePoint(points[y - 1], dirVec, 0.5);
 
           points.splice(y, 0, newPoint);
           indexOffset++;
@@ -116,7 +116,7 @@ export default class VectorUtils {
         }
       }
 
-    })
+    });
 
     return change;
   }

@@ -21,7 +21,7 @@ export class DrawCanvasComponent implements AfterViewInit {
   // a reference to the canvas element from our template
   @ViewChild('canvas', {static: false}) public canvas: ElementRef;
 
-  readonly MOUSE_LEFT_BTN = 1;
+  readonly MOUSE_LEFT_BTN = 0;
   readonly MOUSE_RIGHT_BTN = 2;
 
   private cx; // CanvasRenderingContext2D
@@ -39,11 +39,6 @@ export class DrawCanvasComponent implements AfterViewInit {
 
   public drawImage = new Image();
 
-  public width = 1300;
-
-  public height = 650;
-
-  private rightClickCircleSize: number;
 
   private event: MouseEvent;
 
@@ -61,6 +56,21 @@ export class DrawCanvasComponent implements AfterViewInit {
    */
   private currentZoomRounded = 100;
 
+  /**
+   * True if only points should be drawn
+   */
+  private pointMode = 'false';
+
+  /**
+   * Size of the circle which is displayed with a right click, in px
+   */
+  private rightClickCircleSize = 40;
+
+  /**
+   * If true no lindes will be displayed
+   */
+  private hideLines = false;
+
   constructor(public imageService: ImageService) {
     // draw on load
     this.drawImage.onload = () => {
@@ -69,22 +79,8 @@ export class DrawCanvasComponent implements AfterViewInit {
   }
 
   public ngAfterViewInit() {
-
     console.log('Image load');
-    // set some default properties about the line
-    this.cx.lineWidth = 1;
-    this.cx.lineCap = 'round';
-    this.cx.strokeStyle = '#fff';
-    this.cx.fillStyle = '#ff0000';
-
-    // set the width and height
-    this.canvas.nativeElement.width = this.width;
-    this.canvas.nativeElement.height = this.height;
-
     this.cx = this.canvas.nativeElement.getContext('2d');
-
-    this.rightClickCircleSize = 40;
-
     this.initializeCanvas();
   }
 
@@ -124,8 +120,19 @@ export class DrawCanvasComponent implements AfterViewInit {
     const scroll = ($event) => {
       console.log('scroll');
       const delta = $event.wheelDelta ? $event.wheelDelta / 40 : $event.detail ? -$event.detail : 0;
-      if (delta) {
-        zoomFunction(delta);
+      if (mouseClicked && mouseBtn === me.MOUSE_RIGHT_BTN) {
+        if (delta > 0) {
+          me.rightClickCircleSize = me.rightClickCircleSize + 2;
+        } else {
+          me.rightClickCircleSize = me.rightClickCircleSize - 2;
+        }
+        const pt = me.cx.transformedPoint(lastMousePoint.x, lastMousePoint.y);
+        me.canvasRedraw();
+        DrawUtil.drawCircle(this.cx, new Point(pt.x, pt.y), this.rightClickCircleSize);
+      } else {
+        if (delta) {
+          zoomFunction(delta);
+        }
       }
       return $event.preventDefault() && false;
     };
@@ -138,6 +145,10 @@ export class DrawCanvasComponent implements AfterViewInit {
     this.canvas.nativeElement.addEventListener('DOMMouseScroll', scroll, false);
     this.canvas.nativeElement.addEventListener('mousewheel', scroll, false);
 
+    this.canvas.nativeElement.addEventListener('keyPress', (evt) => {
+      console.log(evt.key);
+    }, false);
+
     /**
      * Event for mouse down
      */
@@ -146,7 +157,9 @@ export class DrawCanvasComponent implements AfterViewInit {
       btnAlt = evt.altKey;
       btnCtrl = evt.ctrlKey;
       mouseClicked = true;
-      mouseBtn = evt.mouseButton;
+      mouseBtn = evt.button;
+
+      console.log('Mouse clicked');
 
       // dragging or zooming via click
       if (btnAlt) {
@@ -179,25 +192,30 @@ export class DrawCanvasComponent implements AfterViewInit {
           me.cx.translate(pt.x - dragStartPos.x, pt.y - dragStartPos.y);
           me.canvasRedraw();
         } else {
+          console.log(mouseBtn);
+          const pt = me.cx.transformedPoint(lastMousePoint.x, lastMousePoint.y);
           // draw
           switch (mouseBtn) {
             case me.MOUSE_LEFT_BTN:
-              me.newLineOnCanvas(this.currentLayer, lastMousePoint);
-              me.saveContent();
-              me.canvasRedraw();
+              if (me.pointMode === 'false') {
+                me.newLineOnCanvas(this.currentLayer, new Point(pt.x, pt.y));
+                me.saveContent();
+                me.canvasRedraw();
+              }
               break;
             case me.MOUSE_RIGHT_BTN:
-              if (btnCtrl) {
-                if (VectorUtils.removeCollidingPointListsOfCircle(me.currentLayer.lines, lastMousePoint, me.rightClickCircleSize)) {
+              // check ctrl key again, for better editing
+              if (evt.ctrlKey) {
+                if (VectorUtils.removeCollidingPointListsOfCircle(me.currentLayer.lines, new Point(pt.x, pt.y), me.rightClickCircleSize)) {
                   this.saveContent();
                 }
               } else {
-                if (VectorUtils.movePointListsToCircleBoundaries(me.currentLayer.lines, lastMousePoint, me.rightClickCircleSize)) {
+                if (VectorUtils.movePointListsToCircleBoundaries(me.currentLayer.lines, new Point(pt.x, pt.y), me.rightClickCircleSize)) {
                   this.saveContent();
                 }
               }
               me.canvasRedraw();
-              DrawUtil.drawCircle(this.cx, lastMousePoint, this.rightClickCircleSize);
+              DrawUtil.drawCircle(this.cx, new Point(pt.x, pt.y), this.rightClickCircleSize);
               break;
           }
         }
@@ -224,7 +242,10 @@ export class DrawCanvasComponent implements AfterViewInit {
   private canvasRedraw() {
     this.clearCanvas();
     this.cx.drawImage(this.drawImage, 0, 0);
-    DrawUtil.redrawCanvas(this.cx, this.image.layers);
+
+    if (!this.hideLines) {
+      DrawUtil.redrawCanvas(this.cx, this.image.layers);
+    }
   }
 
   /**
@@ -269,14 +290,12 @@ export class DrawCanvasComponent implements AfterViewInit {
     this.currentLayer = image.layers[0];
     this.renderContext = true;
     this.drawImage.src = 'data:image/png;base64,' + this.image.data;
-  }
 
-
-  /**
-   * Mouse movement with right mouse button pressed
-   */
-  public onMouseMoveWithRightClick(event: MouseEvent, mousePos: Point) {
-
+    // setting layer settings
+    this.cx.lineWidth = image.layers[0].size || 1;
+    this.cx.lineCap = 'round';
+    this.cx.strokeStyle = image.layers[0].color || '#fff';
+    this.cx.fillStyle = image.layers[0].color || '#fff';
   }
 
   public addLayer(event) {
@@ -284,10 +303,17 @@ export class DrawCanvasComponent implements AfterViewInit {
     this.currentLayer = this.image.layers[this.image.layers.length - 1];
   }
 
-  public selectPoints(index: number) {
-    this.currentLayer.line = this.currentLayer.lines[index];
+  public selectLine($event, index: number) {
+    if ($event.ctrlKey) {
+      CImageUtil.removeLine(this.currentLayer, this.currentLayer.lines[index]);
+      this.saveContent();
+      this.canvasRedraw();
+    } else {
+      this.currentLayer.line = this.currentLayer.lines[index];
+    }
+    // preventing default ctrl click
+    return $event.preventDefault() && false;
   }
-
 
   public onEvent(event: MouseEvent): boolean {
     return false;

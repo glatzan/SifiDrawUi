@@ -1,10 +1,9 @@
 <h4>Bild {{image !== undefined ? image.name : ""}}</h4>
 <div class="content">
-  <canvas #canvas
+  <canvas #canvas height="700" width="1300"
           (mouseenter)="onEvent($event)"
           (mouseleave)="onEvent($event)"
           (blur)="onEvent($event)"
-          (keydown)="onMouseMove($event)"
           (contextmenu)="onEvent($event)"></canvas>
 
   <div class="canvasInfo">
@@ -17,6 +16,25 @@
   </div>
 
   <div class="settings" *ngIf="renderContext">
+    <div class="modeGroup">
+      <mat-label class="modeLabel">
+        Modus
+      </mat-label>
+
+      <mat-button-toggle-group #group="matButtonToggleGroup" class="modeBtn" [(value)]="pointMode">
+        <mat-button-toggle value="false">
+          Linie
+        </mat-button-toggle>
+        <mat-button-toggle value="true">
+          Punkt
+        </mat-button-toggle>
+      </mat-button-toggle-group>
+    </div>
+
+    <div class="hideLinesGroup">
+      <mat-checkbox [(ngModel)]="hideLines" (change)="canvasRedraw()">Linien verstecken</mat-checkbox>
+    </div>
+
     <mat-form-field>
       <mat-select [(ngModel)]="currentLayer" placeholder="Label">
         <mat-option *ngFor="let layer of image.layers" [value]="layer">
@@ -47,7 +65,7 @@
                        <a style="text-decoration: underline" href="#"
                           (mouseenter)='highLightLine(idx)'
                           (mouseleave)="canvasRedraw()"
-                          (click)="selectPoints(idx)">[{{x.length}}]</a>
+                          (click)="selectLine($event, idx)">[{{x.length}}]</a>
                      </span>
       <input matInput style="display: none"/>
     </mat-form-field>
