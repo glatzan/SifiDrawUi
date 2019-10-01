@@ -4,11 +4,12 @@ import {ProjectService} from '../../service/project.service';
 import {Dataset} from '../../model/dataset';
 import {Layer} from '../../model/layer';
 import {DatasetService} from '../../service/dataset.service';
-import {delay} from 'rxjs/operators';
+import {delay, flatMap} from 'rxjs/operators';
 import {ImageService} from '../../service/image.service';
 import {CImage} from '../../model/cimage';
 import DrawUtil from '../../utils/draw-util';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material';
+import CImageUtil from "../../utils/cimage-util";
 
 @Component({
   selector: 'app-export-dialog',
@@ -17,33 +18,33 @@ import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material';
 })
 export class ExportDialogComponent implements OnInit {
 
-  private showDialog = false;
+  private exportIsRunning: boolean = false;
 
   private projects: ProjectData[];
 
+  private selectedProject: ProjectData;
+
   private datasets: Dataset[];
 
-  private project: ProjectData;
+  private selectedDatasets: Dataset[];
 
-  private dataset: Dataset;
+  private targetProject: ProjectData;
 
-  private name: string;
+  private targetDataset: string;
 
-  private background: string;
+  private simpleMode: boolean = true;
 
-  private backgroundImage: boolean;
+  private simpleCopyOrigImage: boolean = false;
 
-  private layerSettings: boolean;
+  private simpleCustomBackgroundColor: string = "#000000"
 
-  private copyLayers: boolean;
+  private simpleKeepLayerSettings: boolean = false;
 
-  private layers: { selected: boolean, layer: Layer }[];
+  private simpleLayerSettings: { selected: boolean, layer: Layer }[];
 
-  private showProgressDialog: boolean;
+  private simpleCopyLayersToNewImage: boolean = false;
 
-  private currentProgress = 0;
-
-  private todoProgress = 0;
+  private complexFilters: string = "";
 
   constructor(public dialogRef: MatDialogRef<ExportDialogComponent>,
               @Inject(MAT_DIALOG_DATA) public data: string,
@@ -53,103 +54,99 @@ export class ExportDialogComponent implements OnInit {
   }
 
   ngOnInit() {
-  }
+    const me = this;
+    me.targetDataset = "";
+    me.targetProject = null;
+    me.addLayer();
 
-  public showExportDialog(id: string) {
-    this.showDialog = true;
-    this.name = '';
-    this.background = '#000000';
-    this.backgroundImage = false;
-    this.layers = [];
-    this.layers.push({selected: false, layer: new Layer("1")});
-    this.projects = [];
-    this.layerSettings = false;
-    this.showProgressDialog = false;
-    this.currentProgress = 0;
-    this.todoProgress = 0;
     this.projectService.getProjects().subscribe((data: ProjectData[]) => {
       this.projects = data;
-      this.projects.forEach(x => {
-          console.log(x.id + ' ' + id);
-          if (x.id === id) {
-            this.project = x;
-            this.datasets = x.datasets;
 
-            if (this.datasets.length > 0) {
-              this.dataset = this.datasets[0];
-            }
-          }
+      for (let p of this.projects) {
+        if (p.id === this.data) {
+          this.selectedProject = p;
+          break;
         }
-      );
+      }
+
+      if (this.selectedProject == null)
+        this.selectedProject = this.projects[0]
+
+      me.onSelectProject();
+
     }, error1 => {
       console.log('Fehler beim laden der Project Datein');
     });
+
   }
 
-  private abort() {
-    this.showDialog = false;
+  public onSelectProject() {
+    this.datasets = this.selectedProject.datasets
+    this.selectedDatasets = [this.datasets[0]] || null;
+  }
+
+  public addLayer() {
+    this.simpleLayerSettings.push({selected: true, layer: new Layer("" + this.simpleLayerSettings.length + 1)})
   }
 
   private async create() {
 
-    //this.datasetService.
-    const canvas = document.createElement('canvas');
-    const cx = canvas.getContext('2d');
-    this.showProgressDialog = true;
-    this.currentProgress = 0;
-    const c = await this.datasetService.getDataset(this.dataset.id).toPromise();
-    this.todoProgress = c.images.length;
-
-    const newDatasetID = btoa(`${this.project.id}/${this.name}`);
-
-    await this.datasetService.createDataset(newDatasetID).toPromise()
-
-    for (const img of c.images) {
-      const image = await this.imageService.getImage(img.id).toPromise();
-      this.currentProgress++;
-      console.log(image.id);
-
-      await DrawUtil.drawCanvas(canvas, image, this.backgroundImage, this.background, this.layerSettings, this.layers.filter(y => y.selected).map(f => f.layer));
-
-      const newIMG = new CImage();
-      newIMG.id = img.id.replace(this.dataset.id, newDatasetID)
-
-      const imgData = canvas.toDataURL()
-      newIMG.data = imgData.substr(imgData.indexOf(',') + 1);
-      newIMG.name = img.name;
-
-      if (this.copyLayers) {
-        newIMG.layers = image.layers
-      }
-
-      // console.log(newIMG.data)
-      this.imageService.createImage(newIMG).subscribe(() => {
-        console.log('saved');
-      }, error1 => {
-        console.log('Fehler beim laden der Dataset Datein');
-        console.error(error1);
-      });
-    }
-
-
-    // => {
-    // this.todoProgress = data.images.length;
+    // //this.datasetService.
+    // const canvas = document.createElement('canvas');
+    // const cx = canvas.getContext('2d');
+    // this.showProgressDialog = true;
     // this.currentProgress = 0;
+    // const c = await this.datasetService.getDataset(this.dataset.id).toPromise();
+    // this.todoProgress = c.images.length;
     //
+    // const newDatasetID = btoa(`${this.project.id}/${this.name}`);
     //
-    // data.images.forEach((x, index) => {
-    //   const t = await this.imageService.getImageSynced(x.id);
-    //   his.timageService.getImageSynced(x.id).then(image => {
-    //     console.log(image.id);
-    //     //DrawUtil.drawCanvas(cx, image, this.backgroundImage, this.background, this.layerSettings, this.layers.filter(y => y.selected).map(f => f.layer));
-    //     this.currentProgress++;
+    // await this.datasetService.createDataset(newDatasetID).toPromise()
+    //
+    // for (const img of c.images) {
+    //   const image = await this.imageService.getImage(img.id).toPromise();
+    //   this.currentProgress++;
+    //   console.log(image.id);
+    //
+    //   await DrawUtil.drawCanvas(canvas, image, this.backgroundImage, this.background, this.layerSettings, this.layers.filter(y => y.selected).map(f => f.layer));
+    //
+    //   const newIMG = new CImage();
+    //   newIMG.id = img.id.replace(this.dataset.id, newDatasetID)
+    //
+    //   const imgData = canvas.toDataURL()
+    //   newIMG.data = imgData.substr(imgData.indexOf(',') + 1);
+    //   newIMG.name = img.name;
+    //
+    //   if (this.copyLayers) {
+    //     newIMG.layers = image.layers
+    //   }
+    //
+    //   // console.log(newIMG.data)
+    //   this.imageService.createImage(newIMG).subscribe(() => {
+    //     console.log('saved');
+    //   }, error1 => {
+    //     console.log('Fehler beim laden der Dataset Datein');
+    //     console.error(error1);
     //   });
-    // });
-
-
   }
 
-  closeDialog() {
-    this.dialogRef.close('');
+
+  // => {
+  // this.todoProgress = data.images.length;
+  // this.currentProgress = 0;
+  //
+  //
+  // data.images.forEach((x, index) => {
+  //   const t = await this.imageService.getImageSynced(x.id);
+  //   his.timageService.getImageSynced(x.id).then(image => {
+  //     console.log(image.id);
+  //     //DrawUtil.drawCanvas(cx, image, this.backgroundImage, this.background, this.layerSettings, this.layers.filter(y => y.selected).map(f => f.layer));
+  //     this.currentProgress++;
+  //   });
+  // });
+
+
+  public close(): void {
+    this.dialogRef.close();
   }
 }

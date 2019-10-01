@@ -18,7 +18,7 @@ import {
   MatFormFieldModule,
   MatGridListModule,
   MatIconModule,
-  MatIconRegistry, MatInputModule, MatMenuModule, MatProgressSpinnerModule, MatSelectModule
+  MatIconRegistry, MatInputModule, MatMenuModule, MatProgressSpinnerModule, MatSelectModule, MatTabsModule
 } from '@angular/material';
 import {FormsModule} from "@angular/forms";
 import {MatColorPickerModule} from "mat-color-picker";
@@ -56,7 +56,8 @@ import {MatSnackBarModule} from '@angular/material';
     MatButtonToggleModule,
     MatCheckboxModule,
     MatSnackBarModule,
-    MatMenuModule
+    MatMenuModule,
+    MatTabsModule
   ],
   entryComponents: [ExportDialogComponent, ImportDialogComponent],
   providers: [{provide: MAT_SNACK_BAR_DEFAULT_OPTIONS, useValue: {duration: 500}}],

@@ -1,0 +1,21 @@
+<div mat-dialog-title>Daten Import</div>
+<div mat-dialog-content>
+  <div class="gridContainer">
+    <mat-form-field floatLabel="always" class="filter">
+      <textarea matInput placeholder="Mapping" rows="9" style="white-space: nowrap;width: 90% "
+                [(ngModel)]="mapping"></textarea>
+    </mat-form-field>
+    <mat-form-field floatLabel="always">
+      <textarea matInput placeholder="Filter" rows="20" style="white-space: nowrap;" [(ngModel)]="data"></textarea>
+    </mat-form-field>
+  </div>
+</div>
+
+
+<div mat-dialog-actions>
+  <div class="btnContainer">
+    <mat-spinner class="spinner" *ngIf="importIsRunning" [diameter]="20"></mat-spinner>
+    <button mat-stroked-button class="importBtn" (click)="import()" [disabled]="importIsRunning">Import</button>
+    <button mat-stroked-button class="closeBtn" (click)="close()" [disabled]="importIsRunning">Close</button>
+  </div>
+</div>

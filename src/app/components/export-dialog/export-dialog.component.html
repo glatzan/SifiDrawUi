@@ -1,11 +1,91 @@
-<h1 mat-dialog-title>Export</h1>
+<div mat-dialog-title>Daten Export</div>
+
 <div mat-dialog-content>
+  <div class="formGrid">
+    <mat-form-field class="projectObj">
+      <mat-select [(ngModel)]="selectedProject" placeholder="Projekt" (selectionChange)="onSelectProject()">
+        <mat-option *ngFor="let project of projects" [value]="project">
+          {{project.id}}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field class="datasetObj">
+      <mat-label>Datasets</mat-label>
+      <mat-select [(ngModel)]="selectedDatasets" multiple>
+        <mat-option *ngFor="let dataset of datasets" [value]="dataset">{{dataset.name}}</mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field class="targetProjectObj">
+      <mat-select [(ngModel)]="targetProject" placeholder="Ziel Projekt">
+        <mat-option *ngFor="let project of projects" [value]="project">
+          {{project.id}}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field class="targetDatasetObj">
+      <input matInput placeholder="Ziel Dataset" [(ngModel)]="targetDataset">
+    </mat-form-field>
+
+    <mat-tab-group class="modeTabs">
+      <mat-tab label="Einfach">
+        <div class="simpleTabGrid">
+
+          <section class="origImgObj">
+            <mat-checkbox [(ngModel)]="simpleCopyOrigImage">Original Bild als Hintergrund
+            </mat-checkbox>
+          </section>
+
+          <mat-form-field class="colorObj">
+            <input matInput [disabled]="simpleCopyOrigImage" [(ngModel)]="simpleCustomBackgroundColor"
+                   placeholder="Hintergrundfarbe" type="color"/>
+          </mat-form-field>
+
+          <section class="copyLayerObj">
+            <mat-checkbox [(ngModel)]="simpleCopyLayersToNewImage">Layer-Punkte in das neue Bild kopieren</mat-checkbox>
+          </section>
+
+          <section class="keepLayerSettingsObj">
+            <mat-checkbox [(ngModel)]="simpleKeepLayerSettings">Original Layer settings verwenden</mat-checkbox>
+          </section>
+
+          <div>asd
+            <div *ngFor="let layer of simpleLayerSettings;let even = even">
+              <section class="">
+                <mat-checkbox [(ngModel)]="layer.selected"></mat-checkbox>
+              </section>
+              <mat-form-field class="colorObj">
+                <input matInput [disabled]="simpleKeepLayerSettings" [(ngModel)]="layer.layer.color"
+                       placeholder="Farbe" type="color"/>
+              </mat-form-field>
+
+              <mat-form-field>
+                <input matInput [(ngModel)]="layer.layer.size" placeholder="Dicke"
+                       type="number" min="1"/>
+              </mat-form-field>
+            </div>
+
+          </div>
+        </div>
+      </mat-tab>
+
+
+      <mat-tab label="Experte">
+      </mat-tab>
+    </mat-tab-group>
+  </div>
 </div>
 
 <div mat-dialog-actions>
-  <button mat-button>Export</button>
-  <button mat-button>Close</button>
+  <div class="btnContainer">
+    <mat-spinner class="spinner" *ngIf="exportIsRunning" [diameter]="20"></mat-spinner>
+    <button mat-stroked-button class="importBtn" (click)="import()" [disabled]="exportIsRunning">Import</button>
+    <button mat-stroked-button class="closeBtn" (click)="close()" [disabled]="exportIsRunning">Close</button>
+  </div>
 </div>
+
 
 <!--<p-dialog header="Title" [(visible)]="showDialog" [style]="{width: '700px'}" [contentStyle]="{'overflow':'visible'}"-->
 <!--          modal="true">-->

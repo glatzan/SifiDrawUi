@@ -16,7 +16,7 @@ export class CaseListComponent implements OnInit {
 
   private projectData: ProjectData[];
 
-  private selectedProjectId: string;
+  public selectedProjectId: string;
 
   @Input() imageListComponent: ImageListComponent;
 
@@ -41,18 +41,6 @@ export class CaseListComponent implements OnInit {
   private onSelectDataset(event, id) {
     this.selectedProjectId = id;
     this.imageListComponent.onDatasetSelection(id);
-  }
-
-  openDialog(id: string): void {
-    const dialogRef = this.dialog.open(ExportDialogComponent, {
-      height: '500px',
-      width: '250px',
-      data: {id}
-    });
-
-    dialogRef.afterClosed().subscribe(result => {
-      console.log('The dialog was closed');
-    });
   }
 }
 

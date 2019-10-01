@@ -1,0 +1,31 @@
+.gridContainer {
+  display: grid;
+  grid-template-columns: 100%;
+  grid-template-rows: auto auto auto;
+}
+
+.btnContainer {
+  width: 100%;
+  display: grid;
+  grid-column-gap: 15px;
+  grid-template-columns: auto fit-content(200px) fit-content(200px) fit-content(200px);
+  grid-template-rows: auto;
+
+  .spinner {
+    grid-column: 2;
+    align-self: center;
+    justify-self: right;
+  }
+
+  .importBtn {
+    grid-column: 3;
+    justify-self: right;
+    width: 100px;
+  }
+
+  .closeBtn {
+    grid-column: 4;
+    justify-self: right;
+    width: 100px;
+  }
+}
