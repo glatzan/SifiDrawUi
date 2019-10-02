@@ -1,7 +1,18 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.mat-dialog-content {
+  flex-grow: 1;
+}
+
 .formGrid {
   width: 100%;
   display: grid;
   grid-gap: 5px;
+  grid-column-gap: 15px;
   grid-template-columns: fit-content(200px) auto;
   grid-template-rows: fit-content(40px) fit-content(40px) fit-content(500px);
 
@@ -32,60 +43,100 @@
     grid-row: 4;
   }
 
-  .simpleTabGrid{
+  .simpleTabGrid {
     width: 100%;
     display: grid;
     grid-gap: 10px;
     grid-template-columns: fit-content(200px) auto;
-    grid-template-rows: fit-content(30px) fit-content(30px) fit-content(500px);
+    grid-template-rows: fit-content(30px) fit-content(30px) fit-content(30px) fit-content(500px);
 
-    .origImgObj{
+    .origImgObj {
       align-self: center;
     }
 
-    .colorObj{
+    .colorObj {
       width: 100px;
-      grid-row: 1/3;
-      grid-column: 2;
-      margin-left: 20px;
     }
 
-    .copyLayerObj{
+    .copyLayerObj {
     }
 
-    .keepLayerSettingsObj{
+    .keepLayerSettingsObj {
       grid-row: 3;
     }
+
+    .layerListObj {
+      grid-row: 4;
+      grid-column: 1/3;
+      grid-column-gap: 15px;
+      margin-left: 20px;
+
+      .layerGrid {
+        width: 100%;
+        display: grid;
+        grid-gap: 10px;
+        grid-column-gap: 20px;
+        grid-template-columns: fit-content(200px) fit-content(200px) fit-content(200px) fit-content(200px) auto;
+
+        .layerLabel {
+          align-self: center;
+        }
+
+        .selectLayer {
+          align-self: center;
+        }
+
+        .layerColorInput {
+          align-self: center;
+          width: 50px;
+        }
+
+        .widthInput {
+          width: 50px;
+        }
+
+        .layerIdInput {
+          width: 100px;
+        }
+      }
+    }
   }
-}
-
-
-.oddBackGround {
-  background-color: aliceblue;
 }
 
 .btnContainer {
   width: 100%;
   display: grid;
   grid-column-gap: 15px;
-  grid-template-columns: auto fit-content(200px) fit-content(200px) fit-content(200px);
+  grid-template-columns: fit-content(200px) auto fit-content(200px) fit-content(200px) fit-content(200px);
   grid-template-rows: auto;
 
   .spinner {
-    grid-column: 2;
     align-self: center;
     justify-self: right;
+    grid-column: 4;
   }
 
-  .importBtn {
-    grid-column: 3;
+  .exportBtn {
     justify-self: right;
     width: 100px;
+    grid-column: 4;
   }
 
   .closeBtn {
-    grid-column: 4;
     justify-self: right;
     width: 100px;
+    grid-column: 5;
+  }
+
+  .addBtn {
+    width: 100px;
+    justify-self: left;
+  }
+
+  .removeBtn {
+    width: 130px;
+    justify-self: left;
   }
 }
+
+

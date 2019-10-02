@@ -33,12 +33,12 @@ export class ImageService {
     return this._http.put<CImage>(`${this.serverURL}/image`, image, httpOptions);
   }
 
-  public createImage(image: CImage): Observable<any> {
+  public createImage(image: CImage, type : string): Observable<any> {
     const httpOptions = {
       headers: new HttpHeaders({})
     };
-    console.log(`${this.serverURL}/image`);
-    return this._http.post<CImage>(`${this.serverURL}/image/png`, image, httpOptions);
+    console.log(`${this.serverURL}/image/${type}`);
+    return this._http.post<CImage>(`${this.serverURL}/image/${type}`, image, httpOptions);
   }
 
 
