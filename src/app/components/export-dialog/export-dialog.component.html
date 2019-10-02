@@ -38,15 +38,20 @@
             </mat-checkbox>
           </section>
 
-          <input matInput [disabled]="simpleCopyOrigImage" [(ngModel)]="simpleCustomBackgroundColor" class="colorObj" (change)="generateFilters()"
+          <input matInput [disabled]="simpleCopyOrigImage" [(ngModel)]="simpleCustomBackgroundColor" class="colorObj"
+                 (change)="generateFilters()"
                  placeholder="Hintergrundfarbe" type="color"/>
 
           <section class="copyLayerObj">
-            <mat-checkbox [(ngModel)]="simpleCopyLayersToNewImage" (change)="generateFilters()">Layer-Punkte in das neue Bild kopieren</mat-checkbox>
+            <mat-checkbox [(ngModel)]="simpleCopyLayersToNewImage" (change)="generateFilters()">Layer-Punkte in das neue
+              Bild kopieren
+            </mat-checkbox>
           </section>
 
           <section class="keepLayerSettingsObj">
-            <mat-checkbox [(ngModel)]="simpleKeepLayerSettings" (change)="generateFilters()">Original Layer settings verwenden</mat-checkbox>
+            <mat-checkbox [(ngModel)]="simpleKeepLayerSettings" (change)="generateFilters()">Original Layer settings
+              verwenden
+            </mat-checkbox>
           </section>
 
           <div class="layerListObj">
@@ -58,7 +63,8 @@
 
               <mat-label class="layerLabel">Layer {{layer.layer.id}}</mat-label>
 
-              <input matInput [disabled]="simpleKeepLayerSettings" [(ngModel)]="layer.layer.color" (change)="generateFilters()"
+              <input matInput [disabled]="simpleKeepLayerSettings" [(ngModel)]="layer.layer.color"
+                     (change)="generateFilters()"
                      class="layerColorInput"
                      placeholder="Farbe" type="color"/>
 
@@ -94,6 +100,7 @@
     <button mat-stroked-button class="removeBtn" (click)="removeLayer()" [disabled]="exportIsRunning">Remove Layer
     </button>
     <mat-spinner class="spinner" *ngIf="exportIsRunning" [diameter]="20"></mat-spinner>
+    <mat-progress-bar mode="determinate" [value]="percentRun" class="progressBar"></mat-progress-bar>
     <button mat-stroked-button class="exportBtn" (click)="export()" [disabled]="exportIsRunning">Export</button>
     <button mat-stroked-button class="closeBtn" (click)="close()" [disabled]="exportIsRunning">Close</button>
   </div>

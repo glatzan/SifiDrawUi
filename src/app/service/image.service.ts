@@ -21,8 +21,7 @@ export class ImageService {
       })
     };
 
-    console.log(`${this.serverURL}/image/${id}`)
-
+    // console.log(`${this.serverURL}/image/${id}`)
     return this._http.get<CImage>(`${this.serverURL}/image/${id}`, httpOptions);
   }
 
@@ -37,7 +36,7 @@ export class ImageService {
     const httpOptions = {
       headers: new HttpHeaders({})
     };
-    console.log(`${this.serverURL}/image/${type}`);
+    // console.log(`${this.serverURL}/image/${type}`);
     return this._http.post<CImage>(`${this.serverURL}/image/${type}`, image, httpOptions);
   }
 

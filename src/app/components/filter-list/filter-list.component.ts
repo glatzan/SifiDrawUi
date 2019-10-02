@@ -11,13 +11,16 @@ import {FilterService} from "../../service/filter.service";
 import {ImageEventFilter} from "../../filter/image-event-filter";
 import {HttpClient} from "@angular/common/http";
 import {logger} from "codelyzer/util/logger";
+import {Dataset} from "../../model/dataset";
+import {forkJoin} from "rxjs";
+import {DisplayCallback} from "../../worker/display-callback";
 
 @Component({
   selector: 'app-filter-list',
   templateUrl: './filter-list.component.html',
   styleUrls: ['./filter-list.component.scss']
 })
-export class FilterListComponent implements OnInit {
+export class FilterListComponent implements OnInit, DisplayCallback {
 
   private filterIsRunning = false;
   private filterValue: string;
@@ -44,37 +47,22 @@ export class FilterListComponent implements OnInit {
   ngOnInit() {
   }
 
-  public async runFilter() {
+  public runFilter() {
 
     if (this.filterValue === undefined || this.filterValue.length == 0) {
       console.log(this.filterValue + "---")
       return;
     }
-    const me = this;
-    me.filterIsRunning = true;
-    const cImage = await this.imageService.getImage(this._cImage.id).toPromise();
-    DrawUtil.loadImageFromBase64(cImage.data, img => {
-      const f = me.filterService;
-      let end = undefined;
-      let start = undefined;
-      try {
-        eval(me.filterValue);
-      } catch (e) {
-        if (e instanceof SyntaxError) {
-          alert(e);
-        }
-        alert(e);
-        me.filterIsRunning = false;
-        return
-      }
 
-      if (end === undefined)
-        end = start;
+    const dataset = new Dataset();
+    dataset.images = [new CImage()]
+    dataset.images[0].id = this._cImage.id;
 
-      const endFilter = this.filterService.getNewEventFilter(this.filterCallBack, me, me._cImage, end);
-      start.doFilter(img, undefined);
-      console.log("end");
-    })
+    console.log("start")
+
+    this.filterService.runWorkers([dataset], this.filterValue, {
+      displayCallback: this
+    });
   }
 
   public resetFilter() {
@@ -85,36 +73,13 @@ export class FilterListComponent implements OnInit {
     })
   }
 
-  public filterCallBack(image: CImage) {
+  public displayCallBack(image: CImage): void {
     this.filterIsRunning = false;
 
+    console.log("callback")
     if (!this.resetTriggered)
       this.filterOutput.emit(image)
     else
       this.resetTriggered = false;
   }
-
-
 }
-
-
-// public filter = [
-//   {
-//     category: "Split", filter: [
-//       {
-//         name: "Split-Filter",
-//         description: "Ausplitten des Filterbaumes",
-//         command: "const split = new SplitFilter(img);"
-//       }
-//     ]
-//   },
-//   {
-//     category: "Merge", filter: [
-//       {
-//         name: "Img-Merge-Filter",
-//         description: "Ausplitten des Filterbaumes",
-//         command: "const merge = new IMGMergeFilter(imgs, colors);"
-//       }
-//     ]
-//   }
-// ]

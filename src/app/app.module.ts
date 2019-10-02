@@ -12,13 +12,21 @@ import {FilterListComponent} from './components/filter-list/filter-list.componen
 import {ScrollingModule} from '@angular/cdk/scrolling';
 import {
   MAT_SNACK_BAR_DEFAULT_OPTIONS,
-  MatButtonModule, MatButtonToggleModule, MatCheckboxModule,
+  MatButtonModule,
+  MatButtonToggleModule,
+  MatCheckboxModule,
   MatDialogModule,
   MatDividerModule,
   MatFormFieldModule,
   MatGridListModule,
   MatIconModule,
-  MatIconRegistry, MatInputModule, MatMenuModule, MatProgressSpinnerModule, MatSelectModule, MatTabsModule
+  MatIconRegistry,
+  MatInputModule,
+  MatMenuModule,
+  MatProgressBarModule,
+  MatProgressSpinnerModule,
+  MatSelectModule,
+  MatTabsModule
 } from '@angular/material';
 import {FormsModule} from "@angular/forms";
 import {MatColorPickerModule} from "mat-color-picker";
@@ -57,7 +65,8 @@ import {MatSnackBarModule} from '@angular/material';
     MatCheckboxModule,
     MatSnackBarModule,
     MatMenuModule,
-    MatTabsModule
+    MatTabsModule,
+    MatProgressBarModule
   ],
   entryComponents: [ExportDialogComponent, ImportDialogComponent],
   providers: [{provide: MAT_SNACK_BAR_DEFAULT_OPTIONS, useValue: {duration: 500}}],

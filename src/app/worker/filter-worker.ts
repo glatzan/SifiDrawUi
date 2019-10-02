@@ -1,13 +1,16 @@
 import {Observable} from "rxjs";
-import {flatMap} from "rxjs/operators";
+import {flatMap, tap} from "rxjs/operators";
 import {ImageService} from "../service/image.service";
 import {FilterData} from "./filter-data";
+import {ProcessCallback} from "./processCallback";
 
 export class FilterWorker {
 
   private parent: FilterWorker;
 
   private child: FilterWorker;
+
+  private callback: ProcessCallback;
 
   public constructor(parent?: FilterWorker) {
     this.registerChildFilter(parent);
@@ -24,11 +27,16 @@ export class FilterWorker {
   }
 
   public doChain(ob: Observable<any>): Observable<any> {
-    if (this.child == null)
-      return ob;
-    else {
+    if (this.child == null) {
+      if (this.callback != null)
+        this.callback.callback();
+      return ob.pipe(tap(x => {
+        if (this.callback != null)
+          this.callback.callback();
+      })) ;
+    } else {
       return ob.pipe(flatMap(x => {
-        return this.child.doWork(this,x);
+        return this.child.doWork(this, x);
       }))
     }
   }
@@ -46,5 +54,12 @@ export class FilterWorker {
 
   public addAsChild(parent: FilterWorker) {
     parent.child = this;
+  }
+
+  public pushCallBack(callback: ProcessCallback) {
+    this.callback = callback;
+
+    if (this.child != null)
+      this.child.pushCallBack(callback);
   }
 }

@@ -6,5 +6,6 @@
 //  const f1 = f.getNewMagicFilter(start, "-level 25%,75%");
 //  end = f.getNewMagicFilter(f1, "+level-colors green,gold");
 
-
-start = f.getNewMagicFilter("-threshold 20% -define connected-components:area-threshold=5 -define connected-components:mean-color=true -connected-components 8")
+start = f.origImageWorker(img);
+const v1 = f.magicWorker(start, "-threshold 20% -define connected-components:area-threshold=5 -define connected-components:mean-color=true -connected-components 8");
+const v2 = f.displayImageWorker(v1, display);

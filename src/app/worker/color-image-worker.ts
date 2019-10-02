@@ -4,6 +4,7 @@ import {FilterData} from "./filter-data";
 import {Observable} from "rxjs";
 import {flatMap} from "rxjs/operators";
 import DrawUtil from "../utils/draw-util";
+import {ProcessCallback} from "./processCallback";
 
 export class ColorImageWorker extends FilterWorker {
 

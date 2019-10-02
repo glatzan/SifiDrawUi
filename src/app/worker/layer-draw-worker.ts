@@ -6,6 +6,7 @@ import {flatMap, map} from "rxjs/operators";
 import DrawUtil from "../utils/draw-util";
 import {Layer} from "../model/layer";
 import {connectableObservableDescriptor} from "rxjs/internal/observable/ConnectableObservable";
+import {ProcessCallback} from "./processCallback";
 
 export class LayerDrawWorker extends FilterWorker {
 
@@ -47,7 +48,6 @@ export class LayerDrawWorker extends FilterWorker {
       layer => DrawUtil.loadBase64AsCanvas(data.origImage.data).pipe(
         flatMap(canvas => {
           return new Observable<FilterData>((observer) => {
-            console.log(this.size)
             DrawUtil.drawManyPointLinesOnCanvas(canvas, layer.lines, this.color, this.size, this.drawPoints)
             data.origImage.data = DrawUtil.canvasAsBase64(canvas);
 

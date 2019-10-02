@@ -4,6 +4,7 @@ import {FilterData} from "./filter-data";
 import {Observable} from "rxjs";
 import {flatMap} from "rxjs/operators";
 import DrawUtil from "../utils/draw-util";
+import {ProcessCallback} from "./processCallback";
 
 export class SaveImageWorker extends FilterWorker {
 
@@ -23,9 +24,6 @@ export class SaveImageWorker extends FilterWorker {
     this.project = project;
     this.dataset = dataset;
     this.copyLayer = copyLayer;
-
-    console.log("--------")
-    console.log(this.project)
   }
 
   public doWork(parent: FilterWorker, data?: FilterData): Observable<FilterData> {
@@ -39,16 +37,20 @@ export class SaveImageWorker extends FilterWorker {
       if (data.origImage.id == null || data.origImage.id.length == 0)
         observer.error("ID not set");
 
-      const id = atob(data.origImage.id);
+      let imageName = "";
 
-      const index = id.lastIndexOf("/");
+      if (data.targetName != null) {
+        imageName = data.targetName;
+      } else {
+        const id = atob(data.origImage.id).split("/");
 
-      if (index == -1)
-        observer.error("ID not valid");
+        if (id.length >= 1)
+          observer.error("ID not valid");
 
-      const name = id.substring(index + 1);
+        imageName = id[id.length - 1];
+      }
 
-      data.origImage.id = this.project.replace("/", "") + "/" + this.dataset.replace("/", "") + "/" + name;
+      data.origImage.id = btoa(this.project.replace("/", "") + "/" + this.dataset.replace("/", "") + "/" + imageName);
 
       observer.next(data);
       observer.complete();

@@ -41,16 +41,17 @@ export default class DrawUtil {
    * Creates a canvas and draws an image into it
    * @param img
    */
-  static loadImageAsCanvas(img: HTMLImageElement): HTMLCanvasElement {
-    const canvas = DrawUtil.createCanvas(img.naturalHeight, img.naturalWidth);
+  static loadImageAsCanvas(img: HTMLImageElement, canvas?: HTMLCanvasElement): HTMLCanvasElement {
+    if (!canvas)
+      canvas = DrawUtil.createCanvas(img.naturalHeight, img.naturalWidth);
     canvas.getContext('2d').drawImage(img, 0, 0);
     return canvas;
   }
 
-  static loadBase64AsCanvas(base: string): Observable<HTMLCanvasElement> {
+  static loadBase64AsCanvas(base: string, canvas?: HTMLCanvasElement): Observable<HTMLCanvasElement> {
     return DrawUtil.loadImageAsObservable(base).pipe(flatMap(x => {
       return new Observable<HTMLCanvasElement>((observer) => {
-        const c = DrawUtil.loadImageAsCanvas(x);
+        const c = DrawUtil.loadImageAsCanvas(x, canvas);
         observer.next(c);
         observer.complete();
       })

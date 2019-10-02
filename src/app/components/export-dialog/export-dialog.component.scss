@@ -107,25 +107,32 @@
   width: 100%;
   display: grid;
   grid-column-gap: 15px;
-  grid-template-columns: fit-content(200px) auto fit-content(200px) fit-content(200px) fit-content(200px);
+  grid-template-columns: fit-content(200px) fit-content(100px) auto fit-content(100px) fit-content(100px) fit-content(200px);
   grid-template-rows: auto;
 
   .spinner {
     align-self: center;
     justify-self: right;
+    grid-column: 3;
+  }
+
+  .progressBar {
+    align-self: center;
+    justify-self: right;
+    width: 200px;
     grid-column: 4;
   }
 
   .exportBtn {
     justify-self: right;
     width: 100px;
-    grid-column: 4;
+    grid-column: 5;
   }
 
   .closeBtn {
     justify-self: right;
     width: 100px;
-    grid-column: 5;
+    grid-column: 6;
   }
 
   .addBtn {

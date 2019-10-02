@@ -12,15 +12,14 @@ import {MAT_DIALOG_DATA, MatDialogRef, MatSnackBar} from '@angular/material';
 import CImageUtil from "../../utils/cimage-util";
 import {FilterService} from "../../service/filter.service";
 import {forkJoin} from "rxjs";
+import {ProcessCallback} from "../../worker/processCallback";
 
 @Component({
   selector: 'app-export-dialog',
   templateUrl: './export-dialog.component.html',
   styleUrls: ['./export-dialog.component.scss']
 })
-export class ExportDialogComponent implements OnInit {
-
-  private exportIsRunning: boolean = false;
+export class ExportDialogComponent implements OnInit, ProcessCallback {
 
   private projects: ProjectData[];
 
@@ -48,6 +47,14 @@ export class ExportDialogComponent implements OnInit {
 
   private complexFilters: string = "";
 
+  exportIsRunning: boolean = false;
+
+  maxRunCount: number = 0;
+
+  percentRun: number = 0;
+
+  completedRunCount: number = 0;
+
   constructor(public dialogRef: MatDialogRef<ExportDialogComponent>,
               @Inject(MAT_DIALOG_DATA) public data: string,
               public projectService: ProjectService,
@@ -63,6 +70,11 @@ export class ExportDialogComponent implements OnInit {
     me.targetProject = null;
     me.simpleLayerSettings = [];
     me.addLayer();
+
+    me.maxRunCount = 0;
+    me.percentRun = 0;
+    me.exportIsRunning = false;
+    me.completedRunCount = 0;
 
     this.projectService.getProjects().subscribe((data: ProjectData[]) => {
       this.projects = data;
@@ -130,7 +142,7 @@ export class ExportDialogComponent implements OnInit {
       }
     }
 
-    result.push(`const v${c} = f.saveImageWorker(${startVar}, projectDir, datasetDir);`);
+    result.push(`const v${c} = f.saveImageWorker(${startVar}, projectDir, datasetDir, copyLayer);`);
 
 
     this.complexFilters = result.join("\r\n");
@@ -175,14 +187,21 @@ export class ExportDialogComponent implements OnInit {
     this.exportIsRunning = true;
     forkJoin(reqDatasets).subscribe(datasets => {
       console.log("start")
-      this.filterService.runWorkers({
-        src: datasets,
-        target: targetSets
-      }, this.complexFilters, {targetProject: this.targetProject.id}, this);
+      this.filterService.runWorkers(datasets, this.complexFilters, {
+        targetProject: this.targetProject.id,
+        copyLayer: this.simpleCopyLayersToNewImage,
+        targetDatasetDir: targetSets,
+        processCallback: this
+      });
     })
 
 
   }
+
+  public callback(): void {
+    this.percentRun = Math.round(++this.completedRunCount * 100 / this.maxRunCount);
+  }
+
 
   private async create() {
 

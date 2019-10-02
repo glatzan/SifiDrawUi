@@ -12,7 +12,13 @@ import {ColorImageWorker} from "../worker/color-image-worker";
 import {LayerDrawWorker} from "../worker/layer-draw-worker";
 import {SaveImageWorker} from "../worker/save-image-worker";
 import {Dataset} from "../model/dataset";
-import {forkJoin, Observable} from "rxjs";
+import {defer, forkJoin, merge, Observable, of, Subject} from "rxjs";
+import {finalize, ignoreElements, mergeMap, tap} from "rxjs/operators";
+import {ProcessCallback} from "../worker/processCallback";
+import {FilterData} from "../worker/filter-data";
+import {DisplayImageWorker} from "../worker/display-image-worker";
+import {MagicWorker} from "../worker/magic-worker";
+import {DisplayCallback} from "../worker/display-callback";
 
 @Injectable({
   providedIn: 'root'
@@ -53,25 +59,46 @@ export class FilterService {
     return new SaveImageWorker(parent, this.imageService, project, dataset, copyLayer);
   }
 
-  public runWorkers(imgs: { src: Dataset[], target: string[] }, filterChain: string, env: { targetProject: string }, callback) {
+  public displayImageWorker(parent: FilterWorker, displayCallback: DisplayCallback) {
+    return new DisplayImageWorker(parent, displayCallback);
+  }
+
+  public magicWorker(parent: FilterWorker, command: string) {
+    return new MagicWorker(parent, command, this.imageMagicService);
+  }
+
+  public runWorkers(datasets: Dataset[], filterChain: string, env: { targetProject?: string, copyLayer?: boolean, targetDatasetDir?: string[], processCallback?: ProcessCallback, displayCallback?: DisplayCallback }) {
     try {
 
-      console.log("rung" + imgs.target.length)
-
-      if (imgs.src.length !== imgs.target.length) {
-        console.log("Error");
-        return;
-      }
-
-      const f = this
+      const f = this;
       const projectDir = env.targetProject;
-
+      const copyLayer = env.copyLayer;
+      const display = env.displayCallback;
       const results = [];
 
-      for (let y = 0; y < imgs.src.length; y++) {
-        for (let i = 0; i < imgs.src[y].images.length; i++) {
-          const img = imgs.src[y].images[i].id;
-          const datasetDir = imgs.target[y];
+      for (let y = 0; y < datasets.length; y++) {
+        for (let i = 0; i < datasets[y].images.length; i++) {
+          const img = datasets[y].images[i].id;
+          const data = new FilterData();
+          data.origImage = datasets[y].images[i];
+
+          const id = atob(img).split("/");
+
+          if (datasets.length > 1) {
+            if (id.length >= 2)
+              data.targetName = id[id.length - 2] + "-" + id[id.length - 1];
+            else
+              data.targetName = String(results.length);
+          } else {
+            if (id.length > 1)
+              data.targetName = id[id.length - 1];
+            else
+              data.targetName = String(results.length);
+          }
+
+          let datasetDir = ";"
+          if (env.targetDatasetDir)
+            datasetDir = env.targetDatasetDir[y];
 
           let start;
 
@@ -82,21 +109,59 @@ export class FilterService {
             return;
           }
 
-
-          results.push(start.doWork(undefined))
+          start.pushCallBack(env.processCallback);
+          results.push(start.doWork(undefined, data))
         }
       }
 
+      if (env.processCallback) {
+        env.processCallback.maxRunCount = results.length * 2;
+        env.processCallback.completedRunCount = 0;
+        env.processCallback.percentRun = 0;
+      }
+
       forkJoin(results).subscribe(x => {
-        callback.exportIsRunning = false;
+        if (env.processCallback)
+          env.processCallback.exportIsRunning = false;
         console.log("Ende");
       });
+
     } catch (e) {
       if (e instanceof SyntaxError) {
         alert(e);
       }
-      console.error(e)
-      callback.exportIsRunning = false;
+      console.error(e);
+      if (env.processCallback)
+        env.processCallback.exportIsRunning = false;
     }
   }
+}
+
+
+function forkJoinWithProgress(arrayOfObservables) {
+
+  return defer(() => { // here we go
+
+    let counter = 0;
+    const percent$ = new Subject();
+
+    const modilefiedObservablesList = arrayOfObservables.map(
+      (item, index) => item.pipe(
+        tap(() => {
+          const percentValue = ++counter * 100 / arrayOfObservables.length;
+          percent$.next(percentValue);
+        })
+      )
+    );
+
+    const finalResult$ = forkJoin(modilefiedObservablesList).pipe(
+      tap(() => {
+        percent$.next(100);
+        percent$.complete();
+      })
+    );
+
+    return of([finalResult$, percent$.asObservable()]);
+  })
+
 }
