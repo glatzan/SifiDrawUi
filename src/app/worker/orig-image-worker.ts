@@ -22,7 +22,6 @@ export class OrigImageWorker extends FilterWorker {
     const s = this.imageService.getImage(this.imageID).pipe(flatMap(image => {
       return new Observable<FilterData>((observer) => {
         data.origImage = image;
-        data.data = "";
         observer.next(data);
         observer.complete();
       })

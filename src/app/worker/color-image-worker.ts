@@ -28,32 +28,17 @@ export class ColorImageWorker extends FilterWorker {
   public doWork(parent: FilterWorker, data?: FilterData): Observable<FilterData> {
     console.log("Call ColorImageWorker");
 
-    let s;
+    const s = DrawUtil.loadBase64AsCanvas(data.origImage.data).pipe(flatMap(canvas => {
+      return new Observable<FilterData>((observer) => {
+        const height = this.height < 0 ? canvas.height : this.height;
+        const width = this.width < 0 ? canvas.width : this.width;
 
-    if (data == undefined) {
-
-      data = new FilterData();
-
-      s = new Observable<FilterData>((observer) => {
-        const canvas = DrawUtil.createCanvas(this.height, this.width);
-        DrawUtil.drawRect(canvas, this.x, this.y, this.width, this.height, this.color);
+        DrawUtil.drawRect(canvas, this.x, this.y, width, height, this.color);
         data.origImage.data = DrawUtil.canvasAsBase64(canvas);
         observer.next(data);
         observer.complete();
       })
-    } else {
-      s = DrawUtil.loadBase64AsCanvas(data.origImage.data).pipe(flatMap(canvas => {
-        return new Observable<FilterData>((observer) => {
-          const height = this.height < 0 ? canvas.height : this.height;
-          const width = this.width < 0 ? canvas.width : this.width;
-
-          DrawUtil.drawRect(canvas, this.x, this.y, width, height, this.color);
-          data.origImage.data = DrawUtil.canvasAsBase64(canvas);
-          observer.next(data);
-          observer.complete();
-        })
-      }));
-    }
+    }));
 
     return this.doChain(s);
   }

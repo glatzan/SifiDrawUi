@@ -10,19 +10,13 @@ export class SaveImageWorker extends FilterWorker {
 
   private imageService: ImageService;
 
-  private project: string;
-
-  private dataset: string;
-
   private copyLayer: boolean;
 
   private type: string = "png";
 
-  public constructor(parent: FilterWorker, imageService: ImageService, project: string, dataset: string, copyLayer: boolean) {
+  public constructor(parent: FilterWorker, imageService: ImageService, copyLayer: boolean) {
     super(parent);
     this.imageService = imageService;
-    this.project = project;
-    this.dataset = dataset;
     this.copyLayer = copyLayer;
   }
 
@@ -39,10 +33,10 @@ export class SaveImageWorker extends FilterWorker {
 
       let imageName = "";
 
-      if (data.targetName != null) {
-        imageName = data.targetName;
+      if (data.data.targetName != null) {
+        imageName = data.data.targetName;
       } else {
-        const id = atob(data.origImage.id).split("/");
+        const id = atob(data.data.origName).split("/");
 
         if (id.length >= 1)
           observer.error("ID not valid");
@@ -50,7 +44,7 @@ export class SaveImageWorker extends FilterWorker {
         imageName = id[id.length - 1];
       }
 
-      data.origImage.id = btoa(this.project.replace("/", "") + "/" + this.dataset.replace("/", "") + "/" + imageName);
+      data.origImage.id = btoa(data.data.targetProject.replace("/", "") + "/" + data.data.targetDataset.replace("/", "") + "/" + imageName);
 
       observer.next(data);
       observer.complete();

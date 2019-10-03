@@ -24,7 +24,7 @@ export class DisplayImageWorker extends FilterWorker {
         this.displayCallback.displayCallBack(data.origImage);
       observer.next(data);
       observer.complete();
-    })
+    });
 
     return this.doChain(s);
   }

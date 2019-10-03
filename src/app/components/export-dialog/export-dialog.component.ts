@@ -142,8 +142,30 @@ export class ExportDialogComponent implements OnInit, ProcessCallback {
       }
     }
 
-    result.push(`const v${c} = f.saveImageWorker(${startVar}, projectDir, datasetDir, copyLayer);`);
+    let res = "[]";
 
+    if (this.targetDataset && this.selectedDatasets) {
+      const targetSets = this.targetDataset.trim().split(",");
+
+      if (targetSets.length == 1) {
+        console.log("adding")
+        while (targetSets.length < this.selectedDatasets.length) {
+          targetSets.push(targetSets[0]);
+        }
+      }
+
+      res = "[";
+      for (let i = 0; i < targetSets.length; i++){
+        res += `'${targetSets[i]}',`;
+      }
+      console.log(res)
+
+      res = res.slice(0, -1)+"]";
+    }
+
+    const targetProject = this.targetProject ? this.targetProject.id : "";
+
+    result.push(`const v${c} = f.saveImageWorker(${startVar}, '${targetProject}', ${res}, ${this.simpleCopyLayersToNewImage});`);
 
     this.complexFilters = result.join("\r\n");
   }
@@ -168,16 +190,6 @@ export class ExportDialogComponent implements OnInit, ProcessCallback {
       return;
     }
 
-    if (targetSets.length == 1) {
-      console.log("adding")
-      while (targetSets.length < this.selectedDatasets.length) {
-        targetSets.push(targetSets[0]);
-      }
-    }
-
-    for (let i of targetSets)
-      console.log(i)
-
     const reqDatasets = []
 
     for (let d of this.selectedDatasets) {
@@ -186,13 +198,7 @@ export class ExportDialogComponent implements OnInit, ProcessCallback {
 
     this.exportIsRunning = true;
     forkJoin(reqDatasets).subscribe(datasets => {
-      console.log("start")
-      this.filterService.runWorkers(datasets, this.complexFilters, {
-        targetProject: this.targetProject.id,
-        copyLayer: this.simpleCopyLayersToNewImage,
-        targetDatasetDir: targetSets,
-        processCallback: this
-      });
+      this.filterService.runWorkers(datasets, this.complexFilters, {processCallback: this});
     })
 
 

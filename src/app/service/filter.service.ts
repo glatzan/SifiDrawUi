@@ -19,6 +19,7 @@ import {FilterData} from "../worker/filter-data";
 import {DisplayImageWorker} from "../worker/display-image-worker";
 import {MagicWorker} from "../worker/magic-worker";
 import {DisplayCallback} from "../worker/display-callback";
+import {BWClassPrepareWorker} from "../worker/b-w-class-prepare-worker";
 
 @Injectable({
   providedIn: 'root'
@@ -43,38 +44,41 @@ export class FilterService {
   }
 
 
-  public origImageWorker(imageID: string, parent?: FilterWorker) {
+  public origImageWorker(imageID: string, parent?: FilterWorker): OrigImageWorker {
     return new OrigImageWorker(parent, imageID, this.imageService);
   }
 
-  public colorImageWorker(parent: FilterWorker, color: string = "#000000", x: number = -1, y: number = -1, width: number = -1, height: number = -1) {
+  public colorImageWorker(parent: FilterWorker, color: string = "#000000", x: number = -1, y: number = -1, width: number = -1, height: number = -1): ColorImageWorker {
     return new ColorImageWorker(parent, x, y, width, height, color);
   }
 
-  public layerDrawWorker(parent: FilterWorker, layerID: string, color: string = "", size: number = -1, drawPoints: boolean = false) {
+  public layerDrawWorker(parent: FilterWorker, layerID: string, color: string = "", size: number = -1, drawPoints: boolean = false): LayerDrawWorker {
     return new LayerDrawWorker(parent, layerID, color, size, drawPoints);
   }
 
-  public saveImageWorker(parent: FilterWorker, project: string, dataset: string, copyLayer: boolean = false) {
+  public saveImageWorker(parent: FilterWorker, project: string, dataset: string, copyLayer: boolean = false): SaveImageWorker {
     return new SaveImageWorker(parent, this.imageService, project, dataset, copyLayer);
   }
 
-  public displayImageWorker(parent: FilterWorker, displayCallback: DisplayCallback) {
+  public displayImageWorker(parent: FilterWorker, displayCallback: DisplayCallback): DisplayImageWorker {
     return new DisplayImageWorker(parent, displayCallback);
   }
 
-  public magicWorker(parent: FilterWorker, command: string) {
+  public magicWorker(parent: FilterWorker, command: string): MagicWorker {
     return new MagicWorker(parent, command, this.imageMagicService);
   }
 
-  public runWorkers(datasets: Dataset[], filterChain: string, env: { targetProject?: string, copyLayer?: boolean, targetDatasetDir?: string[], processCallback?: ProcessCallback, displayCallback?: DisplayCallback }) {
+  public bwClassPrepareWorker(parent: FilterWorker): BWClassPrepareWorker {
+    return new BWClassPrepareWorker(parent);
+  }
+
+  public runWorkers(datasets: Dataset[], filterChain: string, env: { processCallback?: ProcessCallback, displayCallback?: DisplayCallback }) {
     try {
 
       const f = this;
-      const projectDir = env.targetProject;
-      const copyLayer = env.copyLayer;
       const display = env.displayCallback;
       const results = [];
+      const
 
       for (let y = 0; y < datasets.length; y++) {
         for (let i = 0; i < datasets[y].images.length; i++) {
@@ -86,19 +90,15 @@ export class FilterService {
 
           if (datasets.length > 1) {
             if (id.length >= 2)
-              data.targetName = id[id.length - 2] + "-" + id[id.length - 1];
+              data.data.targetName = id[id.length - 2] + "-" + id[id.length - 1];
             else
-              data.targetName = String(results.length);
+              data.data.targetName = String(results.length);
           } else {
             if (id.length > 1)
-              data.targetName = id[id.length - 1];
+              data.data.targetName = id[id.length - 1];
             else
-              data.targetName = String(results.length);
+              data.data.targetName = String(results.length);
           }
-
-          let datasetDir = ";"
-          if (env.targetDatasetDir)
-            datasetDir = env.targetDatasetDir[y];
 
           let start;
 

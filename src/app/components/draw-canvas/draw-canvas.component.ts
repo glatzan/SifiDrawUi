@@ -11,6 +11,8 @@ import {logger} from 'codelyzer/util/logger';
 import {PointTracker} from '../../utils/point-tracker';
 import {MatSnackBar} from "@angular/material";
 import {ImageListComponent} from "../image-list/image-list.component";
+import {PNG} from "pngjs";
+import {Readable} from "stream";
 
 @Component({
   selector: 'app-draw-canvas',
@@ -22,6 +24,8 @@ export class DrawCanvasComponent implements AfterViewInit {
 
   // a reference to the canvas element from our template
   @ViewChild('canvas', {static: false}) public canvas: ElementRef;
+
+  private img: string;
 
   @Input() imageListComponent: ImageListComponent;
 

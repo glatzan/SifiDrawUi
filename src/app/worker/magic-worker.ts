@@ -23,7 +23,6 @@ export class MagicWorker extends FilterWorker {
     const s = this.imageMagicService.performMagic(data.origImage, this.command).pipe(flatMap(img => {
       return new Observable<FilterData>((observer) => {
         data.origImage = img;
-        data.data = "";
         observer.next(data);
         observer.complete();
       })
