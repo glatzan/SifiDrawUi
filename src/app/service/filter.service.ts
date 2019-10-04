@@ -6,14 +6,14 @@ import {Filter} from "../filter/filter";
 import {CImage} from "../model/cimage";
 import {ImageEventFilter} from "../filter/image-event-filter";
 import {ImageService} from "./image.service";
-import {OrigImageWorker} from "../worker/orig-image-worker";
+import {ImageLoadWorker} from "../worker/image-load-worker";
 import {FilterWorker} from "../worker/filter-worker";
 import {ColorImageWorker} from "../worker/color-image-worker";
 import {LayerDrawWorker} from "../worker/layer-draw-worker";
 import {SaveImageWorker} from "../worker/save-image-worker";
 import {Dataset} from "../model/dataset";
 import {defer, forkJoin, merge, Observable, of, Subject} from "rxjs";
-import {finalize, ignoreElements, mergeMap, tap} from "rxjs/operators";
+import {finalize, flatMap, ignoreElements, map, mergeMap, tap} from "rxjs/operators";
 import {ProcessCallback} from "../worker/processCallback";
 import {FilterData} from "../worker/filter-data";
 import {DisplayImageWorker} from "../worker/display-image-worker";
@@ -43,9 +43,10 @@ export class FilterService {
     return new ImageEventFilter(parentFilter || undefined, callBack.bind(bind), origImage)
   }
 
+  public
 
-  public origImageWorker(imageID: string, parent?: FilterWorker): OrigImageWorker {
-    return new OrigImageWorker(parent, imageID, this.imageService);
+  public imageLoadWorker(parent?: FilterWorker): ImageLoadWorker {
+    return new ImageLoadWorker(parent, this.imageService);
   }
 
   public colorImageWorker(parent: FilterWorker, color: string = "#000000", x: number = -1, y: number = -1, width: number = -1, height: number = -1): ColorImageWorker {
@@ -56,8 +57,8 @@ export class FilterService {
     return new LayerDrawWorker(parent, layerID, color, size, drawPoints);
   }
 
-  public saveImageWorker(parent: FilterWorker, project: string, dataset: string, copyLayer: boolean = false): SaveImageWorker {
-    return new SaveImageWorker(parent, this.imageService, project, dataset, copyLayer);
+  public saveImageWorker(parent: FilterWorker, project: string, datasetMapping: [{ dataset: string, mapping: string }], addDatasetAsPrefix: boolean = false, copyLayer: boolean = false, imageSuffix?: string): SaveImageWorker {
+    return new SaveImageWorker(parent, this.imageService, project, datasetMapping, addDatasetAsPrefix, copyLayer, imageSuffix);
   }
 
   public displayImageWorker(parent: FilterWorker, displayCallback: DisplayCallback): DisplayImageWorker {
@@ -78,27 +79,16 @@ export class FilterService {
       const f = this;
       const display = env.displayCallback;
       const results = [];
-      const
+
+      let count = 0;
 
       for (let y = 0; y < datasets.length; y++) {
         for (let i = 0; i < datasets[y].images.length; i++) {
-          const img = datasets[y].images[i].id;
           const data = new FilterData();
           data.origImage = datasets[y].images[i];
+          data.origName = atob(datasets[y].images[i].id);
 
-          const id = atob(img).split("/");
-
-          if (datasets.length > 1) {
-            if (id.length >= 2)
-              data.data.targetName = id[id.length - 2] + "-" + id[id.length - 1];
-            else
-              data.data.targetName = String(results.length);
-          } else {
-            if (id.length > 1)
-              data.data.targetName = id[id.length - 1];
-            else
-              data.data.targetName = String(results.length);
-          }
+          data.numberInBatch = count;
 
           let start;
 
@@ -111,6 +101,7 @@ export class FilterService {
 
           start.pushCallBack(env.processCallback);
           results.push(start.doWork(undefined, data))
+          count++;
         }
       }
 
@@ -135,6 +126,8 @@ export class FilterService {
         env.processCallback.exportIsRunning = false;
     }
   }
+
+
 }
 
 

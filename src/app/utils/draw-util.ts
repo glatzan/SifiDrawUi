@@ -80,7 +80,7 @@ export default class DrawUtil {
     const cx = canvas.getContext('2d');
     cx.beginPath();
     cx.rect(x, y, width, height);
-    cx.fillStyle = "color";
+    cx.fillStyle = color;
     cx.fill();
   }
 

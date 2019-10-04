@@ -1,0 +1,22 @@
+[
+  {
+    "worker": "MagicWorker",
+    "presets": [
+      {
+        "name": "Lower Contrast",
+        "command": "+contrast +contrast",
+        "combinable" : true
+      },
+      {
+        "name": "Enhance Contrast",
+        "command": "-contrast -contrast -contrast -contrast",
+        "combinable" : true
+      },
+      {
+        "name": "Mirror horizontal",
+        "command": "-fop",
+        "combinable" : true
+      }
+    ]
+  }
+]

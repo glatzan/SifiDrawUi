@@ -37,19 +37,17 @@ export class LayerDrawWorker extends FilterWorker {
         }
       }
 
-      if (layer == null) {
-        observer.error()
-      } else {
-        observer.next(layer);
-        observer.complete();
-      }
+      observer.next(layer);
+      observer.complete();
 
     }).pipe(flatMap(
       layer => DrawUtil.loadBase64AsCanvas(data.origImage.data).pipe(
         flatMap(canvas => {
           return new Observable<FilterData>((observer) => {
-            DrawUtil.drawManyPointLinesOnCanvas(canvas, layer.lines, this.color, this.size, this.drawPoints)
-            data.origImage.data = DrawUtil.canvasAsBase64(canvas);
+            if (layer != null) {
+              DrawUtil.drawManyPointLinesOnCanvas(canvas, layer.lines, this.color, this.size, this.drawPoints)
+              data.origImage.data = DrawUtil.canvasAsBase64(canvas);
+            }
 
             observer.next(data);
             observer.complete();

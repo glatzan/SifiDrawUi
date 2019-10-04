@@ -45,6 +45,10 @@ export class ExportDialogComponent implements OnInit, ProcessCallback {
 
   private simpleCopyLayersToNewImage: boolean = false;
 
+  private simpleFlattenColorSpace: boolean = true;
+
+  private simpleImageSuffix: string = "";
+
   private complexFilters: string = "";
 
   exportIsRunning: boolean = false;
@@ -118,7 +122,7 @@ export class ExportDialogComponent implements OnInit, ProcessCallback {
     const result = [];
     let startVar = "";
 
-    result.push(`start = f.origImageWorker(img);`);
+    result.push(`start = f.imageLoadWorker();`);
     startVar = "start";
 
     if (!this.simpleCopyOrigImage) {
@@ -142,30 +146,45 @@ export class ExportDialogComponent implements OnInit, ProcessCallback {
       }
     }
 
-    let res = "[]";
+    if (this.simpleFlattenColorSpace) {
+      const newVar = `v${c}`;
+      result.push(`const ${newVar} = f.bwClassPrepareWorker(${startVar});`);
+      startVar = newVar;
+      c += 1;
+    }
+
+    let targetSetsArr = "[]";
+
+    let addDatasetAsPrefix = false;
 
     if (this.targetDataset && this.selectedDatasets) {
       const targetSets = this.targetDataset.trim().split(",");
 
       if (targetSets.length == 1) {
-        console.log("adding")
-        while (targetSets.length < this.selectedDatasets.length) {
-          targetSets.push(targetSets[0]);
+        targetSetsArr = `[{dataset : '*', mapping : '${targetSets[0]}'}]`;
+        if (this.selectedDatasets.length > 1)
+          addDatasetAsPrefix = true;
+      } else {
+        if (targetSetsArr.length !== this.selectedDatasets.length) {
+          while (targetSets.length < this.selectedDatasets.length) {
+            targetSets.push(targetSets[0]);
+          }
+          addDatasetAsPrefix = true;
         }
-      }
 
-      res = "[";
-      for (let i = 0; i < targetSets.length; i++){
-        res += `'${targetSets[i]}',`;
-      }
-      console.log(res)
+        targetSetsArr = "[";
+        for (let i = 0; i < targetSets.length; i++) {
+          const dataSetID = atob(this.selectedDatasets[i].id);
+          targetSetsArr += `{dataset : '${dataSetID.substring(dataSetID.lastIndexOf("/") + 1)}', mapping : '${targetSets[i]}'}`;
+        }
 
-      res = res.slice(0, -1)+"]";
+        targetSetsArr += "]";
+      }
     }
 
     const targetProject = this.targetProject ? this.targetProject.id : "";
 
-    result.push(`const v${c} = f.saveImageWorker(${startVar}, '${targetProject}', ${res}, ${this.simpleCopyLayersToNewImage});`);
+    result.push(`const v${c} = f.saveImageWorker(${startVar}, '${targetProject}', ${targetSetsArr}, ${addDatasetAsPrefix}, ${this.simpleCopyLayersToNewImage}, '${this.simpleImageSuffix}');`);
 
     this.complexFilters = result.join("\r\n");
   }

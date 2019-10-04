@@ -15,6 +15,7 @@ export class DatasetService {
   }
 
   public getDataset(id: String): Observable<Dataset> {
+    console.log(id)
     const httpOptions = {
       headers: new HttpHeaders({
         'Content-Type': 'application/json'
@@ -22,6 +23,17 @@ export class DatasetService {
     }
     console.log(`${this.serverURL}/dataset`)
     return this._http.get<Dataset>(`${this.serverURL}/dataset/${id}`, httpOptions);
+  }
+
+  public getDatasets(id: String[]): Observable<Dataset[]> {
+    console.log("id")
+    const httpOptions = {
+      headers: new HttpHeaders({
+        'Content-Type': 'application/json'
+      })
+    }
+    console.log(`${this.serverURL}/dataset`)
+    return this._http.get<Dataset[]>(`${this.serverURL}/datasets/${id.join("-")}`, httpOptions);
   }
 
   public createDataset(id: String): Observable<any> {

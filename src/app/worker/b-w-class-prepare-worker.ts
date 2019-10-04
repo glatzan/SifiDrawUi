@@ -13,7 +13,7 @@ export class BWClassPrepareWorker extends FilterWorker {
   }
 
   public doWork(parent: FilterWorker, data: FilterData): Observable<FilterData> {
-    console.log("Call OrigImageWorker");
+    console.log("Call ImageLoadWorker");
     const s = new Observable<FilterData>((observer) => {
 
       let buff = new Buffer(data.origImage.data, 'base64');

@@ -3,7 +3,8 @@
 <div mat-dialog-content>
   <div class="formGrid">
     <mat-form-field class="projectObj">
-      <mat-select [(ngModel)]="selectedProject" placeholder="Projekt" (selectionChange)="onSelectProject();generateFilters();">
+      <mat-select [(ngModel)]="selectedProject" placeholder="Projekt"
+                  (selectionChange)="onSelectProject();generateFilters();">
         <mat-option *ngFor="let project of projects" [value]="project">
           {{project.id}}
         </mat-option>
@@ -13,7 +14,7 @@
     <mat-form-field class="datasetObj">
       <mat-label>Datasets</mat-label>
       <mat-select [(ngModel)]="selectedDatasets" multiple (selectionChange)="generateFilters()">
-        <mat-option *ngFor="let dataset of datasets" [value]="dataset" >{{dataset.name}}</mat-option>
+        <mat-option *ngFor="let dataset of datasets" [value]="dataset">{{dataset.name}}</mat-option>
       </mat-select>
     </mat-form-field>
 
@@ -53,6 +54,15 @@
               verwenden
             </mat-checkbox>
           </section>
+
+          <section class="flattenColorSpaceObj">
+            <mat-checkbox [(ngModel)]="simpleFlattenColorSpace" (change)="generateFilters()">Klassen auf sw reduzieren
+            </mat-checkbox>
+          </section>
+
+          <mat-form-field class="imageSuffixObj">
+            <input matInput placeholder="Bild-Suffix" [(ngModel)]="simpleImageSuffix" (change)="generateFilters()">
+          </mat-form-field>
 
           <div class="layerListObj">
             <div *ngFor="let layer of simpleLayerSettings;let even = even" class="layerGrid">
