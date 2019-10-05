@@ -171,12 +171,9 @@ export class DrawCanvasComponent implements AfterViewInit {
           if (this.imageListComponent.onSelectPrevImage() != null)
             this.snackBar.open("Vorheriges Bild");
         } else if (!isNaN(Number($event.key))) {
-          const layer = CImageUtil.findLayer(this.image, $event.key);
-          if (layer != null) {
+          const layer = CImageUtil.findOrAddLayer(this.image, $event.key);
             this.currentLayer = layer;
             this.snackBar.open(`Layer ${layer.id} ausgewählt`);
-          } else
-            this.snackBar.open(`Layer ${$event.key} nicht vorhanden`);
         } else if ($event.key == "h") {
           this.hideLines = !this.hideLines;
           this.snackBar.open(`Linien ${this.hideLines ? 'ausgeblendet' : 'eingeblendet'}`);

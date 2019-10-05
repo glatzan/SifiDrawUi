@@ -70,7 +70,12 @@
       <input matInput style="display: none"/>
     </mat-form-field>
 
-    <mat-form-field>
+    <mat-form-field class="labelName">
+      <input matInput [(ngModel)]="currentLayer.id" placeholder="Label ID" (change)="canvasRedraw()"/>
+    </mat-form-field>
+
+
+    <mat-form-field class="rubber">
       <input matInput [(ngModel)]="rightClickCircleSize" placeholder="Radierer"
              type="number" min="1"
       />
@@ -82,4 +87,4 @@
   </div>
 </div>
 
-<img [src]="img" />
+<img [src]="img"/>
