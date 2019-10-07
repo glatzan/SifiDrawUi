@@ -5,4 +5,6 @@ export class FilterData {
   public origName: string;
   public batchSize : number;
   public numberInBatch : number;
+
+  public additionalData : any;
 }

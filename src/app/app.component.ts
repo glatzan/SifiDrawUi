@@ -17,6 +17,12 @@ import {Layer} from "./model/layer";
 import DrawUtil from "./utils/draw-util";
 import {CImage} from "./model/cimage";
 import {PNG} from "pngjs";
+import {FlaskService} from "./service/flask.service";
+import {ImageJService} from "./service/image-j.service";
+import {PointLine} from "./model/point-line";
+import {Point} from "./model/point";
+import {CPolygon} from "./utils/cpolygon";
+import {SplineUtil} from "./utils/spline-util";
 
 @Component({
   selector: 'app-root',
@@ -29,7 +35,13 @@ export class AppComponent {
   private selectedDatasetId: string;
   private selectedImageId: string;
 
-  constructor(public dialog: MatDialog, private filterService: FilterService, private imageService: ImageService, private imageMagicService: ImageMagicService, private datasetSerive: DatasetService) {
+  constructor(public dialog: MatDialog,
+              private filterService: FilterService,
+              private imageService: ImageService,
+              private imageMagicService: ImageMagicService,
+              private datasetSerive: DatasetService,
+              private falskService: FlaskService,
+              private imageJService: ImageJService) {
   }
 
   onDatasetSelect(id: string) {
@@ -69,11 +81,11 @@ export class AppComponent {
   public joinTest() {
 
     let w = new ImageLoadWorker(null, this.imageService);
-    // , 'aW1nczIvMjE2NTk=', 'aW1nczIvMjE4Mjk=', 'aW1nczIvMjE4Nzk='
-    let datasetID = ['aW1nczIvMjEwNTI=', 'aW1nczIvMjEzMjg=', 'aW1nczIvMjE1NDU=', 'aW1nczIvMjE2NTk=', 'aW1nczIvMjE4Mjk=', 'aW1nczIvMjE4Nzk=']
+    // , 'aW1nczIvMjEzMjg=', 'aW1nczIvMjE1NDU=', 'aW1nczIvMjE2NTk=', 'aW1nczIvMjE4Mjk=', 'aW1nczIvMjE4Nzk='
+    let datasetID = ['aW1nczIvMjEwNTI=']
 //
 
-    let datasetMapping = [{dataset: atob("imgs2/21052"), mapping: 'tut123'}];
+    // let datasetMapping = [{dataset: atob("imgs2/21052"), mapping: 'tut123'}];
 
     let me = this;
     // from(datasetID).pipe(concatMap(
@@ -92,16 +104,68 @@ export class AppComponent {
     //   )
     // )).subscribe(x => console.log("test"));
 
-    from(datasetID).pipe(concatMap(
+    // from(datasetID).pipe(concatMap(
+    //   x => this.datasetSerive.getDataset(x).pipe(
+    //     mergeMap(dataset =>
+    //       from(dataset.images).pipe(
+    //         me.load(),
+    //         me.save(datasetMapping),
+    //       )
+    //     )
+    //   )
+    // )).subscribe(x => console.log("test"));
+
+    // from(datasetID).pipe(concatMap(
+    //   x => this.datasetSerive.getDataset(x).pipe(
+    //     mergeMap(dataset =>
+    //       from(dataset.images).pipe(
+    //         me.load(),
+    //         me.flask("unetg1")
+    //       )
+    //     )
+    //   )
+    // )).subscribe(x => console.log("test"));
+
+    // from(['dG1wL2VzZA==']).pipe(concatMap(
+    //   x => this.datasetSerive.getDataset(x).pipe(
+    //     mergeMap(dataset =>
+    //       from(dataset.images).pipe(
+    //         me.load(),
+    //         me.flask("unetg1"),
+    //         me.save([{dataset: atob("tmp/esd"), mapping: 'was'}], "_mask"),
+    //       )
+    //     )
+    //   )
+    // )).subscribe(x => console.log("test"));
+
+    from(['dG1wL2VzZHc=']).pipe(concatMap(
       x => this.datasetSerive.getDataset(x).pipe(
         mergeMap(dataset =>
           from(dataset.images).pipe(
             me.load(),
-            me.save(datasetMapping),
+            me.color("#000000", 0, 400),
+            me.line(),
+            me.drawLine("#CD0000"),
+            me.spline(),
+            me.save([{dataset: atob("tmp/export"), mapping: 'export'}], "_mask")
           )
         )
       )
     )).subscribe(x => console.log("test"));
+
+  }
+
+  public end() {
+
+  }
+
+  public flask(endpoint: string) {
+    return flatMap((data: FilterData) => this.falskService.processImage(data.origImage, "unetg1").pipe(map(cimg => {
+      let data = new FilterData();
+      data.origImage = cimg;
+      console.log("load img" + data.origName)
+      return data
+    })));
   }
 
   public classPrepare() {
@@ -133,13 +197,13 @@ export class AppComponent {
     }));
   }
 
-  public color(color: string, height: number = -1, width: number = -1) {
+  public color(color: string, x = 0, y = 0, height: number = -1, width: number = -1) {
     return flatMap((data: FilterData) => DrawUtil.loadBase64AsCanvas(data.origImage.data).pipe(
       map(canvas => {
-        const heightt = height < 0 ? canvas.height : height;
-        const widtht = width < 0 ? canvas.width : width;
+        height = height < 0 ? canvas.height - y : height;
+        width = width < 0 ? canvas.width - x : width;
 
-        DrawUtil.drawRect(canvas, 0, 0, widtht, heightt, color);
+        DrawUtil.drawRect(canvas, x, y, width, height, color);
         data.origImage.data = DrawUtil.canvasAsBase64(canvas);
 
         console.log("color img" + data.origName + " " + color)
@@ -192,7 +256,107 @@ export class AppComponent {
     )
   }
 
-  public save(datasetMapping, imageSuffix? : string) {
+  public line() {
+    return flatMap((data: FilterData) =>
+      this.imageJService.getLines(data.origImage).pipe(
+        map(json => {
+
+            let map = new Map<string, PointLine>();
+
+            for (let res of json) {
+              let tmp = map.get(res['Contour ID']);
+              const entry = new Point(res['X'], res['Y'], res['Pos.']);
+              if (!tmp) {
+                tmp = map.set(res['Contour ID'], new PointLine(res['Contour ID'])).get(res['Contour ID']);
+              }
+
+              tmp.addPoint(entry)
+            }
+
+            const result = Array.from(map.values());
+            data.additionalData = result
+
+            console.log(result)
+            return data;
+          }
+        )
+      )
+    )
+  }
+
+  public drawLine(color: string, size: number = 1) {
+    return flatMap((data: FilterData) => DrawUtil.loadBase64AsCanvas(data.origImage.data).pipe(map(canvas => {
+        if (data.additionalData != null) {
+          console.log("add data found")
+          for (let a of data.additionalData) {
+            console.log(a)
+            DrawUtil.drawPointLinesOnCanvas(canvas, a.points, color, size, false)
+          }
+          data.origImage.data = DrawUtil.canvasAsBase64(canvas);
+        }
+        console.log("Draw data")
+        return data;
+      }))
+    )
+  }
+
+  public spline() {
+    return flatMap((data: FilterData) => DrawUtil.loadBase64AsCanvas(data.origImage.data).pipe(map(canvas => {
+        if (data.additionalData != null) {
+
+          const poly = new CPolygon();
+
+          const rest = [];
+
+
+          let a = 0;
+          for (let pointlines of data.additionalData) {
+            console.log("-----")
+            console.log(pointlines)
+            for (let point of pointlines.points) {
+
+              // if (a % 10 == 0)
+                poly.addPoint(point.x, point.y);
+
+              a += 1;
+            }
+          }
+
+          function RandomSplinePoly() {
+            const poly = new CPolygon();
+            for (let i = 0; i < 6; i++) {
+              poly.addPoint(Math.floor(Math.random() * 1300), Math.floor(Math.random() * 650));
+            }
+            return poly;
+          }
+
+          console.log(poly)
+
+          let bezierPoly = SplineUtil.computeSplineCurve(RandomSplinePoly(), 0.5, false);
+
+          // draw each bezier segment
+          let last = bezierPoly.size - 1;
+          for (let i = 0; i < last; i += 3) {
+            DrawUtil.drawSpline(canvas, bezierPoly.x[i], bezierPoly.y[i], bezierPoly.x[i + 1], bezierPoly.y[i + 1], bezierPoly.x[i + 2], bezierPoly.y[i + 2], bezierPoly.x[i + 3], bezierPoly.y[i + 3], "#000000")
+          }
+
+          bezierPoly = SplineUtil.computeSplineCurve(poly, 0.0, false);
+
+          // draw each bezier segment
+          last = bezierPoly.size - 1;
+          for (let i = 0; i < last; i += 3) {
+            DrawUtil.drawSpline(canvas, bezierPoly.x[i], bezierPoly.y[i], bezierPoly.x[i + 1], bezierPoly.y[i + 1], bezierPoly.x[i + 2], bezierPoly.y[i + 2], bezierPoly.x[i + 3], bezierPoly.y[i + 3], "#cbcd00")
+          }
+
+          data.origImage.data = DrawUtil.canvasAsBase64(canvas);
+        }
+        console.log("Draw data")
+        return data;
+      }))
+    )
+  }
+
+  public save(datasetMapping, imageSuffix?: string) {
     return flatMap((data: FilterData) => new Observable<FilterData>((observer) => {
 
       let oldID = data.origName.split("/");

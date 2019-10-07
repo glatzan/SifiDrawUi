@@ -39,6 +39,4 @@ export class ImageService {
     console.log(`${this.serverURL}/image/${type}`);
     return this._http.post<CImage>(`${this.serverURL}/image/${type}`, image, httpOptions);
   }
-
-
 }

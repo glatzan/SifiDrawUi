@@ -107,6 +107,22 @@ export default class DrawUtil {
     }
   }
 
+  static drawSpline(canvas: HTMLCanvasElement, startX: number, startY: number, e1X: number, e1Y: number, e2X: number, e2Y: number, endX: number, endY: number, color: string = '#fff', size: number = 1, drawPoint: boolean = true) {
+    const cx = canvas.getContext('2d');
+    cx.strokeStyle = color;
+    cx.lineWidth = size;
+    cx.fillStyle = color;
+    cx.beginPath();
+    cx.moveTo(startX, startY); // from
+    cx.bezierCurveTo(e1X, e1Y, e2X, e2Y, endX, endY);
+    cx.stroke();
+
+    if (drawPoint) {
+      cx.fillRect(startX, startY, 2, 2);
+      cx.fillRect(startX, endY, 2, 2);
+    }
+  }
+
   /**
    * Draws lines between points
    * @param canvas
@@ -169,7 +185,7 @@ export default class DrawUtil {
     cx.stroke();
   }
 
-  static clearRect(cx: CanvasRenderingContext2D, width: number, height: number, point_: Point = {x: 0, y: 0}) {
+  static clearRect(cx: CanvasRenderingContext2D, width: number, height: number, point_: Point = {x: 0, y: 0, pos: 0}) {
     cx.clearRect(point_.x, point_.y, width, height);
   }
 
