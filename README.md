@@ -16,7 +16,11 @@ Install : <br>
 https://material.angular.io/guide/getting-started <br>
 
 npm install material-community-components <br>
-npm install rxjs-compat
+npm install rxjs-compat<br>
+npm install pngjs  --save<br>
+npm install buffer --save <br>
+npm install process --save <br>
+
 
 
 npm install --save @angular/material @angular/cdk @angular/animations

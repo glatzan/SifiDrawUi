@@ -6,13 +6,17 @@ import DrawUtil from '../../utils/draw-util';
 import {ImageService} from '../../service/image.service';
 import {CImage} from '../../model/cimage';
 import CImageUtil from '../../utils/cimage-util';
-import {debounceTime} from 'rxjs/operators';
+import {debounceTime, flatMap} from 'rxjs/operators';
 import {logger} from 'codelyzer/util/logger';
 import {PointTracker} from '../../utils/point-tracker';
-import {MatSnackBar} from "@angular/material";
-import {ImageListComponent} from "../image-list/image-list.component";
-import {PNG} from "pngjs";
-import {Readable} from "stream";
+import {MatSnackBar} from '@angular/material';
+import {ImageListComponent} from '../image-list/image-list.component';
+import {PNG} from 'pngjs';
+import {Readable} from 'stream';
+import {Observable} from 'rxjs';
+import {FilterData} from '../../worker/filter-data';
+import {CPolygon} from '../../utils/cpolygon';
+import {SplineUtil} from '../../utils/spline-util';
 
 @Component({
   selector: 'app-draw-canvas',
@@ -156,32 +160,34 @@ export class DrawCanvasComponent implements AfterViewInit {
 
     this.canvas.nativeElement.addEventListener('keydown', ($event) => {
       console.log($event.key);
-      console.log("hallo")
+      console.log('hallo');
       return $event.preventDefault() && false;
     }, false);
 
     window.addEventListener('keydown', ($event) => {
       if (me.renderContext) {
-        if ($event.key == " " || $event.key == "ArrowDown") {
+        if ($event.key == ' ' || $event.key == 'ArrowDown') {
           // next image
-          if (this.imageListComponent.onSelectNextImage() != null)
-            this.snackBar.open("Nächstes Bild");
-        } else if ($event.key == "ArrowUp") {
+          if (this.imageListComponent.onSelectNextImage() != null) {
+            this.snackBar.open('Nächstes Bild');
+          }
+        } else if ($event.key == 'ArrowUp') {
           // previouse image
-          if (this.imageListComponent.onSelectPrevImage() != null)
-            this.snackBar.open("Vorheriges Bild");
+          if (this.imageListComponent.onSelectPrevImage() != null) {
+            this.snackBar.open('Vorheriges Bild');
+          }
         } else if (!isNaN(Number($event.key))) {
           const layer = CImageUtil.findOrAddLayer(this.image, $event.key);
-            this.currentLayer = layer;
-            this.snackBar.open(`Layer ${layer.id} ausgewählt`);
-        } else if ($event.key == "h") {
+          this.currentLayer = layer;
+          this.snackBar.open(`Layer ${layer.id} ausgewählt`);
+        } else if ($event.key == 'h') {
           this.hideLines = !this.hideLines;
           this.snackBar.open(`Linien ${this.hideLines ? 'ausgeblendet' : 'eingeblendet'}`);
           this.canvasRedraw();
-        } else if ($event.key == "r") {
+        } else if ($event.key == 'r') {
           this.canvasResetZoom();
         } else {
-          console.log($event.key)
+          console.log($event.key);
         }
       }
     }, false);
@@ -313,7 +319,7 @@ export class DrawCanvasComponent implements AfterViewInit {
     if (selectedImageId !== undefined) {
       this.imageService.getImage(selectedImageId).subscribe((data: CImage) => {
         console.log('Image select');
-        console.log(data)
+        console.log(data);
         this.prepareImage(data);
       }, error1 => {
         console.log('Fehler beim laden der Dataset Datein');
@@ -390,6 +396,36 @@ export class DrawCanvasComponent implements AfterViewInit {
 
   private onFilterCompleted(image: CImage) {
     this.prepareImage(image);
+  }
+
+  public test() {
+    function RandomSplinePoly() {
+      const poly = new CPolygon();
+      for (let i = 0; i < 6; i++) {
+        poly.addPoint(Math.floor(Math.random() * 1300), Math.floor(Math.random() * 650));
+      }
+      return poly;
+    }
+
+    const splinePoly = RandomSplinePoly();
+
+    const bezierPoly = SplineUtil.computeSplineCurve(splinePoly, 0.5, true);
+
+    // draw each bezier segment
+    const last = bezierPoly.size - 1;
+    for (let i = 0; i < last; i += 3) {
+      this.cx.beginPath();
+      this.cx.moveTo(bezierPoly.x[i], bezierPoly.y[i]);
+      this.cx.bezierCurveTo(bezierPoly.x[i + 1], bezierPoly.y[i + 1], bezierPoly.x[i + 2], bezierPoly.y[i + 2], bezierPoly.x[i + 3], bezierPoly.y[i + 3]);
+      this.cx.stroke();
+      // this.cx.BezierCurve(
+      //   bezierPoly.x[i], bezierPoly.y[i],
+      //   bezierPoly.x[i + 1], bezierPoly.y[i + 1],
+      //   bezierPoly.x[i + 2], bezierPoly.y[i + 2],
+      //   bezierPoly.x[i + 3], bezierPoly.y[i + 3],
+      //   1 // -> draw contour only, no filling
+      // );
+    }
   }
 }
 
