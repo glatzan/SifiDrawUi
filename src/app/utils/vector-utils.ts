@@ -9,7 +9,7 @@ export default class VectorUtils {
   static directionVector(p1: Point, p2: Point): Point {
     const px = p1.x - p2.x;
     const py = p1.y - p2.y;
-    return {x: px, y: py};
+    return new Point(px, py);
   }
 
   static calculateNewPoint(p1: Point, p2: Point, targetLength: number, dirVec?: Point): Point {
@@ -17,15 +17,13 @@ export default class VectorUtils {
     if (dist < targetLength) {
       const dirVect = !dirVec ? VectorUtils.directionVector(p1, p2) : dirVec;
       const f = 1 - dist / targetLength;
-      return {
-        x: Math.round(p2.x - dirVect.x * f), y: Math.round(p2.y - dirVect.y * f)
-      };
+      return new Point(Math.round(p2.x - dirVect.x * f), Math.round(p2.y - dirVect.y * f));
     }
     return null;
   }
 
   static calculatePoint(p1: Point, dirVec: Point, offset: number): Point {
-    return {x: Math.round(p1.x - dirVec.x * offset), y: Math.round(p1.y - dirVec.y * offset)};
+    return new Point(Math.round(p1.x - dirVec.x * offset), Math.round(p1.y - dirVec.y * offset));
   }
 
   static removeCollidingPointListsOfCircle(poinst: Point[][], origin: Point, radius: number): boolean {
@@ -51,7 +49,7 @@ export default class VectorUtils {
   static movePointListsToCircleBoundaries(points: Point[][], origin: Point, radius: number): boolean {
     let changed = false;
     for (let i = 0; i < points.length; i++) {
-      let result = this.movePointsToCircleBoundaries(points[i], origin, radius);
+      const result = this.movePointsToCircleBoundaries(points[i], origin, radius);
 
       if (result != null && result.length > 0) {
         VectorUtils.updatePoints(points[i], result);

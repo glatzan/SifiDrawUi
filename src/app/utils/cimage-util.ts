@@ -16,8 +16,9 @@ export default class CImageUtil {
     '#E64D66', '#4DB380', '#FF4D4D', '#99E6E6', '#6666FF'];
 
   static prepareImage(image: CImage) {
-    if (!CImageUtil.hasLayer(image))
-      CImageUtil.addLayer(image)
+    if (!CImageUtil.hasLayer(image)) {
+      CImageUtil.addLayer(image);
+    }
 
     for (const layer of image.layers) {
       if (layer.line === undefined) {
@@ -31,14 +32,16 @@ export default class CImageUtil {
   }
 
   static initFirstLineOfLayer(layer: Layer): Point[] {
-    if (layer.lines == undefined || layer.lines.length == 0)
+    if (layer.lines === undefined || layer.lines.length === 0) {
       return layer.line = CImageUtil.addLine(layer);
+    }
     return layer.line = layer.lines[0];
   }
 
   static initLastLineOfLayer(layer: Layer): Point[] {
-    if (layer.lines == undefined || layer.lines.length == 0)
+    if (layer.lines === undefined || layer.lines.length === 0) {
       return layer.line = CImageUtil.addLine(layer);
+    }
     return layer.line = layer.lines[layer.lines.length - 1];
   }
 
@@ -76,17 +79,18 @@ export default class CImageUtil {
   }
 
   static addPointToLine(line: Point[], x: number, y: number) {
-    line.push({x: x, y: y});
+    line.push(new Point(x, y));
   }
 
   static findOrAddLayer(image: CImage, layerID: string) {
     if (!CImageUtil.hasLayer(image)) {
-      return CImageUtil.addLayer(image, layerID)
+      return CImageUtil.addLayer(image, layerID);
     } else {
       const tmp = CImageUtil.findLayer(image, layerID);
-      if (tmp != null)
+      if (tmp != null) {
         return tmp;
-      return CImageUtil.addLayer(image, layerID)
+      }
+      return CImageUtil.addLayer(image, layerID);
     }
   }
 
@@ -101,24 +105,24 @@ export default class CImageUtil {
 
   static addLayer(img: CImage, layerID?: string): Layer {
     if (!CImageUtil.hasLayer(img)) {
-      img.layers = [new Layer(layerID ? layerID : "1")];
+      img.layers = [new Layer(layerID ? layerID : '1')];
       return img.layers[0];
     }
 
-    let color = "#ffffff"
+    let color = '#ffffff';
 
     try {
       const c = parseInt(layerID);
-      console.log("---" + c)
-      if (c-1 > 0 && c-1 < CImageUtil.colors.length) {
-        color = CImageUtil.colors[c-1]
+      console.log('---' + c);
+      if (c - 1 > 0 && c - 1 < CImageUtil.colors.length) {
+        color = CImageUtil.colors[c - 1];
       }
     } catch (e) {
     }
 
-    img.layers = [...img.layers, (new Layer(layerID ? layerID : "" + (img.layers.length + 1)))];
+    img.layers = [...img.layers, (new Layer(layerID ? layerID : '' + (img.layers.length + 1)))];
     img.layers[img.layers.length - 1].color = color;
-    return img.layers[img.layers.length - 1]
+    return img.layers[img.layers.length - 1];
   }
 
   static hasLayer(img: CImage) {

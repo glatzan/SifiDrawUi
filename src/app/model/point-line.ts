@@ -1,4 +1,4 @@
-import {Point} from "./point";
+import {Point} from './point';
 
 export class PointLine {
 
@@ -9,11 +9,21 @@ export class PointLine {
     this.id = id;
   }
 
-  public add(x: number, y: number, pos: number) {
+  public add(x: number, y: number);
+  public add(x: number, y: number, pos: number);
+  public add(x: number, y: number, pos?: number) {
     this.addPoint(new Point(x, y, pos));
   }
 
   public addPoint(point: Point) {
     this.points.push(point);
+  }
+
+  public getFirstPoint() {
+    return this.points[0];
+  }
+
+  public getLastPoint() {
+    return this.points[this.points.length - 1];
   }
 }
