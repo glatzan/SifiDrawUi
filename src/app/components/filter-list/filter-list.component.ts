@@ -28,9 +28,14 @@ export class FilterListComponent implements OnInit, DisplayCallback {
   private resetTriggered = false
   private doNotResetFilter = false
 
+
   @Input() set cImage(cImage: CImage) {
     this._cImage = cImage;
     console.log("Loading Image")
+    if (this.doNotResetFilter) {
+      this.doNotResetFilter = false;
+      return;
+    }
     this._http.get('assets/defaultFilterValue.txt', {responseType: 'text' as 'json'}).subscribe(x => {
       this.filterValue = x.toString();
     })
@@ -60,7 +65,7 @@ export class FilterListComponent implements OnInit, DisplayCallback {
 
     console.log("start")
 
-    this.filterService.runWorkers([dataset], this.filterValue, {
+    this.filterService.runFilterOnDataset(dataset, this.filterValue, {
       displayCallback: this
     });
   }
@@ -75,6 +80,8 @@ export class FilterListComponent implements OnInit, DisplayCallback {
 
   public displayCallBack(image: CImage): void {
     this.filterIsRunning = false;
+
+    this.doNotResetFilter = true;
 
     console.log("callback")
     if (!this.resetTriggered)

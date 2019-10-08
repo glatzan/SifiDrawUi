@@ -25,6 +25,7 @@ import {CPolygon} from './utils/cpolygon';
 import {SplineUtil} from './utils/spline-util';
 import VectorUtils from './utils/vector-utils';
 import {DrawCanvasComponent} from './components/draw-canvas/draw-canvas.component';
+import {PointLineUtil} from "./utils/point-line-util";
 
 @Component({
   selector: 'app-root',
@@ -376,143 +377,7 @@ export class AppComponent {
 
 
   public sortLines(pLine: PointLine[]) {
-
-    enum Direction {
-      Start_Start = 1,
-      Start_End,
-      End_Start,
-      End_End,
-    }
-
-    class Dist {
-      p1: PointLine;
-      p2: PointLine;
-      dist: number;
-      dir: Direction;
-
-      constructor(p1: PointLine, p2: PointLine) {
-        this.p1 = p1;
-        this.p2 = p2;
-      }
-
-      public getP1Point() {
-        if (this.dist === Direction.Start_Start || this.dist === Direction.Start_End) {
-          return this.p1.getLastPoint();
-        } else {
-          return this.p1.getFirstPoint;
-        }
-      }
-
-      public getP2Point() {
-        if (this.dist === Direction.Start_Start || this.dist === Direction.End_Start) {
-          return this.p2.getLastPoint();
-        } else {
-          return this.p2.getFirstPoint;
-        }
-      }
-    }
-
-    function findShortestLineToPoint(point: PointLine, lines: PointLine[]): Dist {
-      let shortestDist: { dist: number, dir: Direction };
-      let result: Dist;
-      for (let line of lines) {
-        const calc = getShortestDistBetweenLines(point.getFirstPoint(), point.getLastPoint(), line.getFirstPoint(), line.getLastPoint());
-
-        if (!shortestDist || shortestDist.dist > calc.dist) {
-          shortestDist = calc;
-          result = new Dist(point, line);
-          result.dist = calc.dist;
-          result.dir = calc.dir;
-        }
-      }
-      return result;
-    }
-
-
-    function removePointLineFromArr(line: PointLine, lines: PointLine[]): PointLine[] {
-      const result: PointLine[] = [];
-      for (let l of lines) {
-        if (line !== l) {
-          result.push(l);
-        }
-      }
-      return result;
-    }
-
-
-    function findShortestDist(line: PointLine[]) {
-      let resultDist: Dist;
-      for (let i = 0; i < pLine.length; i++) {
-        for (let y = 1 + i; y < pLine.length; y++) {
-          const tmpD = new Dist(pLine[i], pLine[y]);
-          const calc = getShortestDistBetweenLines(tmpD.p1.getFirstPoint(), tmpD.p1.getLastPoint(), tmpD.p2.getFirstPoint(), tmpD.p2.getLastPoint());
-
-          if (!resultDist || resultDist.dist > calc.dist) {
-            resultDist = tmpD;
-            tmpD.dist = calc.dist;
-            tmpD.dir = calc.dir;
-          }
-        }
-      }
-      return resultDist;
-    }
-
-    function getShortestDistBetweenLines(p1x1: Point, p1x2: Point, p2x1: Point, p2x2: Point): { dist: number, dir: Direction } {
-      let shortestDist = VectorUtils.distance(p1x1, p2x1);
-      let dir = Direction.Start_Start;
-
-      let tmp = VectorUtils.distance(p1x1, p2x2);
-      if (tmp < shortestDist) {
-        shortestDist = tmp;
-        dir = Direction.Start_End;
-      }
-
-      tmp = VectorUtils.distance(p1x2, p2x2);
-      if (tmp < shortestDist) {
-        shortestDist = tmp;
-        dir = Direction.End_Start;
-      }
-
-      tmp = VectorUtils.distance(p1x2, p2x2);
-      if (tmp < shortestDist) {
-        shortestDist = tmp;
-        dir = Direction.End_End;
-      }
-
-      return {dist: shortestDist, dir: dir};
-    }
-
-    const startDist = findShortestDist(pLine);
-
-
-    const distArr: Dist[] = [];
-
-    const shortest = findShortestDist(pLine);
-    pLine = removePointLineFromArr(shortest.p1, pLine);
-    pLine = removePointLineFromArr(shortest.p2, pLine);
-
-    distArr.push(shortest);
-
-    let p1: Point = shortest.getP1Point();
-    let p2: Point = shortest.getP2Point();
-
-    while (distArr.length > 0) {
-      const d1 = findShortestLineToPoint(p1, pLine);
-      const d2 = findShortestLineToPoint(p2, pLine);
-
-      if (d1.dist < d2.dist) {
-        distArr.splice(0, 0, d1);
-        pLine = removePointLineFromArr(d1.p2, pLine);
-      } else {
-        distArr.push(shortest);
-        pLine = removePointLineFromArr(d2.p2, pLine);
-      }
-
-      p1 = distArr[0].getP1Point();
-      p2 = distArr[distArr.length - 1].getP2Point();
-    }
-
-    console.log(distArr);
+    const distancePointContainer = PointLineUtil.orderLines(pLine);
   }
 
   public save(datasetMapping, imageSuffix?: string) {

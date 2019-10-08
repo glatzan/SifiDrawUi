@@ -19,9 +19,14 @@
   .canvasInfo{
     grid-area: canvasinfo;
     display: grid;
-    grid-template-columns: auto 10% 10%;
+    grid-template-columns: auto 10% 10% 10%;
     width: 100%;
-    grid-template-areas: ". zoom resetBtn";
+    grid-template-areas: ". mouse zoom resetBtn";
+
+    .mouse{
+      justify-self: right;
+      align-self: center;
+    }
 
     .zoom{
       justify-self: right;

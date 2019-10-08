@@ -7,6 +7,9 @@
           (contextmenu)="onEvent($event)"></canvas>
 
   <div class="canvasInfo">
+    <span class="mouse">
+      X {{lastMousePoint.x}} Y {{lastMousePoint.y}}
+    </span>
     <span class="zoom">
       Zoom {{currentZoomRounded}} %
     </span>

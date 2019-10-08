@@ -113,13 +113,19 @@ export default class DrawUtil {
     cx.lineWidth = size;
     cx.fillStyle = color;
     cx.beginPath();
+    console.log("start "+ startX + " " + startY)
+    console.log("end "+ endX + " " + endY)
     cx.moveTo(startX, startY); // from
     cx.bezierCurveTo(e1X, e1Y, e2X, e2Y, endX, endY);
     cx.stroke();
 
     if (drawPoint) {
-      cx.fillRect(startX, startY, 2, 2);
-      cx.fillRect(startX, endY, 2, 2);
+      cx.fillStyle = "green";
+      cx.fillRect(startX, startY, 4, 4);
+      cx.fillRect(endX, endY, 4, 4);
+      cx.fillStyle = "red";
+      cx.fillRect(e1X, e1Y, 4, 4);
+      cx.fillRect(e2X, endY, 4, 4);
     }
   }
 

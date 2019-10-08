@@ -34,6 +34,7 @@ export class DrawCanvasComponent implements AfterViewInit {
   @Input() imageListComponent: ImageListComponent;
 
   readonly MOUSE_LEFT_BTN = 0;
+
   readonly MOUSE_RIGHT_BTN = 2;
 
   private cx; // CanvasRenderingContext2D
@@ -83,6 +84,9 @@ export class DrawCanvasComponent implements AfterViewInit {
    */
   private hideLines = false;
 
+  // last point of the mouse
+  private lastMousePoint = new Point(0, 0);
+
   constructor(public imageService: ImageService,
               private snackBar: MatSnackBar) {
     // draw on load
@@ -100,8 +104,6 @@ export class DrawCanvasComponent implements AfterViewInit {
   private initializeCanvas() {
     const me = this;
 
-    // last point of the mouse
-    const lastMousePoint = new Point(0, 0);
     // start position for canvas drag
     let dragStartPos = null;
     // true if the canvas is dragged
@@ -120,7 +122,7 @@ export class DrawCanvasComponent implements AfterViewInit {
     this.pointTracker = new PointTracker(this.cx);
 
     const zoomFunction = (clicks) => {
-      const pt = me.cx.transformedPoint(lastMousePoint.x, lastMousePoint.y);
+      const pt = me.cx.transformedPoint(this.lastMousePoint.x, this.lastMousePoint.y);
       me.cx.translate(pt.x, pt.y);
       const factor = Math.pow(me.scaleFactor, clicks);
       currentZoom = currentZoom * factor;
@@ -139,7 +141,7 @@ export class DrawCanvasComponent implements AfterViewInit {
         } else {
           me.rightClickCircleSize = me.rightClickCircleSize - 2;
         }
-        const pt = me.cx.transformedPoint(lastMousePoint.x, lastMousePoint.y);
+        const pt = me.cx.transformedPoint(this.lastMousePoint.x, this.lastMousePoint.y);
         me.canvasRedraw();
         DrawUtil.drawCircle(this.cx, new Point(pt.x, pt.y), this.rightClickCircleSize);
       } else {
@@ -151,8 +153,8 @@ export class DrawCanvasComponent implements AfterViewInit {
     };
 
     const setLastPoint = (evt) => {
-      lastMousePoint.x = evt.offsetX || (evt.pageX - me.canvas.nativeElement.offsetLeft);
-      lastMousePoint.y = evt.offsetY || (evt.pageY - me.canvas.nativeElement.offsetTop);
+      this.lastMousePoint.x = evt.offsetX || (evt.pageX - me.canvas.nativeElement.offsetLeft);
+      this.lastMousePoint.y = evt.offsetY || (evt.pageY - me.canvas.nativeElement.offsetTop);
     };
 
     this.canvas.nativeElement.addEventListener('DOMMouseScroll', scroll, false);
@@ -208,7 +210,7 @@ export class DrawCanvasComponent implements AfterViewInit {
       if (btnAlt) {
         btnAlt = true;
         dragged = false;
-        dragStartPos = me.cx.transformedPoint(lastMousePoint.x, lastMousePoint.y);
+        dragStartPos = me.cx.transformedPoint(this.lastMousePoint.x, this.lastMousePoint.y);
         // alternate mode
       } else if (btnCtrl) {
         if (mouseBtn === me.MOUSE_LEFT_BTN) {
@@ -216,7 +218,7 @@ export class DrawCanvasComponent implements AfterViewInit {
         }
       } else {
         if (mouseBtn == me.MOUSE_LEFT_BTN) {
-          const pt = me.cx.transformedPoint(lastMousePoint.x, lastMousePoint.y);
+          const pt = me.cx.transformedPoint(this.lastMousePoint.x, this.lastMousePoint.y);
           CImageUtil.addPointToCurrentLine(this.currentLayer, pt.x, pt.y);
           me.saveContent();
           me.canvasRedraw();
@@ -237,12 +239,12 @@ export class DrawCanvasComponent implements AfterViewInit {
             return;
           }
           dragged = true;
-          const pt = me.cx.transformedPoint(lastMousePoint.x, lastMousePoint.y);
+          const pt = me.cx.transformedPoint(this.lastMousePoint.x, this.lastMousePoint.y);
           me.cx.translate(pt.x - dragStartPos.x, pt.y - dragStartPos.y);
           me.canvasRedraw();
         } else {
           console.log(mouseBtn);
-          const pt = me.cx.transformedPoint(lastMousePoint.x, lastMousePoint.y);
+          const pt = me.cx.transformedPoint(this.lastMousePoint.x, this.lastMousePoint.y);
           // draw
           switch (mouseBtn) {
             case me.MOUSE_LEFT_BTN:
