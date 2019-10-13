@@ -16,7 +16,7 @@ export class BWClassPrepareWorker extends FilterWorker {
     console.log("Call ImageLoadWorker");
     const s = new Observable<FilterData>((observer) => {
 
-      let buff = new Buffer(data.origImage.data, 'base64');
+      let buff = new Buffer(data.getImg().data, 'base64');
       let png = PNG.sync.read(buff);
 
       for (let y = 0; y < png.height; y++) {
@@ -35,7 +35,7 @@ export class BWClassPrepareWorker extends FilterWorker {
       }
 
       let buffer = PNG.sync.write(png, {colorType: 0});
-      data.origImage.data = buffer.toString('base64');
+      data.getImg().data = buffer.toString('base64');
 
       observer.next(data);
       observer.complete();

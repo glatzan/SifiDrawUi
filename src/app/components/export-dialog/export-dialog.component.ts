@@ -13,6 +13,7 @@ import CImageUtil from "../../utils/cimage-util";
 import {FilterService} from "../../service/filter.service";
 import {forkJoin} from "rxjs";
 import {ProcessCallback} from "../../worker/processCallback";
+import {DisplayCallback} from "../../worker/display-callback";
 
 @Component({
   selector: 'app-export-dialog',
@@ -122,35 +123,24 @@ export class ExportDialogComponent implements OnInit, ProcessCallback {
     const result = [];
     let startVar = "";
 
-    result.push(`start = f.imageLoadWorker();`);
-    startVar = "start";
+    result.push(`m.load(),`);
 
     if (!this.simpleCopyOrigImage) {
-      result.push(`const v1 = f.colorImageWorker(${startVar}, "${this.simpleCustomBackgroundColor}");`);
+      result.push(`m.color("${this.simpleCustomBackgroundColor}"),`);
       startVar = "v1";
     }
 
-    let c = 2;
-
     for (let layer of this.simpleLayerSettings) {
       if (layer.selected) {
-        const newVar = `v${c}`;
-
         if (this.simpleKeepLayerSettings)
-          result.push(`const ${newVar} = f.layerDrawWorker(${startVar})`);
+          result.push(`m.layer('${layer.layer.id}'),`);
         else
-          result.push(`const ${newVar} = f.layerDrawWorker(${startVar},'${layer.layer.id}','${layer.layer.color}',${layer.layer.size});`);
-
-        startVar = newVar;
-        c += 1;
+          result.push(`m.layer('${layer.layer.id}','${layer.layer.color}',${layer.layer.size}, false),`);
       }
     }
 
     if (this.simpleFlattenColorSpace) {
-      const newVar = `v${c}`;
-      result.push(`const ${newVar} = f.bwClassPrepareWorker(${startVar});`);
-      startVar = newVar;
-      c += 1;
+      result.push(`m.prepareClasses(),`);
     }
 
     let targetSetsArr = "[]";
@@ -184,7 +174,7 @@ export class ExportDialogComponent implements OnInit, ProcessCallback {
 
     const targetProject = this.targetProject ? this.targetProject.id : "";
 
-    result.push(`const v${c} = f.saveImageWorker(${startVar}, '${targetProject}', ${targetSetsArr}, ${addDatasetAsPrefix}, ${this.simpleCopyLayersToNewImage}, '${this.simpleImageSuffix}');`);
+    result.push(`m.save('${targetProject}', ${targetSetsArr}, ${addDatasetAsPrefix}, ${this.simpleCopyLayersToNewImage}, '${this.simpleImageSuffix}')`);
 
     this.complexFilters = result.join("\r\n");
   }
@@ -212,78 +202,17 @@ export class ExportDialogComponent implements OnInit, ProcessCallback {
     const reqDatasets = []
 
     for (let d of this.selectedDatasets) {
-      reqDatasets.push(this.datasetService.getDataset(d.id))
+      reqDatasets.push(d.id)
     }
 
-    this.exportIsRunning = true;
-    forkJoin(reqDatasets).subscribe(datasets => {
-      this.filterService.runWorkers(datasets, this.complexFilters, {processCallback: this});
-    })
-
-
+    this.filterService.runFilterOnDatasetID(reqDatasets, this.complexFilters, {
+      processCallback: this
+    });
   }
 
   public callback(): void {
     this.percentRun = Math.round(++this.completedRunCount * 100 / this.maxRunCount);
   }
-
-
-  private async create() {
-
-    // //this.datasetService.
-    // const canvas = document.createElement('canvas');
-    // const cx = canvas.getContext('2d');
-    // this.showProgressDialog = true;
-    // this.currentProgress = 0;
-    // const c = await this.datasetService.getDataset(this.dataset.id).toPromise();
-    // this.todoProgress = c.images.length;
-    //
-    // const newDatasetID = btoa(`${this.project.id}/${this.name}`);
-    //
-    // await this.datasetService.createDataset(newDatasetID).toPromise()
-    //
-    // for (const img of c.images) {
-    //   const image = await this.imageService.getImage(img.id).toPromise();
-    //   this.currentProgress++;
-    //   console.log(image.id);
-    //
-    //   await DrawUtil.drawCanvas(canvas, image, this.backgroundImage, this.background, this.layerSettings, this.layers.filter(y => y.selected).map(f => f.layer));
-    //
-    //   const newIMG = new CImage();
-    //   newIMG.id = img.id.replace(this.dataset.id, newDatasetID)
-    //
-    //   const imgData = canvas.toDataURL()
-    //   newIMG.data = imgData.substr(imgData.indexOf(',') + 1);
-    //   newIMG.name = img.name;
-    //
-    //   if (this.copyLayers) {
-    //     newIMG.layers = image.layers
-    //   }
-    //
-    //   // console.log(newIMG.data)
-    //   this.imageService.createImage(newIMG).subscribe(() => {
-    //     console.log('saved');
-    //   }, error1 => {
-    //     console.log('Fehler beim laden der Dataset Datein');
-    //     console.error(error1);
-    //   });
-  }
-
-
-  // => {
-  // this.todoProgress = data.images.length;
-  // this.currentProgress = 0;
-  //
-  //
-  // data.images.forEach((x, index) => {
-  //   const t = await this.imageService.getImageSynced(x.id);
-  //   his.timageService.getImageSynced(x.id).then(image => {
-  //     console.log(image.id);
-  //     //DrawUtil.drawCanvas(cx, image, this.backgroundImage, this.background, this.layerSettings, this.layers.filter(y => y.selected).map(f => f.layer));
-  //     this.currentProgress++;
-  //   });
-  // });
-
 
   public close(): void {
     this.dialogRef.close();

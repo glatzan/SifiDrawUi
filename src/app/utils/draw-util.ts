@@ -146,6 +146,12 @@ export default class DrawUtil {
     }
   }
 
+  static drawPoint(canvas: HTMLCanvasElement,points: Point, color: string = '#fff', size: number = 2,){
+    const cx = canvas.getContext('2d');
+    cx.fillStyle = color;
+    cx.fillRect(points.x, points.y, size, size);
+  }
+
   /**
    * Draws several lines
    * @param canvas

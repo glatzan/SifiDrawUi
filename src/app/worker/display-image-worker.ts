@@ -21,7 +21,7 @@ export class DisplayImageWorker extends FilterWorker {
     const s = new Observable<FilterData>((observer) => {
       console.log(this.displayCallback)
       if (this.displayCallback != null)
-        this.displayCallback.displayCallBack(data.origImage);
+        this.displayCallback.displayCallBack(data.getImg());
       observer.next(data);
       observer.complete();
     });

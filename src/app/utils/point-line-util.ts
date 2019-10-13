@@ -8,17 +8,13 @@ export class PointLineUtil {
   public static orderLines(lines: PointLine[]): DistancePointContainer {
     const firstPair = PointLineUtil.findShortestDistanceBetweenLines(lines);
 
-    console.log(firstPair)
-
     PointLineUtil.orderLine(firstPair.line1, true, firstPair.data.startPointLine1);
     PointLineUtil.orderLine(firstPair.line2, false, firstPair.data.startPointLine2);
 
     lines = PointLineUtil.removeLineFromLineArray(firstPair.line1, lines);
     lines = PointLineUtil.removeLineFromLineArray(firstPair.line2, lines);
 
-
     const distancePoint = new DistancePointContainer(firstPair.line1, firstPair.line2);
-
 
     while (lines.length > 0) {
       let shortestDistanceToLine: { line2: PointLine, distance: number, direction1: Direction, direction2: Direction };
@@ -48,7 +44,6 @@ export class PointLineUtil {
       }
     }
 
-    console.log(distancePoint);
     return distancePoint;
   }
 
@@ -72,40 +67,26 @@ export class PointLineUtil {
   private static getShortestDistBetweenLines(line1p1: Point, line1p2: Point, line2p1: Point, line2p2: Point):
     { distance: number, startPointLine1: Direction, startPointLine2: Direction } {
 
-    console.log("points")
-    console.log(line1p1)
-    console.log(line1p2)
-    console.log(line2p1)
-    console.log(line2p2)
-
     let shortestDistance = {
       distance: VectorUtils.distance(line1p1, line2p1),
       startPointLine1: Direction.FirstPoint,
       startPointLine2: Direction.FirstPoint
     };
 
-    console.log("S_S " + shortestDistance.distance)
-
     let tmp = VectorUtils.distance(line1p1, line2p2);
     if (tmp < shortestDistance.distance) {
       shortestDistance = {distance: tmp, startPointLine1: Direction.FirstPoint, startPointLine2: Direction.LastPoint};
     }
-
-    console.log("S_E " + tmp)
 
     tmp = VectorUtils.distance(line1p2, line2p1);
     if (tmp < shortestDistance.distance) {
       shortestDistance = {distance: tmp, startPointLine1: Direction.LastPoint, startPointLine2: Direction.FirstPoint};
     }
 
-    console.log("E_S " + tmp)
-
     tmp = VectorUtils.distance(line1p2, line2p2);
     if (tmp < shortestDistance.distance) {
       shortestDistance = {distance: tmp, startPointLine1: Direction.LastPoint, startPointLine2: Direction.LastPoint};
     }
-
-    console.log("E_E " + tmp)
 
     return shortestDistance;
   }
@@ -121,12 +102,10 @@ export class PointLineUtil {
   private static orderLine(line: PointLine, p1: boolean, direction: Direction): PointLine {
     if (p1) {
       if (direction == Direction.FirstPoint) {
-        console.log("reversing first")
         line.points.reverse();
       }
     } else {
       if (direction == Direction.LastPoint) {
-        console.log("reversing second")
         line.points.reverse();
       }
     }
@@ -151,6 +130,7 @@ enum Direction {
 
 export class DistancePointContainer {
   private lines: PointLine[] = [];
+  private distance : number[] = [];
 
   constructor()
   constructor(line1: PointLine)
@@ -160,6 +140,7 @@ export class DistancePointContainer {
       this.lines.push(line1);
     if (line2)
       this.lines.push(line2)
+
   }
 
   public getFirstPoint(): Point {
@@ -176,9 +157,8 @@ export class DistancePointContainer {
       line.points = line.points.reverse();
     }
 
-
     if (atStart) {
-      this.lines = this.lines.splice(0, 0, line);
+      this.lines.splice(0, 0, line);
     } else {
       this.lines.push(line);
     }

@@ -20,9 +20,9 @@ export class MagicWorker extends FilterWorker {
 
   public doWork(parent: FilterWorker, data: FilterData): Observable<FilterData> {
     console.log("Call MagicWorker");
-    const s = this.imageMagicService.performMagic(data.origImage, this.command).pipe(flatMap(img => {
+    const s = this.imageMagicService.performMagic(data.getImg(), this.command).pipe(flatMap(img => {
       return new Observable<FilterData>((observer) => {
-        data.origImage = img;
+        data.setImg(img);
         observer.next(data);
         observer.complete();
       })

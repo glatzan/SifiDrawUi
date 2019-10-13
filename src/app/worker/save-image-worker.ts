@@ -38,7 +38,7 @@ export class SaveImageWorker extends FilterWorker {
     const s = new Observable<FilterData>((observer) => {
 
       if (!this.copyLayer)
-        data.origImage.layers = [];
+        data.getImg().layers = [];
 
       if (data.origName == null || data.origName.length == 0)
         observer.error("ID not set");
@@ -86,11 +86,11 @@ export class SaveImageWorker extends FilterWorker {
       if (this.imageSuffix)
         newName += this.imageSuffix;
 
-      data.origImage.id = btoa(newName);
+      data.getImg().id = btoa(newName);
 
       observer.next(data);
       observer.complete();
-    }).pipe(flatMap(data => this.imageService.createImage(data.origImage, this.type)));
+    }).pipe(flatMap(data => this.imageService.createImage(data.getImg(), this.type)));
 
     return this.doChain(s);
   }

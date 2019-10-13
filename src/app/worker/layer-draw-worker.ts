@@ -30,7 +30,7 @@ export class LayerDrawWorker extends FilterWorker {
 
       let layer: Layer;
 
-      for (let l of data.origImage.layers) {
+      for (let l of data.getImg().layers) {
         if (l.id == this.layerID) {
           layer = l;
           break;
@@ -41,12 +41,12 @@ export class LayerDrawWorker extends FilterWorker {
       observer.complete();
 
     }).pipe(flatMap(
-      layer => DrawUtil.loadBase64AsCanvas(data.origImage.data).pipe(
+      layer => DrawUtil.loadBase64AsCanvas(data.getImg().data).pipe(
         flatMap(canvas => {
           return new Observable<FilterData>((observer) => {
             if (layer != null) {
               DrawUtil.drawManyPointLinesOnCanvas(canvas, layer.lines, this.color, this.size, this.drawPoints)
-              data.origImage.data = DrawUtil.canvasAsBase64(canvas);
+              data.getImg().data = DrawUtil.canvasAsBase64(canvas);
             }
 
             observer.next(data);

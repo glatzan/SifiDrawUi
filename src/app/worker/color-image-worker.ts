@@ -28,13 +28,13 @@ export class ColorImageWorker extends FilterWorker {
   public doWork(parent: FilterWorker, data?: FilterData): Observable<FilterData> {
     console.log("Call ColorImageWorker");
 
-    const s = DrawUtil.loadBase64AsCanvas(data.origImage.data).pipe(flatMap(canvas => {
+    const s = DrawUtil.loadBase64AsCanvas(data.getImg().data).pipe(flatMap(canvas => {
       return new Observable<FilterData>((observer) => {
         const height = this.height < 0 ? canvas.height : this.height;
         const width = this.width < 0 ? canvas.width : this.width;
 
         DrawUtil.drawRect(canvas, this.x, this.y, width, height, this.color);
-        data.origImage.data = DrawUtil.canvasAsBase64(canvas);
+        data.getImg().data = DrawUtil.canvasAsBase64(canvas);
         observer.next(data);
         observer.complete();
       })

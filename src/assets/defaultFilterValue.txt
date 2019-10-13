@@ -12,6 +12,27 @@ m.load(),
 m.color("#000000",0,400),
 m.line(),
 m.sortLines(),
+m.drawLine(),
 m.reducePoints(),
+m.checkXProgression("green"),
 m.cubicSpline(),
 m.display(display)
+
+
+
+
+    // from(datasetID).pipe(concatMap(
+    //   x => this.datasetSerive.getDataset(x).pipe(
+    //     mergeMap(dataset =>
+    //       from(dataset.images).pipe(
+    //         me.load(),
+    //         this.color("#000000"),
+    //         this.layer("2", "#ffffff", 3, false),
+    //         this.layer("3", "#ffffff", 3, false),
+    //         this.layer("4", "#ffffff", 3, false),
+    //         me.classPrepare(),
+    //         me.save(datasetMapping,"_mask"),
+    //       )
+    //     )
+    //   )
+    // )).subscribe(x => console.log("test"));

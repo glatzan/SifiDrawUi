@@ -63,8 +63,6 @@ export class FilterListComponent implements OnInit, DisplayCallback {
     dataset.images = [new CImage()]
     dataset.images[0].id = this._cImage.id;
 
-    console.log("start")
-
     this.filterService.runFilterOnDataset(dataset, this.filterValue, {
       displayCallback: this
     });

@@ -16,9 +16,9 @@ export class ImageLoadWorker extends FilterWorker {
 
   public doWork(parent: FilterWorker, data: FilterData): Observable<FilterData> {
     console.log("Call ImageLoadWorker");
-    const s = this.imageService.getImage(data.origImage.id).pipe(flatMap(image => {
+    const s = this.imageService.getImage(data.getImg().id).pipe(flatMap(image => {
       return new Observable<FilterData>((observer) => {
-        data.origImage = image;
+        data.setImg(image);
         observer.next(data);
         observer.complete();
       })
