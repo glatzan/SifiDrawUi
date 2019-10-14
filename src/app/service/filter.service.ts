@@ -429,17 +429,16 @@ export class FilterService {
   }
 
   public flask(endpoint: string) {
-    return flatMap((data: FilterData) => this.flaskService.processImage(data.getImg(), 'unetg1').pipe(map(cimg => {
+    return flatMap((data: FilterData) => this.flaskService.processImage(data.getImg(), endpoint).pipe(map(cimg => {
       console.log('Fask img' + atob(cimg.id));
-      let data = new FilterData()
       data.setImg(cimg);
       return data;
     })));
   }
 
-  public magic() {
+  public magic(command: string) {
     return flatMap((data: FilterData) =>
-      this.imageMagicService.performMagic(data.getImg(), '-threshold 20% -define connected-components:area-threshold=5 -define connected-components:mean-color=true -connected-components 8').pipe(
+      this.imageMagicService.performMagic(data.getImg(), command).pipe(
         map(cimg => {
             data.setImg(cimg);
             return data;
