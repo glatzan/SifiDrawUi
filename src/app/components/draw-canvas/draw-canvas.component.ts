@@ -118,6 +118,8 @@ export class DrawCanvasComponent implements AfterViewInit {
     let mouseBtn = -1;
     // current canvas zoom
     let currentZoom = 100;
+    // true if key input is accepted
+    let acceptKeyInput = false;
 
     this.pointTracker = new PointTracker(this.cx);
 
@@ -166,8 +168,16 @@ export class DrawCanvasComponent implements AfterViewInit {
       return $event.preventDefault() && false;
     }, false);
 
+    this.canvas.nativeElement.addEventListener('mouseenter', ($event) => {
+      acceptKeyInput = true;
+    });
+
+    this.canvas.nativeElement.addEventListener('mouseleave', ($event) => {
+      acceptKeyInput = false;
+    });
+
     window.addEventListener('keydown', ($event) => {
-      if (me.renderContext) {
+      if (me.renderContext && acceptKeyInput) {
         if ($event.key == ' ' || $event.key == 'ArrowDown') {
           // next image
           if (this.imageListComponent.onSelectNextImage() != null) {
@@ -191,6 +201,9 @@ export class DrawCanvasComponent implements AfterViewInit {
         } else {
           console.log($event.key);
         }
+
+        $event.preventDefault();
+        $event.stopPropagation();
       }
     }, false);
 
