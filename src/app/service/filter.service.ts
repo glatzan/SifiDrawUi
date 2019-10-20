@@ -32,6 +32,7 @@ import {ImageJService} from "./image-j.service";
 import {FlaskService} from "./flask.service";
 import CImageUtil from "../utils/cimage-util";
 import {DatasetService} from "./dataset.service";
+import {isNumber} from "util";
 
 @Injectable({
   providedIn: 'root'
@@ -90,41 +91,61 @@ export class FilterService {
     const tFrom = from;
     const tConcatMap = concatMap;
     const tMergeMap = mergeMap;
+    const obs = Observable
+    const im = CImage
     const m = this;
     const display = env.displayCallback;
     const process = env.processCallback;
 
-  //   if (display) {
-  //     process.maxRunCount = results.length * 2;
-  //     process.completedRunCount = 0;
-  //     process.percentRun = 0;
-  //   }
-  //
-  //
-  // }
-  //
-  // catch(e) {
-  //   if (e instanceof SyntaxError) {
-  //     alert(e);
-  //   }
-  //   console.error(e);
-  //   if (env.processCallback)
-  //     env.processCallback.exportIsRunning = false;
+    //   if (display) {
+    //     process.maxRunCount = results.length * 2;
+    //     process.completedRunCount = 0;
+    //     process.percentRun = 0;
+    //   }
+    //
+    //
+    // }
+    //
+    // catch(e) {
+    //   if (e instanceof SyntaxError) {
+    //     alert(e);
+    //   }
+    //   console.error(e);
+    //   if (env.processCallback)
+    //     env.processCallback.exportIsRunning = false;
 
 
     const exe = "tFrom(datasets).pipe(tConcatMap(" +
       "x => this.datasetService.getDataset(x).pipe(" +
       "tMergeMap(dataset =>" +
       "tFrom(dataset.images).pipe(" +
+      "tMergeMap(image =>" +
+      "new obs((observer) => { observer.next(image); observer.complete()}).pipe(" +
       func +
+      ")" +
+      ",10)" +
       ")" +
       ")" +
       ")" +
       ")).subscribe(x => console.log('test'));"
 
     eval(exe)
+    // tFrom(datasets).pipe(tConcatMap(
+    //   x => this.datasetService.getDataset(x).pipe(
+    //     tMergeMap(dataset =>
+    //       tFrom(dataset.images).pipe(
+    //         tMergeMap(image =>
+    //           new Observable<CImage>((observer) => { observer.next(image); observer.complete()}).pipe(
+    //             m.load(),
+    //             m.save('tmp', [{dataset : '*', mapping : 'ttt'}], false, false, '')
+    //           )
+    //         ,10)
+    //       )
+    //     )
+    //   )
+    // )).subscribe(x => console.log('test'));
 
-    console.log(exe);
+    // console.log(exe);
   }
 
   public runFilterOnDataset(dataset: Dataset, func: string, env: { processCallback?: ProcessCallback, displayCallback?: DisplayCallback }) {
@@ -337,6 +358,18 @@ export class FilterService {
         return data;
       }))
     );
+  }
+
+  public toGrayscale(){
+    return flatMap((data: FilterData) => new Observable<FilterData>((observer) => {
+        let buff = new Buffer(data.getImg().data, 'base64');
+        let png = PNG.sync.read(buff);
+        let buffer = PNG.sync.write(png, {colorType: 0});
+        data.getImg().data = buffer.toString('base64');
+        observer.next(data);
+        observer.complete();
+      }
+    ));
   }
 
   public prepareClasses(color: boolean = false) {
@@ -607,7 +640,11 @@ export class FilterService {
 
       observer.next(data);
       observer.complete();
-    }).pipe(flatMap(data => this.imageService.createImage(data.getImg(), 'png'))));
+    }).pipe(flatMap(data => this.imageService.createImage(data.getImg(), 'png').pipe(
+      map(newImg => {
+        return data
+      }))
+    )));
   }
 
   public display(displayCallback: DisplayCallback, img: number = -1) {
@@ -624,6 +661,65 @@ export class FilterService {
     }));
   }
 
+  public overlay() {
+    return flatMap((data: FilterData) => new Observable<FilterData>((observer) => {
+
+        if (arguments.length >= 2 && data.imgStack.length >= 2) {
+
+          console.log("Overlay");
+
+          if (!isNumber(arguments[0]) && arguments[0] > 0 && arguments[0] < data.imgStack.length)
+            observer.error();
+
+          const buff = new Buffer(data.getImg(arguments[0]).data, 'base64');
+          const png = PNG.sync.read(buff);
+
+          console.log(atob(data.getImg(arguments[0]).data))
+
+          for (let i = 1; i < arguments.length; i++) {
+
+            if (!isNumber(arguments[i]) && arguments[i] > 0 && arguments[i] < data.imgStack.length)
+              observer.error(`Wrong argument ${arguments[i]}`);
+
+            console.log(atob(data.getImg(arguments[i]).data))
+
+            const buff2 = new Buffer(data.getImg(arguments[i]).data, 'base64');
+            const png2 = PNG.sync.read(buff2);
+
+           // if (png.width != png2.width || png.height != png2.height){
+           //   observer.error(`Image does not match ${png.width} - ${png2.width} / ${png.height} - ${png2.height}`);
+           // }
+
+            for (let y = 0; y < png.height; y++) {
+              for (let x = 0; x < png.width; x++) {
+                let idx = (png.width * y + x) << 2;
+
+               // console.log(`${png2.data[idx]} - ${png2.data[idx+1]} - ${png2.data[idx+2]}`)
+                if (png2.data[idx] > 0 || png2.data[idx + 1] > 0 || png2.data[idx + 2] > 0) {
+                  png.data[idx] = png2.data[idx];
+                  png.data[idx + 1] = png2.data[idx + 1];
+                  png.data[idx + 2] = png2.data[idx + 2];
+                }
+              }
+            }
+          }
+
+          let buffer = PNG.sync.write(png, {colorType: 0});
+          this.pushImg();
+          data.getImg().data = buffer.toString('base64');
+
+          observer.next(data);
+          observer.complete();
+          console.log("overlay end")
+        } else {
+          observer.error();
+        }
+        observer.next(data);
+        observer.complete();
+      }
+    ));
+  }
+
   public showProgress(progressCallback) {
 
   }
@@ -632,11 +728,13 @@ export class FilterService {
     return flatMap((data: FilterData) => new Observable<FilterData>((observer) => {
       console.log(`Pushing IMG Index ${index} to ${data.imgStack.length}`);
 
-      const imToCopy = index ? data.getImg(index) : data.getImg();
+      const imToCopy = index != undefined ? data.getImg(index) : data.getImg();
       const copy = Object.assign(new CImage(), imToCopy);
       copy.layers = imToCopy.layers;
 
       data.pushIMG(copy);
+
+      console.log(data.imgStack.length);
 
       observer.next(data);
       observer.complete();

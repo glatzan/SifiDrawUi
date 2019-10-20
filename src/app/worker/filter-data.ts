@@ -17,6 +17,7 @@ export class FilterData {
   }
 
   public getImg(index: number = this.imgStack.length - 1): CImage {
+    console.log(`Get img ${index} from ${this.imgStack} length ${this.imgStack.length}`)
     return this.imgStack[index];
   }
 
