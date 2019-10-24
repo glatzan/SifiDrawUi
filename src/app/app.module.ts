@@ -33,6 +33,8 @@ import {MatColorPickerModule} from "mat-color-picker";
 import {MccColorPickerModule} from "material-community-components";
 import { ImportDialogComponent } from './components/import-dialog/import-dialog.component';
 import {MatSnackBarModule} from '@angular/material';
+import { FilterOverlayComponent } from './components/filter-overlay/filter-overlay.component';
+import {OverlayModule} from "@angular/cdk/overlay";
 
 @NgModule({
   declarations: [
@@ -42,7 +44,8 @@ import {MatSnackBarModule} from '@angular/material';
     ImageListComponent,
     ExportDialogComponent,
     FilterListComponent,
-    ImportDialogComponent
+    ImportDialogComponent,
+    FilterOverlayComponent,
   ],
   imports: [
     HttpClientModule,
@@ -58,8 +61,6 @@ import {MatSnackBarModule} from '@angular/material';
     MatSelectModule,
     MatInputModule,
     FormsModule,
-    MatColorPickerModule,
-    MccColorPickerModule,
     MatProgressSpinnerModule,
     MatButtonToggleModule,
     MatCheckboxModule,
@@ -68,7 +69,7 @@ import {MatSnackBarModule} from '@angular/material';
     MatTabsModule,
     MatProgressBarModule
   ],
-  entryComponents: [ExportDialogComponent, ImportDialogComponent],
+  entryComponents: [ExportDialogComponent, ImportDialogComponent,FilterOverlayComponent],
   providers: [{provide: MAT_SNACK_BAR_DEFAULT_OPTIONS, useValue: {duration: 500}}],
   bootstrap: [AppComponent]
 })

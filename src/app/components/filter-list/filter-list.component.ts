@@ -1,19 +1,14 @@
-import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
-import {ImageListComponent} from "../image-list/image-list.component";
-import {DrawCanvasComponent} from "../draw-canvas/draw-canvas.component";
-import * as ts from "typescript";
+import {Component, ElementRef, EventEmitter, Input, OnInit, Output, ViewChild} from '@angular/core';
 import {CImage} from "../../model/cimage";
 import {ImageService} from "../../service/image.service";
 import {ImageMagicService} from "../../service/image-magic.service";
-import {ImageMagicFilter} from "../../filter/image-magic-filter";
-import DrawUtil from "../../utils/draw-util";
 import {FilterService} from "../../service/filter.service";
-import {ImageEventFilter} from "../../filter/image-event-filter";
 import {HttpClient} from "@angular/common/http";
-import {logger} from "codelyzer/util/logger";
 import {Dataset} from "../../model/dataset";
-import {forkJoin} from "rxjs";
 import {DisplayCallback} from "../../worker/display-callback";
+import {ComponentPortal} from "@angular/cdk/portal";
+
+import {OverlayServiceService} from "../../service/overlay-service.service";
 
 @Component({
   selector: 'app-filter-list',
@@ -28,6 +23,8 @@ export class FilterListComponent implements OnInit, DisplayCallback {
   private resetTriggered = false
   private doNotResetFilter = false
 
+  @ViewChild("filterOverlayButtonRef", { static: true })
+  private filterOverlayButtonRef: ElementRef;
 
   @Input() set cImage(cImage: CImage) {
     this._cImage = cImage;
@@ -46,7 +43,8 @@ export class FilterListComponent implements OnInit, DisplayCallback {
   constructor(public imageMagicService: ImageMagicService,
               private imageService: ImageService,
               private filterService: FilterService,
-              private _http: HttpClient) {
+              private _http: HttpClient,
+              private overlayServiceService: OverlayServiceService) {
   }
 
   ngOnInit() {
@@ -86,5 +84,10 @@ export class FilterListComponent implements OnInit, DisplayCallback {
       this.filterOutput.emit(image)
     else
       this.resetTriggered = false;
+  }
+
+  private openFilterOverlay() {
+    console.log("open" + this.filterOverlayButtonRef)
+    this.overlayServiceService.open({}, this.filterOverlayButtonRef);
   }
 }
