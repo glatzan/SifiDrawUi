@@ -23,9 +23,6 @@ export class FilterListComponent implements OnInit, DisplayCallback {
   private resetTriggered = false
   private doNotResetFilter = false
 
-  @ViewChild("filterOverlayButtonRef", { static: true })
-  private filterOverlayButtonRef: ElementRef;
-
   @Input() set cImage(cImage: CImage) {
     this._cImage = cImage;
     console.log("Loading Image")
@@ -86,8 +83,7 @@ export class FilterListComponent implements OnInit, DisplayCallback {
       this.resetTriggered = false;
   }
 
-  private openFilterOverlay() {
-    console.log("open" + this.filterOverlayButtonRef)
-    this.overlayServiceService.open({}, this.filterOverlayButtonRef);
+  private openFilterOverlay(elemt : ElementRef) {
+    this.overlayServiceService.open({}, elemt);
   }
 }

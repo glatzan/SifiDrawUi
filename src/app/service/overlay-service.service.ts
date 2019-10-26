@@ -61,10 +61,9 @@ export class OverlayServiceService {
       console.log("element")
       console.log(elementRef)
       positionStrategy = this.overlay      .position()
-        .flexibleConnectedTo(elementRef.nativeElement) // <-- elementRef is the icon element from the screenshot
+        .flexibleConnectedTo(elementRef) // <-- elementRef is the icon element from the screenshot
         .withPositions([
-          { originX: 'center', originY: 'top', overlayX: 'center', overlayY: 'bottom' },
-          { originX: 'center', originY: 'bottom', overlayX: 'center', overlayY: 'top' }
+          { originX: 'start', originY: 'top', overlayX: 'end', overlayY: 'bottom' }
         ])
         .withPush(false);
     } else {
