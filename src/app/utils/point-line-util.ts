@@ -32,9 +32,9 @@ export class PointLineUtil {
 
       if (shortestDistanceToLine) {
         if (shortestDistanceToLine.relation.startPointLine1 == Direction.FirstPoint) {
-          distancePoint.addLine(shortestDistanceToLine.line2,shortestDistanceToLine.relation.distance, shortestDistanceToLine.relation.startPointLine2 === Direction.FirstPoint, true);
+          distancePoint.addLine(shortestDistanceToLine.line2, shortestDistanceToLine.relation.distance, shortestDistanceToLine.relation.startPointLine2 === Direction.FirstPoint, true);
         } else {
-          distancePoint.addLine(shortestDistanceToLine.line2, shortestDistanceToLine.relation.distance,shortestDistanceToLine.relation.startPointLine2 === Direction.LastPoint, false);
+          distancePoint.addLine(shortestDistanceToLine.line2, shortestDistanceToLine.relation.distance, shortestDistanceToLine.relation.startPointLine2 === Direction.LastPoint, false);
         }
 
         lines = PointLineUtil.removeLineFromLineArray(shortestDistanceToLine.line2, lines);
@@ -124,10 +124,16 @@ export class DistancePointContainer {
   private lines: PointLine[] = [];
   private distance: number[] = [];
 
-  constructor(line1: PointLine, line2: PointLine, distance: number) {
-    this.lines.push(line1);
-    this.lines.push(line2);
-    this.distance.push(distance);
+  constructor()
+  constructor(line1: PointLine)
+  constructor(line1: PointLine, line2: PointLine, distance: number)
+  constructor(line1?: PointLine, line2?: PointLine, distance?: number) {
+    if (line1)
+      this.lines.push(line1);
+    if (line2)
+      this.lines.push(line2);
+    if (distance)
+      this.distance.push(distance);
   }
 
   public getFirstPoint(): Point {
@@ -139,7 +145,7 @@ export class DistancePointContainer {
     return points[points.length - 1];
   }
 
-  public addLine(line: PointLine, distance: number, reverse: boolean, atStart: boolean) {
+  public addLine(line: PointLine, distance: number, reverse: boolean = false, atStart: boolean = false) {
     if (reverse) {
       line.points.reverse();
     }
@@ -153,11 +159,30 @@ export class DistancePointContainer {
     }
   }
 
+  public addLines(lines: PointLine[], distances: number[]) {
+    let i = 0;
+
+    if (this.lines.length == 0) {
+      if (lines.length != distances.length - 1)
+        return;
+      this.lines.push(lines[0])
+      i++;
+    } else {
+      if (lines.length != distances.length)
+        return;
+    }
+
+
+    for (; i < lines.length; i++) {
+      this.addLine(lines[i], distances[i - 1]);
+    }
+  }
+
   public getLines(): PointLine[] {
     return this.lines;
   }
 
-  public getLine(index: number) : PointLine{
+  public getLine(index: number): PointLine {
     return this.lines[index];
   }
 
@@ -165,8 +190,18 @@ export class DistancePointContainer {
     return this.lines[index] = line;
   }
 
-  public getDistance(index: number): number {
-    return this.distance[index];
+  public getDistanceToNextLine(lineNumber: number): number {
+    if (lineNumber >= this.lines.length - 1)
+      return 0;
+    return this.distance[lineNumber];
+  }
+
+  public getTotalLength() {
+    return this.lines.reduce((a, b) => a + b.length, 0) + this.distance.reduce((a, b) => a + b, 0);
+  }
+
+  public hasLines(): boolean {
+    return this.lines.length > 0;
   }
 }
 

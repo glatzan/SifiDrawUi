@@ -256,47 +256,76 @@ export class FilterService {
     return flatMap((data: CImage) => this.imageService.getImage(data.id).pipe(map(cimg => {
       console.log(`Load img ${atob(cimg.id)}`);
       let data = new FilterData();
-      data.setImg(cimg);
+      data.pushIMG(cimg)
       data.origName = atob(cimg.id);
+      return data;
+    })));
+  }
 
-      console.log(`Data ${data.imgStack.length}`)
+  public cloneImage(index ?: number) {
+    return flatMap((data: FilterData) => new Observable<FilterData>((observer) => {
+      console.log(`Cloning IMG Index ${index} to ${data.imgStack.length}`);
+
+      if (index && index < 0 && index >= data.imgStack.length)
+        observer.error(`Clone Image out of bounds ${index}`);
+
+      const imToCopy = index ? data.imgStack[index] : data.img;
+      const copy = Object.assign(new CImage(), imToCopy);
+      copy.layers = imToCopy.layers;
+      data.pushIMG(copy);
+
+      observer.next(data);
+      observer.complete();
+    }));
+  }
+
+  public activeImage(index: number) {
+    return flatMap((data: FilterData) => new Observable<FilterData>((observer) => {
+      console.log(`Setting IMG Index ${index} as active`);
+
+      if (index && index < 0 && index >= data.imgStack.length)
+        observer.error(`Clone Image out of bounds ${index}`);
+
+      data.img = data.imgStack[index]
+
+      observer.next(data);
+      observer.complete();
+    }));
+  }
+
+  public flask(endpoint: string) {
+    return flatMap((data: FilterData) => this.flaskService.processImage(data.img, endpoint).pipe(map(cimg => {
+      console.log('Fask img' + atob(cimg.id));
+
+      data.img.data = cimg.data;
 
       return data;
     })));
   }
 
-  public color(color: string, x = 0, y = 0, height: number = -1, width: number = -1) {
-    return flatMap((data: FilterData) => DrawUtil.loadBase64AsCanvas(data.getImg().data).pipe(
-      map(canvas => {
-        console.log(`Color img ${color}`);
-
-        height = height < 0 ? canvas.height - y : height;
-        width = width < 0 ? canvas.width - x : width;
-
-        DrawUtil.drawRect(canvas, x, y, width, height, color);
-        data.getImg().data = DrawUtil.canvasAsBase64(canvas);
-
-        return data;
-      })));
-  }
-
-  public getLines() {
+  public findCenterLines(targetName: string = "lines") {
     return flatMap((data: FilterData) =>
-      this.imageJService.getLines(data.getImg()).pipe(
+      this.imageJService.getLines(data.img).pipe(
         map(json => {
-            console.log(`Get Lines`);
+            console.log(`Searching for Lines ..`);
             let map = new Map<string, PointLine>();
 
             for (let res of json) {
-              let tmp = map.get(res['Contour ID']);
-              const entry = new Point(Math.round(res['X']), Math.round(res['Y']), res['Pos.']);
-              if (!tmp) {
-                tmp = map.set(res['Contour ID'], new PointLine(res['Contour ID'])).get(res['Contour ID']);
+              let contour = map.get(res['Contour ID']);
+
+              const point = new Point(Math.round(res['X']), Math.round(res['Y']), res['Pos.']);
+
+              if (!contour) {
+                contour = map.set(res['Contour ID'], new PointLine(res['Contour ID'], res['Length'])).get(res['Contour ID']);
               }
-              tmp.addPoint(entry);
+
+              contour.addPoint(point);
             }
 
-            data.additionalData = Array.from(map.values());
+            const dis = new DistancePointContainer();
+            dis.addLines(Array.from(map.values()), new Array(map.size - 1).fill(0));
+            data.setData(dis, targetName);
+
             return data;
           }
         )
@@ -304,26 +333,63 @@ export class FilterService {
     );
   }
 
-  public sortLines() {
+  public sortLines(sourceName: string = "lines", targetName: string = "sortedLines") {
     return flatMap((data: FilterData) => new Observable<FilterData>((observer) => {
-      if (data.additionalData != null && data.additionalData.length > 1) {
+      const lines = data.getData(sourceName);
+
+      if (lines instanceof DistancePointContainer) {
         console.log("Sort lines");
-        data.additionalData = PointLineUtil.orderLines(data.additionalData);
-        ;
+        const sortedLines: DistancePointContainer = PointLineUtil.orderLines(lines.getLines());
+        data.setData(sortedLines, targetName);
+      } else {
+        observer.error(`Could not find source ${sourceName}`);
+      }
+
+      observer.next(data);
+      observer.complete();
+    }));
+  }
+
+  public prepareHost(joinLinesMaxTo: number = 50, sourceName: string = "sortedLines", targetName: string = "hostLines") {
+    return flatMap((data: FilterData) => new Observable<FilterData>((observer) => {
+      const sortedLines = data.getData(sourceName);
+
+      if (sortedLines instanceof DistancePointContainer && sortedLines.hasLines()) {
+        console.log("Preparing Host");
+
+        const container: DistancePointContainer[] = [];
+        container.push(new DistancePointContainer(sortedLines.getLine(0)));
+
+        for (let i = 1; i < sortedLines.getLines().length; i++) {
+          const line = sortedLines.getLine(i);
+
+          if (sortedLines.getDistanceToNextLine(i - 1) <= joinLinesMaxTo) {
+            container[container.length - 1].addLine(line, sortedLines.getDistanceToNextLine(i - 1))
+          } else {
+            container.push(new DistancePointContainer(line))
+          }
+        }
+
+        const result = Math.max.apply(Math, container.map(o => o.getTotalLength()));
+
+        data.setData(result, targetName);
+
       }
       observer.next(data);
       observer.complete();
     }));
   }
 
-  public reducePoints(modulo: number = 10) {
+  public reducePoints(modulo: number = 10, sourceName: string = "sortedLines") {
     return flatMap((data: FilterData) => new Observable<FilterData>((observer) => {
-      if (data.additionalData != null && data.additionalData instanceof DistancePointContainer) {
+      const sortedLines = data.getData(sourceName);
+
+      if (sortedLines instanceof DistancePointContainer) {
         console.log("Reduce Points");
 
-        for (let i = 0; i < data.additionalData.getLines().length; i++) {
+        for (let i = 0; i < sortedLines.getLines().length; i++) {
           const p = new PointLine();
-          const line = data.additionalData.getLine(i);
+          const line = sortedLines.getLine(i);
 
           p.addPoint(line.getFirstPoint());
 
@@ -336,7 +402,7 @@ export class FilterService {
           if (p.getLastPoint().x != line.getLastPoint().x) {
             p.addPoint(line.getLastPoint())
           }
-          data.additionalData.setLine(i, p);
+          sortedLines.setLine(i, p);
         }
       }
       observer.next(data);
@@ -344,51 +410,74 @@ export class FilterService {
     }));
   }
 
-  public drawLine(color: string = "", size: number = 1, drawStartEndPoints = true, drawDistance = true) {
-    return flatMap((data: FilterData) => DrawUtil.loadBase64AsCanvas(data.getImg().data).pipe(map(canvas => {
-        if (data.additionalData != null && data.additionalData instanceof DistancePointContainer) {
+  public drawLines(color: string = "", size: number = 1, drawStartEndPoints = true, drawDistance = true, sourceName: string = "sortedLines") {
+    return flatMap((data: FilterData) => DrawUtil.loadBase64AsCanvas(data.img.data).pipe(map(canvas => {
+
+        const sortedLines = data.getData(sourceName);
+
+        if (sortedLines instanceof DistancePointContainer) {
           console.log('Draw Lines');
-          let i = 0;
-          for (let a of data.additionalData.getLines()) {
-            DrawUtil.drawPointLinesOnCanvas(canvas, a.points, color == "" ? CImageUtil.colors[i + 1] : color, size, false);
+
+          for (let i = 0; i < sortedLines.getLines().length; i++) {
+            const line = sortedLines.getLine(i);
+
+            DrawUtil.drawPointLinesOnCanvas(canvas, line.points, color == "" ? CImageUtil.colors[i + 1] : color, size, false);
 
             if (drawStartEndPoints) {
-              DrawUtil.text(canvas, "Start Line" + i, a.points[0], "12px Arial", "red");
-              DrawUtil.drawPoint(canvas, a.points[0], "red");
-              DrawUtil.text(canvas, "End Line" + i, a.points[a.points.length - 1], "12px Arial", "blue");
-              DrawUtil.drawPoint(canvas, a.points[a.points.length - 1], "blue");
+              DrawUtil.text(canvas, "Start Line" + i, line.points[0], "12px Arial", "red");
+              DrawUtil.drawPoint(canvas, line.points[0], "red");
+              DrawUtil.text(canvas, "End Line" + i, line.points[line.points.length - 1], "12px Arial", "blue");
+              DrawUtil.drawPoint(canvas, line.points[line.points.length - 1], "blue");
             }
 
-            if (i > 0 && drawDistance) {
-              console.log(i + "" + String(data.additionalData.getDistance(i)));
-              DrawUtil.text(canvas, String(data.additionalData.getDistance(i)), a.points[a.points.length - 1]);
+            if (drawDistance) {
+              console.log(i + "" + String(sortedLines.getDistanceToNextLine(i)));
+              DrawUtil.text(canvas, String(sortedLines.getDistanceToNextLine(i)), line.points[line.points.length - 1]);
             }
-
-            i++;
           }
-          data.getImg().data = DrawUtil.canvasAsBase64(canvas);
+          data.img.data = DrawUtil.canvasAsBase64(canvas);
         }
         return data;
       }))
     );
   }
 
-  public toGrayscale() {
+  /**
+   * 0 = grey, 2 = color
+   */
+  public toColorType(colorType: ColorType) {
     return flatMap((data: FilterData) => new Observable<FilterData>((observer) => {
-        let buff = new Buffer(data.getImg().data, 'base64');
+        let buff = new Buffer(data.img.data, 'base64');
         let png = PNG.sync.read(buff);
-        let buffer = PNG.sync.write(png, {colorType: 0});
-        data.getImg().data = buffer.toString('base64');
+        let buffer = PNG.sync.write(png, {colorType: colorType});
+        data.img.data = buffer.toString('base64');
         observer.next(data);
         observer.complete();
       }
     ));
   }
 
+
+  public color(color: string, x = 0, y = 0, height: number = -1, width: number = -1) {
+    return flatMap((data: FilterData) => DrawUtil.loadBase64AsCanvas(data.img.data).pipe(
+      map(canvas => {
+        console.log(`Color img ${color}`);
+
+        height = height < 0 ? canvas.height - y : height;
+        width = width < 0 ? canvas.width - x : width;
+
+        DrawUtil.drawRect(canvas, x, y, width, height, color);
+        data.img.data = DrawUtil.canvasAsBase64(canvas);
+
+        return data;
+      })));
+  }
+
+
   public prepareClasses(color: boolean = false) {
     return flatMap((data: FilterData) => new Observable<FilterData>((observer) => {
 
-        let buff = new Buffer(data.getImg().data, 'base64');
+        let buff = new Buffer(data.img.data, 'base64');
         let png = PNG.sync.read(buff);
 
         for (let y = 0; y < png.height; y++) {
@@ -424,7 +513,7 @@ export class FilterService {
         }
 
         let buffer = PNG.sync.write(png, {colorType: 0});
-        data.getImg().data = buffer.toString('base64');
+        data.img.data = buffer.toString('base64');
         observer.next(data);
         observer.complete();
       }
@@ -455,7 +544,7 @@ export class FilterService {
   public layer(layerID: string, color: string, size: number, drawPoints: boolean) {
     return flatMap((data: FilterData) => new Observable<Layer>((observer) => {
         let layer = null;
-        for (let tmp of data.getImg().layers) {
+        for (let tmp of data.img.layers) {
           if (tmp.id == layerID) {
             layer = tmp;
             break;
@@ -463,23 +552,15 @@ export class FilterService {
         }
         observer.next(layer);
         observer.complete();
-      }).pipe(flatMap(layer => DrawUtil.loadBase64AsCanvas(data.getImg().data).pipe(map(canvas => {
+      }).pipe(flatMap(layer => DrawUtil.loadBase64AsCanvas(data.img.data).pipe(map(canvas => {
         if (layer != null) {
           DrawUtil.drawManyPointLinesOnCanvas(canvas, layer.lines, color, size, drawPoints);
-          data.getImg().data = DrawUtil.canvasAsBase64(canvas);
+          data.img.data = DrawUtil.canvasAsBase64(canvas);
           console.log('layer img' + data.origName + ' ' + layer.id + ' ' + color);
         }
         return data;
       }))))
     );
-  }
-
-  public flask(endpoint: string) {
-    return flatMap((data: FilterData) => this.flaskService.processImage(data.getImg(), endpoint).pipe(map(cimg => {
-      console.log('Fask img' + atob(cimg.id));
-      data.setImg(cimg);
-      return data;
-    })));
   }
 
   public magic(command: string) {
@@ -623,7 +704,7 @@ export class FilterService {
             DrawUtil.drawSpline(canvas, bezierPoly.x[i], bezierPoly.y[i], bezierPoly.x[i + 1], bezierPoly.y[i + 1], bezierPoly.x[i + 2], bezierPoly.y[i + 2], bezierPoly.x[i + 3], bezierPoly.y[i + 3], color, size, drawPoints);
           }
 
-          data.getImg().data = DrawUtil.canvasAsBase64(canvas);
+          data.img.data = DrawUtil.canvasAsBase64(canvas);
         }
         console.log('Draw data');
         return data;

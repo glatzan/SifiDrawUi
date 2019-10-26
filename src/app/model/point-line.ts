@@ -3,10 +3,12 @@ import {Point} from './point';
 export class PointLine {
 
   id: string;
+  length: number;
   points: Point[] = [];
 
-  constructor(id ?: string) {
+  constructor(id ?: string, length?: number) {
     this.id = id;
+    this.length = length;
   }
 
   public add(x: number, y: number);

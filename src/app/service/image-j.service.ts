@@ -8,7 +8,7 @@ import {Observable} from "rxjs";
 })
 export class ImageJService {
 
-  private serverURL = 'http://127.0.0.1:8080';
+  private serverURL = 'http://192.168.10.114:8080';
 
   constructor(private _http: HttpClient) {
   }
