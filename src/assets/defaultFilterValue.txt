@@ -1,38 +1,10 @@
-// Filter factory: f.getSomeFilter
-// Start filter: start = f.getSomeFiler()
-// End filter: end = f.getSomeFilter(parentFilter)
-// Example
-//  start = f.getNewMagicFilter(undefined, "-resize 1000x1000");
-//  const f1 = f.getNewMagicFilter(start, "-level 25%,75%");
-//  end = f.getNewMagicFilter(f1, "+level-colors green,gold");
-//const v1 = f.magicWorker(start, "-threshold 20% -define connected-components:area-threshold=5 -define connected-components:mean-color=true -connected-components 8");
-
-
 m.load(),
-m.color("#000000",0,400),
-m.line(),
+m.pushImg(),
+m.flask("unetg5"),
+m.getLines(),
 m.sortLines(),
+m.reducePoints(20),
 m.drawLine(),
-m.reducePoints(),
-m.checkXProgression("green"),
-m.cubicSpline(),
-m.display(display)
-
-
-
-
-    // from(datasetID).pipe(concatMap(
-    //   x => this.datasetSerive.getDataset(x).pipe(
-    //     mergeMap(dataset =>
-    //       from(dataset.images).pipe(
-    //         me.load(),
-    //         this.color("#000000"),
-    //         this.layer("2", "#ffffff", 3, false),
-    //         this.layer("3", "#ffffff", 3, false),
-    //         this.layer("4", "#ffffff", 3, false),
-    //         me.classPrepare(),
-    //         me.save(datasetMapping,"_mask"),
-    //       )
-    //     )
-    //   )
-    // )).subscribe(x => console.log("test"));
+m.overlay([0,1],2),
+m.spline(),
+m.display(display),

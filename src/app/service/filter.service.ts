@@ -20,14 +20,14 @@ import {DisplayImageWorker} from "../worker/display-image-worker";
 import {MagicWorker} from "../worker/magic-worker";
 import {DisplayCallback} from "../worker/display-callback";
 import {BWClassPrepareWorker} from "../worker/b-w-class-prepare-worker";
-import {PNG} from "pngjs";
+import {ColorType, PNG} from "pngjs";
 import DrawUtil from "../utils/draw-util";
 import {Layer} from "../model/layer";
 import {PointLine} from "../model/point-line";
 import {Point} from "../model/point";
 import {CPolygon} from "../utils/cpolygon";
 import {SplineUtil} from "../utils/spline-util";
-import {PointLineUtil} from "../utils/point-line-util";
+import {DistancePointContainer, PointLineUtil} from "../utils/point-line-util";
 import {ImageJService} from "./image-j.service";
 import {FlaskService} from "./flask.service";
 import CImageUtil from "../utils/cimage-util";
@@ -308,8 +308,8 @@ export class FilterService {
     return flatMap((data: FilterData) => new Observable<FilterData>((observer) => {
       if (data.additionalData != null && data.additionalData.length > 1) {
         console.log("Sort lines");
-        const distancePointContainer = PointLineUtil.orderLines(data.additionalData);
-        data.additionalData = distancePointContainer.getLines();
+        data.additionalData = PointLineUtil.orderLines(data.additionalData);
+        ;
       }
       observer.next(data);
       observer.complete();
@@ -318,23 +318,25 @@ export class FilterService {
 
   public reducePoints(modulo: number = 10) {
     return flatMap((data: FilterData) => new Observable<FilterData>((observer) => {
-      if (data.additionalData != null) {
+      if (data.additionalData != null && data.additionalData instanceof DistancePointContainer) {
         console.log("Reduce Points");
-        for (let i = 0; i < data.additionalData.length; i++) {
-          const p = new PointLine();
-          p.addPoint(data.additionalData[i].getFirstPoint());
 
-          for (let y = 1; y < data.additionalData[i].points.length; y = y + modulo) {
-            if (p.getLastPoint().x != data.additionalData[i].points[y].x) {
-              p.addPoint(data.additionalData[i].points[y])
+        for (let i = 0; i < data.additionalData.getLines().length; i++) {
+          const p = new PointLine();
+          const line = data.additionalData.getLine(i);
+
+          p.addPoint(line.getFirstPoint());
+
+          for (let y = 1; y < line.points.length; y = y + modulo) {
+            if (p.getLastPoint().x != line.points[y].x) {
+              p.addPoint(line.points[y])
             }
           }
 
-          if (p.getLastPoint().x != data.additionalData[i].getLastPoint().x) {
-            p.addPoint(data.additionalData[i].getLastPoint())
+          if (p.getLastPoint().x != line.getLastPoint().x) {
+            p.addPoint(line.getLastPoint())
           }
-
-          data.additionalData[i] = p;
+          data.additionalData.setLine(i, p);
         }
       }
       observer.next(data);
@@ -342,15 +344,26 @@ export class FilterService {
     }));
   }
 
-  public drawLine(color: string = "", size: number = 1) {
+  public drawLine(color: string = "", size: number = 1, drawStartEndPoints = true, drawDistance = true) {
     return flatMap((data: FilterData) => DrawUtil.loadBase64AsCanvas(data.getImg().data).pipe(map(canvas => {
-        if (data.additionalData != null) {
+        if (data.additionalData != null && data.additionalData instanceof DistancePointContainer) {
           console.log('Draw Lines');
           let i = 0;
-          for (let a of data.additionalData) {
+          for (let a of data.additionalData.getLines()) {
             DrawUtil.drawPointLinesOnCanvas(canvas, a.points, color == "" ? CImageUtil.colors[i + 1] : color, size, false);
-            DrawUtil.drawPoint(canvas, a.points[0], "red");
-            DrawUtil.drawPoint(canvas, a.points[a.points.length - 1], "blue");
+
+            if (drawStartEndPoints) {
+              DrawUtil.text(canvas, "Start Line" + i, a.points[0], "12px Arial", "red");
+              DrawUtil.drawPoint(canvas, a.points[0], "red");
+              DrawUtil.text(canvas, "End Line" + i, a.points[a.points.length - 1], "12px Arial", "blue");
+              DrawUtil.drawPoint(canvas, a.points[a.points.length - 1], "blue");
+            }
+
+            if (i > 0 && drawDistance) {
+              console.log(i + "" + String(data.additionalData.getDistance(i)));
+              DrawUtil.text(canvas, String(data.additionalData.getDistance(i)), a.points[a.points.length - 1]);
+            }
+
             i++;
           }
           data.getImg().data = DrawUtil.canvasAsBase64(canvas);
@@ -360,7 +373,7 @@ export class FilterService {
     );
   }
 
-  public toGrayscale(){
+  public toGrayscale() {
     return flatMap((data: FilterData) => new Observable<FilterData>((observer) => {
         let buff = new Buffer(data.getImg().data, 'base64');
         let png = PNG.sync.read(buff);
@@ -484,14 +497,21 @@ export class FilterService {
 
   public otherSpline() {
     return flatMap((data: FilterData) => DrawUtil.loadBase64AsCanvas(data.getImg().data).pipe(map(canvas => {
-        if (data.additionalData != null) {
-
+        if (data.additionalData != null && data.additionalData instanceof DistancePointContainer) {
+          console.log("OtherSpline")
           const result = [];
 
-          for (let a  of data.additionalData) {
+          const lines = data.additionalData.getLines();
+
+          for (let a  of lines) {
             for (let p of a.points) {
-              result.push(Math.round(p.x));
-              result.push(Math.round(p.y));
+              console.log("adding point")
+              if (result.length === 0 || result[result.length - 1] != p.x) {
+                result.push(p.x);
+                result.push(p.y);
+              } else {
+                console.log("Skipping double points")
+              }
             }
           }
 
@@ -514,45 +534,61 @@ export class FilterService {
 
   public cubicSpline() {
     return flatMap((data: FilterData) => DrawUtil.loadBase64AsCanvas(data.getImg().data).pipe(map(canvas => {
-        if (data.additionalData != null) {
+        if (data.additionalData != null && data.additionalData instanceof DistancePointContainer) {
           console.log("Cubic spline ")
-
-          console.log(data.additionalData)
 
           const Spline = require('cubic-spline');
 
           const xs = [];
           const ys = [];
 
-          const ss = data.additionalData;
-          for (let pointline  of data.additionalData) {
+          const lines = data.additionalData.getLines();
+
+          for (let pointline  of lines) {
             for (let points of pointline.points) {
-              xs.push(points.x);
-              ys.push(points.y);
+
+              if (xs.length == 0 || xs[xs.length - 1] != points.x) {
+                xs.push(points.x);
+                ys.push(points.y);
+              } else {
+                console.log("Skipping double points")
+              }
             }
           }
 
+          console.log(xs)
+
           if (xs[0] > xs[xs.length - 1]) {
-            xs.reverse()
-            ys.reverse()
+            console.log("reverse line!")
+            xs.reverse();
+            ys.reverse();
           }
 
-          const start = xs[0]
+          const start = xs[0];
 
           // new a Spline object
           let spline = new Spline(xs, ys);
 
           const cx = canvas.getContext('2d');
-          cx.strokeStyle = "red";
-          cx.fillStyle = "red"
+          cx.strokeStyle = "green";
+          cx.fillStyle = "green"
           cx.lineWidth = 1;
+
+          let valid = false;
 
           for (let i = start; i < 1300; i++) {
             const c = spline.at(i)
             if (!isNaN(c)) {
               cx.fillRect(i, c, 2, 2);
+              valid = true;
+              console.log("draw Point at " + i)
             }
           }
+
+          if (valid)
+            console.log("valid")
+          else
+            console.log("not valid")
 
           data.getImg().data = DrawUtil.canvasAsBase64(canvas);
         }
@@ -563,14 +599,19 @@ export class FilterService {
 
   public spline(tension: number = 0.5, color: string = "#cb0000", size = 1, drawPoints = false) {
     return flatMap((data: FilterData) => DrawUtil.loadBase64AsCanvas(data.getImg().data).pipe(map(canvas => {
-        if (data.additionalData != null) {
+        if (data.additionalData != null && data.additionalData instanceof DistancePointContainer) {
 
           const poly = new CPolygon();
 
+          const lines = data.additionalData.getLines();
 
-          for (let pointlines of data.additionalData) {
+          for (let pointlines of lines) {
             for (let point of pointlines.points) {
-              poly.addPoint(Math.round(point.x), Math.round(point.y));
+              if (poly.x.length == 0 || poly.x[poly.x.length - 1] != point.x) {
+                poly.addPoint(point.x, point.y);
+              } else {
+                console.log("Skipping double points")
+              }
             }
           }
 
@@ -661,40 +702,36 @@ export class FilterService {
     }));
   }
 
-  public overlay() {
+  public overlay(imgs: number[], imageType: ColorType = 0) {
     return flatMap((data: FilterData) => new Observable<FilterData>((observer) => {
 
-        if (arguments.length >= 2 && data.imgStack.length >= 2) {
+        if (imgs.length >= 2 && data.imgStack.length >= 2) {
 
           console.log("Overlay");
 
-          if (!isNumber(arguments[0]) && arguments[0] > 0 && arguments[0] < data.imgStack.length)
+          if (!isNumber(imgs[0]) && imgs[0] > 0 && imgs[0] < data.imgStack.length)
             observer.error();
 
-          const buff = new Buffer(data.getImg(arguments[0]).data, 'base64');
+          const buff = new Buffer(data.getImg(imgs[0]).data, 'base64');
           const png = PNG.sync.read(buff);
 
-          console.log(atob(data.getImg(arguments[0]).data))
+          for (let i = 1; i < imgs.length; i++) {
 
-          for (let i = 1; i < arguments.length; i++) {
+            if (!isNumber(imgs[i]) && imgs[i] > 0 && imgs[i] < data.imgStack.length)
+              observer.error(`Wrong argument ${imgs[i]}`);
 
-            if (!isNumber(arguments[i]) && arguments[i] > 0 && arguments[i] < data.imgStack.length)
-              observer.error(`Wrong argument ${arguments[i]}`);
-
-            console.log(atob(data.getImg(arguments[i]).data))
-
-            const buff2 = new Buffer(data.getImg(arguments[i]).data, 'base64');
+            const buff2 = new Buffer(data.getImg(imgs[i]).data, 'base64');
             const png2 = PNG.sync.read(buff2);
 
-           // if (png.width != png2.width || png.height != png2.height){
-           //   observer.error(`Image does not match ${png.width} - ${png2.width} / ${png.height} - ${png2.height}`);
-           // }
+            // if (png.width != png2.width || png.height != png2.height){
+            //   observer.error(`Image does not match ${png.width} - ${png2.width} / ${png.height} - ${png2.height}`);
+            // }
 
             for (let y = 0; y < png.height; y++) {
               for (let x = 0; x < png.width; x++) {
                 let idx = (png.width * y + x) << 2;
 
-               // console.log(`${png2.data[idx]} - ${png2.data[idx+1]} - ${png2.data[idx+2]}`)
+                // console.log(`${png2.data[idx]} - ${png2.data[idx+1]} - ${png2.data[idx+2]}`)
                 if (png2.data[idx] > 0 || png2.data[idx + 1] > 0 || png2.data[idx + 2] > 0) {
                   png.data[idx] = png2.data[idx];
                   png.data[idx + 1] = png2.data[idx + 1];
@@ -704,7 +741,8 @@ export class FilterService {
             }
           }
 
-          let buffer = PNG.sync.write(png, {colorType: 0});
+          //
+          let buffer = PNG.sync.write(png, {colorType: imageType});
           this.pushImg();
           data.getImg().data = buffer.toString('base64');
 

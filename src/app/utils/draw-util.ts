@@ -113,8 +113,8 @@ export default class DrawUtil {
     cx.lineWidth = size;
     cx.fillStyle = color;
     cx.beginPath();
-    console.log("start "+ startX + " " + startY)
-    console.log("end "+ endX + " " + endY)
+    console.log("start " + startX + " " + startY)
+    console.log("end " + endX + " " + endY)
     cx.moveTo(startX, startY); // from
     cx.bezierCurveTo(e1X, e1Y, e2X, e2Y, endX, endY);
     cx.stroke();
@@ -146,10 +146,24 @@ export default class DrawUtil {
     }
   }
 
-  static drawPoint(canvas: HTMLCanvasElement,points: Point, color: string = '#fff', size: number = 2,){
+  static drawPoint(canvas: HTMLCanvasElement, points: Point, color: string = '#fff', size: number = 2,) {
     const cx = canvas.getContext('2d');
     cx.fillStyle = color;
     cx.fillRect(points.x, points.y, size, size);
+  }
+
+  /**
+   * Draws a text on the canvas
+   * @param canvas
+   * @param text
+   * @param position
+   * @param style
+   */
+  static text(canvas: HTMLCanvasElement, text: string, position: Point, style: string = "20px Arial", fontColor: string = "#ff0000") {
+    const ctx = canvas.getContext("2d");
+    ctx.fillStyle = fontColor;
+    ctx.font = style;
+    ctx.fillText(text, position.x, position.y);
   }
 
   /**
