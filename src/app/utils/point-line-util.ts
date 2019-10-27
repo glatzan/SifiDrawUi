@@ -163,13 +163,17 @@ export class DistancePointContainer {
     let i = 0;
 
     if (this.lines.length == 0) {
-      if (lines.length != distances.length - 1)
+      if (lines.length - 1 != distances.length) {
+        console.log(`Lines ${lines.length} must have distances-1 ${distances.length}`)
         return;
+      }
       this.lines.push(lines[0])
       i++;
     } else {
-      if (lines.length != distances.length)
+      if (lines.length != distances.length) {
+        console.log("Lines and distances have to be equal in length")
         return;
+      }
     }
 
 
@@ -191,13 +195,33 @@ export class DistancePointContainer {
   }
 
   public getDistanceToNextLine(lineNumber: number): number {
-    if (lineNumber >= this.lines.length - 1)
+    if (lineNumber >= this.lines.length - 1 || lineNumber < 0)
       return 0;
     return this.distance[lineNumber];
   }
 
+  public setDistanceToNextLine(lineNumber: number, distance: number) {
+    if (lineNumber >= this.lines.length - 1 || lineNumber < 0)
+      return;
+
+    this.distance[lineNumber] = distance;
+  }
+
+  public getIndexOfLine(line: PointLine): number {
+    for (let i = 0; i < this.lines.length; i++) {
+      if (line === this.lines[i])
+        return i;
+    }
+  }
+
   public getTotalLength() {
-    return this.lines.reduce((a, b) => a + b.length, 0) + this.distance.reduce((a, b) => a + b, 0);
+    let length = 0;
+    console.log(this.lines)
+    this.lines.forEach(line => length += line.length);
+    this.distance.forEach(dist => length += dist)
+    console.log("-----")
+    console.log(length)
+    return length;
   }
 
   public hasLines(): boolean {

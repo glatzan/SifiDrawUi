@@ -29,7 +29,6 @@ import {
   MatTabsModule
 } from '@angular/material';
 import {FormsModule} from "@angular/forms";
-import {MatColorPickerModule} from "mat-color-picker";
 import {MccColorPickerModule} from "material-community-components";
 import { ImportDialogComponent } from './components/import-dialog/import-dialog.component';
 import {MatSnackBarModule} from '@angular/material';

@@ -1,10 +1,29 @@
+// graft
+//m.load(),
+//m.cloneImage(),
+//m.cloneImage(),
+//m.flask("graft1"),
+//m.findCenterLines(),
+//m.sortLines(),
+//m.drawLines(),
+//m.prepareGraft(),
+//m.overlay([0,2],2),
+//m.spline({sourceName : "graftLines"}),
+//m.display(display)
+
+// host line
 m.load(),
-m.pushImg(),
-m.flask("unetg5"),
-m.getLines(),
-m.sortLines(),
-m.reducePoints(20),
-m.drawLine(),
-m.overlay([0,1],2),
-m.spline(),
-m.display(display),
+m.cloneImage(),
+//m.cloneImage(),
+//m.flask("unetg5"),
+//m.findCenterLines(),
+//m.sortLines(),
+//m.reducePoints(20),
+//m.drawLines(),
+//m.prepareHost(),
+//m.overlay([0,2],2),
+m.drawTest(),
+//m.activeImage(1),
+//m.spline({sourceName : "hostLines"}),
+m.display(display)
+

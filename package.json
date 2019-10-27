@@ -22,6 +22,7 @@
     "@angular/platform-browser-dynamic": "~8.2.0",
     "@angular/router": "~8.2.0",
     "@types/pngjs": "^3.3.2",
+    "algebra.js": "^0.2.5",
     "buffer": "^5.4.3",
     "cardinal-spline-js": "^2.3.10",
     "chart.js": "^2.8.0",

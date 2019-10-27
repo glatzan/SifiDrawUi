@@ -37,11 +37,4 @@ export class FilterData {
     this.imgStack.splice(-1, 1)
   }
 
-  public setImg(img: CImage) {
-    if (this.imgStack.length == 0) {
-      this.pushIMG(img);
-    } else {
-      this.imgStack[this.imgStack.length - 1] = img;
-    }
-  }
 }

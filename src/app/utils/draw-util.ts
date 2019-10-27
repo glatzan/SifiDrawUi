@@ -113,8 +113,6 @@ export default class DrawUtil {
     cx.lineWidth = size;
     cx.fillStyle = color;
     cx.beginPath();
-    console.log("start " + startX + " " + startY)
-    console.log("end " + endX + " " + endY)
     cx.moveTo(startX, startY); // from
     cx.bezierCurveTo(e1X, e1Y, e2X, e2Y, endX, endY);
     cx.stroke();
