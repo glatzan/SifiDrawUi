@@ -2,6 +2,28 @@ import {Point} from '../model/point';
 
 export default class VectorUtils {
 
+  static standardDeviation(array: number[]) {
+    let len = 0;
+    let sum = array.reduce(function (pv, cv) {
+      ++len;
+      return pv + cv;
+    }, 0);
+    let mean = sum / len;
+    let result = 0;
+    for (let i = 0; i < len; i++)
+      result += Math.pow(array[i] - mean, 2);
+    len = (len == 1) ? len : len - 1;
+    return Math.sqrt(result / len);
+  }
+
+  static mean(array: number[]) {
+    let sum = array.reduce((pv, cv) => {
+      console.log(pv)
+      return pv + cv;
+    }, 0);
+    return sum / array.length;
+  }
+
   static distance(p1: Point, p2: Point): number {
     return Math.sqrt((p1.x - p2.x) ** 2 + (p1.y - p2.y) ** 2);
   }

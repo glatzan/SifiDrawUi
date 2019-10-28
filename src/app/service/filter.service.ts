@@ -26,7 +26,7 @@ import {isNumber} from "util";
 import {ProcessCallback} from "../worker/processCallback";
 import {DisplayCallback} from "../worker/display-callback";
 import {Expression, Equation, parse} from 'algebra.js';
-
+import VectorUtils from "../utils/vector-utils";
 
 @Injectable({
   providedIn: 'root'
@@ -465,74 +465,227 @@ export class FilterService {
     );
   }
 
-  public drawTest(color: string = "", size: number = 1, drawStartEndPoints = true, drawDistance = true, sourceName: string = "sortedLines") {
+  public drawTest(color: string = "", size: number = 1, drawStartEndPoints = true, drawDistance = true, sourceName: string = "lines") {
     return flatMap((data: FilterData) => DrawUtil.loadBase64AsCanvas(data.img.data).pipe(map(canvas => {
 
         const sortedLines = data.getData(sourceName);
 
-        // if (sortedLines instanceof DistancePointContainer && sortedLines.hasLines()) {
-        //   console.log("Preparing Host");
-        //
-        //   const centerPoint = 675;
-        //   const maxPointThreashold = 100
+        if (sortedLines instanceof DistancePointContainer && sortedLines.hasLines()) {
+          console.log("Preparing Host");
 
-        let topPoint = new Point(675, 300)
-        // for (let line of sortedLines.getLines()) {
-        //
-        //   if ((line.getFirstPoint().x < centerPoint && line.getLastPoint().x > centerPoint) || (line.getFirstPoint().x > centerPoint && line.getLastPoint().x < centerPoint)) {
-        //     for (let point of line.points) {
-        //       if (point.x > centerPoint - 100 && point.x < centerPoint + 100) {
-        //         if (point.y < topPoint.y) {
-        //           topPoint.x = point.x;
-        //           topPoint.y = point.y;
-        //         }
-        //       }
-        //     }
-        //
-        //   }
-        // }
+          const centerPoint = 675;
+          const maxPointThreashold = 50
+
+          let topPoint = new Point(675, 200)
+          for (let line of sortedLines.getLines()) {
+
+            if ((line.getFirstPoint().x < centerPoint && line.getLastPoint().x > centerPoint) || (line.getFirstPoint().x > centerPoint && line.getLastPoint().x < centerPoint)) {
+              for (let point of line.points) {
+                if (point.x > centerPoint - 100 && point.x < centerPoint + 100) {
+                  if (point.y < topPoint.y) {
+                    topPoint.x = Math.ceil(point.x / 5) * 5;
+                    topPoint.y = point.y;
+                  }
+                }
+              }
+
+            }
+          }
+
+          console.log("-----------------")
+          console.log(topPoint)
+          console.log("-----------------")
+
+          for (let x = 0; x < 1351; x++) {
+            let y = 0.001 * Math.pow(x - topPoint.x, 2) + topPoint.y;
+            DrawUtil.drawPoint(canvas, new Point(x, y))
+          }
 
 
-        for (let x = 0; x < 1351; x++) {
-          let y = 0.001 * Math.pow(x - topPoint.x, 2) + topPoint.y;
-          DrawUtil.drawPoint(canvas, new Point(x, y))
+          const join = function (l1: PointLine, lines: PointLine[], maxDistance: number) {
+
+            let shortestDistance = {
+              distance: Math.max(),
+              firstLine: Direction.FirstPoint,
+              secondLine: Direction.FirstPoint
+            };
+
+
+            for (let l2 of lines) {
+
+
+              let dist = VectorUtils.distance(l1.getFirstPoint(), l2.getFirstPoint());
+
+              if (dist < maxDistance && dist < shortestDistance.distance) {
+                shortestDistance.distance = dist;
+                shortestDistance.firstLine = Direction.FirstPoint;
+                shortestDistance.secondLine = Direction.FirstPoint;
+              }
+
+              dist = VectorUtils.distance(l1.getFirstPoint(), l2.getLastPoint());
+              if (dist < maxDistance && dist < shortestDistance.distance) {
+                shortestDistance.distance = dist;
+                shortestDistance.firstLine = Direction.FirstPoint;
+                shortestDistance.secondLine = Direction.LastPoint;
+              }
+
+              dist = VectorUtils.distance(l1.getLastPoint(), l2.getFirstPoint());
+              if (dist < maxDistance && dist < shortestDistance.distance) {
+                shortestDistance.distance = dist;
+                shortestDistance.firstLine = Direction.LastPoint;
+                shortestDistance.secondLine = Direction.FirstPoint;
+              }
+
+              dist = VectorUtils.distance(l1.getLastPoint(), l2.getLastPoint());
+              if (dist < maxDistance && dist < shortestDistance.distance) {
+                shortestDistance.distance = dist;
+                shortestDistance.firstLine = Direction.LastPoint;
+                shortestDistance.secondLine = Direction.LastPoint;
+              }
+
+              if (shortestDistance.distance != Math.max()) {
+                if (shortestDistance.firstLine == Direction.FirstPoint)
+                  l1.points.reverse();
+
+                if (shortestDistance.secondLine === Direction.LastPoint)
+                  l2.points.reverse();
+
+                l1.points = [...l1.points, ...l2.points];
+              }
+            }
+
+          };
+
+          enum Direction {
+            FirstPoint, LastPoint;
         }
 
-        const points = data.img.layers[0].lines[0];
+          const equation = `(-500/(x - ${topPoint.x}))*(%p.x%-x)+(0.001*(x-${topPoint.x})*(x-${topPoint.x})+${topPoint.y})`;
 
-        for(let p of points){
-          const equation = `(-1/(0.002*(x-${topPoint.x})))*(${p.x}-x)+(0.001*(x-${topPoint.x})*(x-${topPoint.x})+${topPoint.y})`;
-          console.log("P1 " + p.x + " " + p.y)
-          console.log(equation)
-          // const cas = require('../utils/cas');
-          // const result = new cas.Equation("100=(-1/(0.002*(x-691)))*(100-x)+(0.001*Math.pow(x-691,2)+115)").solve() // => 2
-          //(-1/(0.002*(x-675)))*(100-x)+(0.001*Math.pow(x-675,2)+300)
+          data.setData(new HostData(equation, topPoint), "hostData")
+          let i = 0;
+          for (let line of sortedLines.getLines()) {
 
-          var n1 = parse(equation);
-          var quad = new Equation(n1, p.y);
+            const result: number[] = [];
 
-          var answers = quad.solveFor("x");
+            for (let p of line.points) {
+              //const equation = `(-500/(x - ${topPoint.x}))*(${p.x}-x)+(0.001*(x-${topPoint.x})*(x-${topPoint.x})+${topPoint.y})`;
+              const eq = equation.replace("%p.x%", String(p.x));
+              //console.log("P1 " + p.x + " " + p.y)
+              //console.log(equation)
 
-          let y =  0.001 * Math.pow(answers - topPoint.x, 2) + topPoint.y;
+              try {
+                var n1 = parse(eq);
+                var quad = new Equation(n1, p.y);
 
-          console.log("x: " + answers + " y: " + y)
+                var answers = quad.solveFor("x");
 
-          DrawUtil.drawPointLineOnCanvas(canvas, p, new Point(answers,y),'red');
+                let y = 0.001 * Math.pow(answers - topPoint.x, 2) + topPoint.y;
 
-          console.log("Result" + answers);
+                //console.log("x: " + answers + " y: " + y)
+
+                DrawUtil.drawPointLineOnCanvas(canvas, p, new Point(answers, y), 'red');
+
+                const r = VectorUtils.distance(p, new Point(answers, y))
+
+                result.push(r);
+              } catch (e) {
+                console.error("error");
+              }
+              console.log("Result" + answers);
+            }
+
+            const mean = VectorUtils.mean(result);
+            if (mean < 30)
+              DrawUtil.drawPointLinesOnCanvas(canvas, line.points, CImageUtil.colors[i + 1], 2);
+            else
+              DrawUtil.drawPointLinesOnCanvas(canvas, line.points, "red", 3)
+            i++;
+          }
+
+          data.img.data = DrawUtil.canvasAsBase64(canvas);
         }
-
-
-
-
-        //for(let)
-        data.img.data = DrawUtil.canvasAsBase64(canvas);
-        // }
         return data;
       }))
     );
   }
 
+  public drawGraft(sourceName: string = "lines") {
+    return flatMap((data: FilterData) => DrawUtil.loadBase64AsCanvas(data.img.data).pipe(map(canvas => {
+
+        const lines = data.getData(sourceName);
+        const hostData = data.getData("hostData");
+
+        if (lines instanceof DistancePointContainer && lines.hasLines() && hostData instanceof HostData) {
+          let i = 0;
+          for (let line of lines.getLines()) {
+
+            const result: number[] = [];
+            const points: Point[][] = [];
+
+            for (let p of line.points) {
+              //const equation = `(-500/(x - ${topPoint.x}))*(${p.x}-x)+(0.001*(x-${topPoint.x})*(x-${topPoint.x})+${topPoint.y})`;
+              const eq = hostData.formula.replace("%p.x%", String(p.x));
+              //console.log("P1 " + p.x + " " + p.y)
+              //console.log(equation)
+
+              try {
+                var n1 = parse(eq);
+                var quad = new Equation(n1, p.y);
+
+                var answers = Math.round(quad.solveFor("x"));
+
+                let y = Math.round(0.001 * Math.pow(answers - hostData.topPosition.x, 2) + hostData.topPosition.y);
+
+                //console.log("x: " + answers + " y: " + y)
+
+                DrawUtil.drawPointLineOnCanvas(canvas, p, new Point(answers, y), 'green');
+                const linePoint = new Point(answers, y);
+                const r = VectorUtils.distance(p, new Point(answers, y))
+
+                points.push([p, linePoint])
+
+                result.push(r);
+              } catch (e) {
+                console.error("error");
+              }
+            }
+
+            const mean = VectorUtils.mean(result);
+            const dir = points.map(x => VectorUtils.directionVector(x[0], x[1]));
+            const dirY = VectorUtils.mean(dir.map(x => x.y));
+
+            console.log("Dir -----------------")
+            console.log(`Dir ${dir[0].x}/${dir[0].y}`);
+            console.log(`Dir ${dirY}`);
+
+            DrawUtil.text(canvas, `Line ${i}`, new Point(points[0][0].x, points[0][0].y), "8px Arial", "yellow")
+            DrawUtil.text(canvas, `Dist ${mean}`, new Point(points[0][0].x, points[0][0].y + 10), "8px Arial", "yellow")
+            DrawUtil.text(canvas, `${Math.round(dir[0].x)} / ${Math.round(dir[0].y)}`, new Point(points[0][0].x, points[0][0].y + 20), "8px Arial", "yellow")
+            DrawUtil.text(canvas, `P ${points[0][0].x}/${points[0][0].y} - ${points[0][1].x}/${points[0][1].y}`, new Point(points[0][0].x, points[0][0].y + 30), "8px Arial", "yellow")
+
+            if (dirY < -10) {
+              DrawUtil.drawPointLinesOnCanvas(canvas, line.points, "red", 3)
+              DrawUtil.text(canvas, `Out`, new Point(points[0][0].x, points[0][0].y + 40), "8px Arial", "red")
+            }
+
+
+            if (mean < 50)
+              DrawUtil.drawPointLinesOnCanvas(canvas, line.points, CImageUtil.colors[i + 1], 2);
+            else {
+              DrawUtil.drawPointLinesOnCanvas(canvas, line.points, "red", 3)
+            }
+
+
+            i++;
+          }
+        }
+
+        data.img.data = DrawUtil.canvasAsBase64(canvas);
+        return data;
+      }))
+    );
+  }
 
   /**
    * 0 = grey, 2 = color
@@ -936,5 +1089,16 @@ export class FilterService {
       observer.next(data);
       observer.complete();
     }));
+  }
+}
+
+
+class HostData {
+  formula: string;
+  topPosition: Point
+
+  constructor(formula: string, topPosition: Point) {
+    this.formula = formula;
+    this.topPosition = topPosition;
   }
 }
