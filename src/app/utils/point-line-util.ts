@@ -121,8 +121,8 @@ export class PointLineUtil {
 }
 
 export class DistancePointContainer {
-  private lines: PointLine[] = [];
-  private distance: number[] = [];
+  lines: PointLine[] = [];
+  distance: number[] = [];
 
   constructor()
   constructor(line1: PointLine)
