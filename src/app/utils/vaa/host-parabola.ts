@@ -1,0 +1,68 @@
+import DrawUtil from "../draw-util";
+import {Point} from "../../model/point";
+import {Vector} from "./model/vector";
+import {ComplexLine} from "./model/complex-line";
+import CImageUtil from "../cimage-util";
+
+export class HostParabola {
+
+  public static drawParabola(canvas, referencePoint: Vector, from: number = 0, to: number = 1350) {
+    for (let x = 0; x < 1351; x++) {
+      let y = 0.001 * Math.pow(x - referencePoint.x, 2) + referencePoint.y;
+      DrawUtil.drawPoint(canvas, new Point(x, y))
+    }
+  }
+
+  public static findTopPointEndothelial(lines: ComplexLine, canvas, centerPoint: number = 675, horizontalRange: number = 50) {
+    const result: number[] = new Array<number>(horizontalRange);
+    result.fill(Number.MAX_VALUE)
+    const start = centerPoint - Math.floor(horizontalRange / 2);
+    const end = centerPoint + Math.floor(horizontalRange / 2);
+
+
+    for (let container of lines.lines) {
+      if (container.line.getFirstPoint().x < end) {
+        console.log("Line - " +container.line.id)
+        for (let point of container.line.getPoints()) {
+          if (point.x >= start && point.x <= end) {
+
+            const v = result[point.x - start]
+
+            if (point.y < result[point.x - start]) {
+              result[point.x - start] = point.y;
+            }
+          }
+        }
+
+      }
+    }
+
+    let count = 0;
+    const value = result.reduce((a, b) => {
+      if (b != Number.MAX_VALUE) {
+        count++;
+        return a + b;
+      } else
+        return a;
+    })
+
+    const y = value/count;
+
+    DrawUtil.drawPointLineOnCanvas(canvas, new Point(start, y - 10), new Point(start, y + 10), "red", 1, false);
+    DrawUtil.drawPointLineOnCanvas(canvas, new Point(end, y - 10), new Point(end, y + 10), "red", 1, false);
+    DrawUtil.drawPointLineOnCanvas(canvas, new Point(start, y ), new Point(end, y), "red", 1, false);
+
+    return value/count;
+  }
+
+  public static paintLines(lines: ComplexLine, canvas){
+    let i  = 0;
+    for(let l of lines.lines){
+      DrawUtil.drawPointLinesOnCanvas(canvas, l.line.getPoints(), CImageUtil.colors[i + 1], 2);
+      DrawUtil.drawPoint(canvas, new Point(l.line.getFirstPoint().x, l.line.getFirstPoint().y), "Green", 4)
+      DrawUtil.drawPoint(canvas, new Point(l.line.getLastPoint().x, l.line.getLastPoint().y), "Blue", 4)
+      DrawUtil.text(canvas, `Line (${i}) ${l.line.id}`, new Point(l.line.getFirstPoint().x + 5, l.line.getFirstPoint().y + 5), "16px Arial", "DarkOrange")
+      i++;
+    }
+  }
+}

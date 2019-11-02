@@ -7,13 +7,12 @@ import {CImage} from "../model/cimage";
 import {ImageEventFilter} from "../filter/image-event-filter";
 import {ImageService} from "./image.service";
 import {Dataset} from "../model/dataset";
-import {defer, forkJoin, from, merge, Observable, of, Subject} from "rxjs";
-import {concatMap, finalize, flatMap, ignoreElements, map, mergeMap, tap} from "rxjs/operators";
+import {forkJoin, from, Observable} from "rxjs";
+import {concatMap, flatMap, map, mergeMap} from "rxjs/operators";
 import {FilterData} from "../worker/filter-data";
 import {ColorType, PNG} from "pngjs";
 import DrawUtil from "../utils/draw-util";
 import {Layer} from "../model/layer";
-import {PointLine} from "../model/point-line";
 import {Point} from "../model/point";
 import {CPolygon} from "../utils/cpolygon";
 import {SplineUtil} from "../utils/spline-util";
@@ -25,14 +24,14 @@ import {DatasetService} from "./dataset.service";
 import {isNumber} from "util";
 import {ProcessCallback} from "../worker/processCallback";
 import {DisplayCallback} from "../worker/display-callback";
-import {Expression, Equation, parse} from 'algebra.js';
+import {Equation, parse} from 'algebra.js';
 import VectorUtils from "../utils/vector-utils";
 import {HostEpithelial} from "../utils/vaa/host-epithelial";
 import {SimpleLine} from "../utils/vaa/model/simple-line";
 import {Vector} from "../utils/vaa/model/vector";
 import {ComplexLine} from "../utils/vaa/model/complex-line";
-import {Line} from "../utils/vaa/model/line";
 import {HostParabola} from "../utils/vaa/host-parabola";
+import {LineJoiner} from "../utils/vaa/LineJoiner";
 
 @Injectable({
   providedIn: 'root'
@@ -296,8 +295,8 @@ export class FilterService {
             dis.addLines(Array.from(map.values()));
 
             for (let line of dis.lines) {
-              if (line.line.getFirstPoint().x > line.line.getLastPoint().x)
-                line.line.reverse();
+              if (line.getFirstPoint().x > line.getLastPoint().x)
+                line.reverse();
             }
 
             console.log(dis)
@@ -485,17 +484,19 @@ export class FilterService {
   public drawTest(color: string = "", size: number = 1, drawStartEndPoints = true, drawDistance = true, sourceName: string = "lines") {
     return flatMap((data: FilterData) => DrawUtil.loadBase64AsCanvas(data.img.data).pipe(map(canvas => {
 
-        const sortedLines = data.getData(sourceName);
+        const complexLine = data.getData(sourceName);
 
-        if (sortedLines instanceof ComplexLine && sortedLines.hasPoints()) {
+        if (complexLine instanceof ComplexLine && complexLine.hasPoints()) {
           const hostEpithelialValues = HostEpithelial.scanHost(data, canvas);
           const meanHostEpithelialValues = HostEpithelial.reduceMeanValues(hostEpithelialValues);
           const epithelialTopPoint = HostEpithelial.findTopPoint(meanHostEpithelialValues, canvas);
 
           HostParabola.drawParabola(canvas, epithelialTopPoint);
-          HostParabola.findTopPointEndothelial(sortedLines, canvas, epithelialTopPoint.x);
+          HostParabola.findTopPointEndothelial(complexLine, canvas, epithelialTopPoint.x);
 
-          HostParabola.paintLines(sortedLines, canvas);
+          HostParabola.paintLines(complexLine, canvas);
+
+          LineJoiner.joinComplexLine(complexLine, 25);
         }
 
         // const sortedLines = data.getData(sourceName);
@@ -561,22 +562,22 @@ export class FilterService {
 
         //
         //
-          const joinAll = function (lines: PointLine[], maxDistance: number): PointLine[] {
-            const result: PointLine[] = [];
-
-            while (lines.length != 0) {
-              console.log(`-> Start Elemts ${lines.length} Results ${result.length}`)
-              const res = join(lines.pop(), lines, maxDistance, 0);
-              result.push(res[0]);
-              lines = res[1];
-
-              console.log(`-> End Elemts ${lines.length} Results ${result.length}`)
-            }
-
-            console.log(result);
-            return result;
-          };
+        //   const joinAll = function (lines: PointLine[], maxDistance: number): PointLine[] {
+        //     const result: PointLine[] = [];
         //
+        //     while (lines.length != 0) {
+        //       console.log(`-> Start Elemts ${lines.length} Results ${result.length}`)
+        //       const res = join(lines.pop(), lines, maxDistance, 0);
+        //       result.push(res[0]);
+        //       lines = res[1];
+        //
+        //       console.log(`-> End Elemts ${lines.length} Results ${result.length}`)
+        //     }
+        //
+        //     console.log(result);
+        //     return result;
+        //   };
+        // //
         //
         //
         //   const joinLines = function (firstLine: PointLine, secondLine: PointLine, secondLinePosition: Direction) {
@@ -595,121 +596,121 @@ export class FilterService {
         //     }
         //   }
         //
-          const join = function (firstLine: PointLine, lines: PointLine[], maxDistance: number, depth: number): [PointLine, Array<PointLine>] {
-
-            console.log("Recusive " + depth)
-            const nearestLines: shortestDistance[] = []
-
-
-            for (let l2 of lines) {
-
-              let tmp: shortestDistance = null;
-
-              let dist = VectorUtils.distance(firstLine.getFirstPoint(), l2.getFirstPoint());
-
-              // console.log(`Distance ${dist}  ${firstLine.id} ${l2.id} - First - First`)
-              if (dist < maxDistance && (tmp === null || dist < tmp.distance)) {
-                tmp = new shortestDistance();
-                tmp.distance = dist;
-                tmp.firstLine = Direction.FirstPoint;
-                tmp.secondLine = Direction.FirstPoint;
-                tmp.line = l2;
-              }
-
-              dist = VectorUtils.distance(firstLine.getFirstPoint(), l2.getLastPoint());
-              // console.log(`Distance ${dist}  ${firstLine.id} ${l2.id} - First - Last`)
-              if (dist < maxDistance && (tmp === null || dist < tmp.distance)) {
-                tmp = new shortestDistance();
-                tmp.distance = dist;
-                tmp.firstLine = Direction.FirstPoint;
-                tmp.secondLine = Direction.LastPoint;
-                tmp.line = l2;
-              }
-
-              dist = VectorUtils.distance(firstLine.getLastPoint(), l2.getFirstPoint());
-              // console.log(`Distance ${dist}  ${firstLine.id} ${l2.id} - Last - First`)
-              if (dist < maxDistance && (tmp === null || dist < tmp.distance)) {
-                tmp = new shortestDistance();
-                tmp.distance = dist;
-                tmp.firstLine = Direction.LastPoint;
-                tmp.secondLine = Direction.FirstPoint;
-                tmp.line = l2;
-              }
-
-              dist = VectorUtils.distance(firstLine.getLastPoint(), l2.getLastPoint());
-              // console.log(`Distance ${dist}  ${firstLine.id} ${l2.id} - Last - Last`)
-              if (dist < maxDistance && (tmp === null || dist < tmp.distance)) {
-                tmp = new shortestDistance();
-                tmp.distance = dist;
-                tmp.firstLine = Direction.LastPoint;
-                tmp.secondLine = Direction.LastPoint;
-                tmp.line = l2;
-              }
-
-              if (tmp != null) {
-                nearestLines.push(tmp);
-                console.log("Pushing")
-                console.log(tmp)
-              }
-
-
-              // console.log("--")
-            }
-
-            if (nearestLines.length > 0) {
-
-              console.log("Two Ways")
-              let result = null;
-
-              for (let nearestLine of nearestLines) {
-
-                console.log("Line" + firstLine.id + " / " + nearestLine.line.id);
-                const joinVector = joinDir(firstLine, nearestLine.line, nearestLine.secondLine);
-
-                console.log()
-                console.log("-----" + VectorUtils.angle(VectorUtils.reducedDirectionVector(firstLine), VectorUtils.reducedDirectionVector(nearestLine.line)))
-
-                const join1 = VectorUtils.angle(VectorUtils.reducedDirectionVector(firstLine), joinVector);
-                const join2 = VectorUtils.angle(VectorUtils.reducedDirectionVector(nearestLine.line), joinVector);
-
-                console.log("----1 " + join1)
-                console.log("----2 " + join2)
-
-                if (join2 < 0.5 || join1 < 0.5)
-                  continue;
-
-                const newline = new PointLine();
-                newline.id = firstLine.id + "-" + nearestLine.line.id;
-                newline.length = firstLine.length + nearestLine.line.length;
-                newline.points = joinLines(firstLine, nearestLine.line, nearestLine.secondLine);
-
-                const clonedLines = Object.assign([], lines);
-
-                for (let line of clonedLines) {
-                  if (line.id === nearestLine.line.id) {
-                    const index = lines.indexOf(line)
-                    if (index !== -1) {
-                      console.log("Removing second line")
-                      clonedLines.splice(index, 1);
-                    }
-                  }
-                }
-
-                console.log("Calling rec with " + newline.id)
-                const recLine = join(newline, clonedLines, maxDistance, depth + 1);
-                if (result == null || recLine.length > result.length) {
-                  result = recLine;
-                }
-              }
-
-              console.log("!!!!!")
-              console.log(result)
-              if (result == null)
-                return [firstLine, lines];
-              else
-                return result;
-
-            }
+        //   const join = function (firstLine: PointLine, lines: PointLine[], maxDistance: number, depth: number): [PointLine, Array<PointLine>] {
+        //
+        //     console.log("Recusive " + depth)
+        //     const nearestLines: shortestDistance[] = []
+        //
+        //
+        //     for (let l2 of lines) {
+        //
+        //       let tmp: shortestDistance = null;
+        //
+        //       let dist = VectorUtils.distance(firstLine.getFirstPoint(), l2.getFirstPoint());
+        //
+        //       // console.log(`Distance ${dist}  ${firstLine.id} ${l2.id} - First - First`)
+        //       if (dist < maxDistance && (tmp === null || dist < tmp.distance)) {
+        //         tmp = new shortestDistance();
+        //         tmp.distance = dist;
+        //         tmp.firstLine = Direction.FirstPoint;
+        //         tmp.secondLine = Direction.FirstPoint;
+        //         tmp.line = l2;
+        //       }
+        //
+        //       dist = VectorUtils.distance(firstLine.getFirstPoint(), l2.getLastPoint());
+        //       // console.log(`Distance ${dist}  ${firstLine.id} ${l2.id} - First - Last`)
+        //       if (dist < maxDistance && (tmp === null || dist < tmp.distance)) {
+        //         tmp = new shortestDistance();
+        //         tmp.distance = dist;
+        //         tmp.firstLine = Direction.FirstPoint;
+        //         tmp.secondLine = Direction.LastPoint;
+        //         tmp.line = l2;
+        //       }
+        //
+        //       dist = VectorUtils.distance(firstLine.getLastPoint(), l2.getFirstPoint());
+        //       // console.log(`Distance ${dist}  ${firstLine.id} ${l2.id} - Last - First`)
+        //       if (dist < maxDistance && (tmp === null || dist < tmp.distance)) {
+        //         tmp = new shortestDistance();
+        //         tmp.distance = dist;
+        //         tmp.firstLine = Direction.LastPoint;
+        //         tmp.secondLine = Direction.FirstPoint;
+        //         tmp.line = l2;
+        //       }
+        //
+        //       dist = VectorUtils.distance(firstLine.getLastPoint(), l2.getLastPoint());
+        //       // console.log(`Distance ${dist}  ${firstLine.id} ${l2.id} - Last - Last`)
+        //       if (dist < maxDistance && (tmp === null || dist < tmp.distance)) {
+        //         tmp = new shortestDistance();
+        //         tmp.distance = dist;
+        //         tmp.firstLine = Direction.LastPoint;
+        //         tmp.secondLine = Direction.LastPoint;
+        //         tmp.line = l2;
+        //       }
+        //
+        //       if (tmp != null) {
+        //         nearestLines.push(tmp);
+        //         console.log("Pushing")
+        //         console.log(tmp)
+        //       }
+        //
+        //
+        //       // console.log("--")
+        //     }
+        //
+        //     if (nearestLines.length > 0) {
+        //
+        //       console.log("Two Ways")
+        //       let result = null;
+        //
+        //       for (let nearestLine of nearestLines) {
+        //
+        //         console.log("Line" + firstLine.id + " / " + nearestLine.line.id);
+        //         const joinVector = joinDir(firstLine, nearestLine.line, nearestLine.secondLine);
+        //
+        //         console.log()
+        //         console.log("-----" + VectorUtils.angle(VectorUtils.reducedDirectionVector(firstLine), VectorUtils.reducedDirectionVector(nearestLine.line)))
+        //
+        //         const join1 = VectorUtils.angle(VectorUtils.reducedDirectionVector(firstLine), joinVector);
+        //         const join2 = VectorUtils.angle(VectorUtils.reducedDirectionVector(nearestLine.line), joinVector);
+        //
+        //         console.log("----1 " + join1)
+        //         console.log("----2 " + join2)
+        //
+        //         if (join2 < 0.5 || join1 < 0.5)
+        //           continue;
+        //
+        //         const newline = new PointLine();
+        //         newline.id = firstLine.id + "-" + nearestLine.line.id;
+        //         newline.length = firstLine.length + nearestLine.line.length;
+        //         newline.points = joinLines(firstLine, nearestLine.line, nearestLine.secondLine);
+        //
+        //         const clonedLines = Object.assign([], lines);
+        //
+        //         for (let line of clonedLines) {
+        //           if (line.id === nearestLine.line.id) {
+        //             const index = lines.indexOf(line)
+        //             if (index !== -1) {
+        //               console.log("Removing second line")
+        //               clonedLines.splice(index, 1);
+        //             }
+        //           }
+        //         }
+        //
+        //         console.log("Calling rec with " + newline.id)
+        //         const recLine = join(newline, clonedLines, maxDistance, depth + 1);
+        //         if (result == null || recLine.length > result.length) {
+        //           result = recLine;
+        //         }
+        //       }
+        //
+        //       console.log("!!!!!")
+        //       console.log(result)
+        //       if (result == null)
+        //         return [firstLine, lines];
+        //       else
+        //         return result;
+        //
+        //     }
         //
         //     return [firstLine, lines];
         //
