@@ -1,12 +1,13 @@
-import {Line} from "./line";
+import {Line, Orientation} from "./line";
 import {Vector} from "./vector";
 import VectorUtils from "../../vector-utils";
 
 export class ComplexLine implements Line {
 
   id: string;
-  length: number;
+  length: number = 0;
   lines: Line[] = [];
+  infos: LineInformation[] = [];
 
   constructor()
   constructor(id: string)
@@ -22,23 +23,44 @@ export class ComplexLine implements Line {
     return this.lines[this.lines.length - 1].getLastPoint();
   }
 
+  public getLines(): Line[] {
+    return this.lines;
+  }
+
   public addLine(line: Line, reverse: boolean = false, atStart: boolean = false) {
     if (reverse) {
       line.reverse();
     }
 
+    const lineInfo = new LineInformation();
+    let distanceToNext : number = 0;
+
     if (atStart) {
+      if (this.lines != null && this.lines.length != 0) {
+        distanceToNext = VectorUtils.distance(line.getLastPoint(), this.lines[0].getFirstPoint());
+        lineInfo.distanceNextLine = distanceToNext;
+        this.infos[0].distancePrevLine = distanceToNext;
+      }
+
       this.lines.splice(0, 0, line);
+      this.infos.splice(0, 0, lineInfo);
     } else {
+      if (this.lines != null && this.lines.length != 0) {
+        distanceToNext = VectorUtils.distance(this.lines[this.lines.length - 1].getLastPoint(), line.getFirstPoint());
+        lineInfo.distancePrevLine = distanceToNext;
+        this.infos[this.infos.length - 1].distanceNextLine = distanceToNext;
+      }
+
       this.lines.push(line);
+      this.infos.push(lineInfo);
     }
 
-    this.length += line.length;
+    this.length = +this.length + +line.length + +distanceToNext;
   }
 
   public addLines(lines: Line[]) {
-    for (let i = 0; i < lines.length; i++) {
-      this.addLine(lines[i]);
+    for (let line of lines) {
+      this.addLine(line);
     }
   }
 
@@ -72,8 +94,27 @@ export class ComplexLine implements Line {
     return result;
   }
 
-  public getDirectionVector(): Vector {
-    return VectorUtils.directionVector(this.getFirstPoint(), this.getLastPoint());
-  }
+  getDirectionVector(): Vector
+  getDirectionVector(orientation: Orientation): Vector
+  getDirectionVector(orientation?: Orientation): Vector {
+    if (orientation == null) {
+      return VectorUtils.directionVector(this.getFirstPoint(), this.getLastPoint());
+    } else if (orientation === Orientation.FirstPoint) {
+      if (this.lines.length > 0) {
+        return VectorUtils.directionVector(this.lines[0].getFirstPoint(), this.lines[0].getLastPoint())
+      }
+    } else {
+      if (this.lines.length > 0) {
+        const last = this.lines[this.lines.length - 1];
+        return VectorUtils.directionVector(last.getFirstPoint(), last.getLastPoint())
+      }
+    }
 
+    return null
+  }
+}
+
+class LineInformation {
+  distancePrevLine: number;
+  distanceNextLine: number;
 }

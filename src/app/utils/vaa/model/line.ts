@@ -16,4 +16,12 @@ export interface Line {
   getPoints(): Vector[];
 
   getDirectionVector(): Vector;
+
+  getDirectionVector(orientation: Orientation): Vector;
+
+  getDirectionVector(orientation?: Orientation): Vector;
+}
+
+export enum Orientation {
+  FirstPoint, LastPoint
 }

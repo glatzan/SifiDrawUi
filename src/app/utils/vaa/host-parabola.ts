@@ -20,10 +20,10 @@ export class HostParabola {
     const end = centerPoint + Math.floor(horizontalRange / 2);
 
 
-    for (let container of lines.lines) {
-      if (container.line.getFirstPoint().x < end) {
-        console.log("Line - " +container.line.id)
-        for (let point of container.line.getPoints()) {
+    for (let line of lines.lines) {
+      if (line.getFirstPoint().x < end) {
+        console.log("Line - " + line.id)
+        for (let point of line.getPoints()) {
           if (point.x >= start && point.x <= end) {
 
             const v = result[point.x - start]
@@ -46,23 +46,37 @@ export class HostParabola {
         return a;
     })
 
-    const y = value/count;
+    const y = value / count;
 
     DrawUtil.drawPointLineOnCanvas(canvas, new Point(start, y - 10), new Point(start, y + 10), "red", 1, false);
     DrawUtil.drawPointLineOnCanvas(canvas, new Point(end, y - 10), new Point(end, y + 10), "red", 1, false);
-    DrawUtil.drawPointLineOnCanvas(canvas, new Point(start, y ), new Point(end, y), "red", 1, false);
+    DrawUtil.drawPointLineOnCanvas(canvas, new Point(start, y), new Point(end, y), "red", 1, false);
 
-    return value/count;
+    return value / count;
   }
 
-  public static paintLines(lines: ComplexLine, canvas){
-    let i  = 0;
-    for(let l of lines.lines){
-      DrawUtil.drawPointLinesOnCanvas(canvas, l.line.getPoints(), CImageUtil.colors[i + 1], 2);
-      DrawUtil.drawPoint(canvas, new Point(l.line.getFirstPoint().x, l.line.getFirstPoint().y), "Green", 4)
-      DrawUtil.drawPoint(canvas, new Point(l.line.getLastPoint().x, l.line.getLastPoint().y), "Blue", 4)
-      DrawUtil.text(canvas, `Line (${i}) ${l.line.id}`, new Point(l.line.getFirstPoint().x + 5, l.line.getFirstPoint().y + 5), "16px Arial", "DarkOrange")
+  public static paintLines(lines: ComplexLine, canvas, i: number = 0, level: number = 0): number {
+    for (let l of lines.lines) {
+      DrawUtil.drawPointLinesOnCanvas(canvas, l.getPoints(), CImageUtil.colors[i + 1], 5-level);
+      if (level == 0) {
+        DrawUtil.drawPoint(canvas, new Point(l.getFirstPoint().x, l.getFirstPoint().y), "Green", 4)
+        DrawUtil.drawPoint(canvas, new Point(l.getLastPoint().x, l.getLastPoint().y), "Blue", 4)
+        DrawUtil.text(canvas, `Line (${i}) ${l.id}`, new Point(l.getFirstPoint().x + 5, l.getFirstPoint().y + 5), "16px Arial", "DarkOrange")
+      }
+
+
+      if(l.id.length === 3){
+        const dir = l.getDirectionVector();
+        DrawUtil.text(canvas, `${l.id}`, new Point(l.getLastPoint().x+ Math.round(dir.x/2), l.getLastPoint().y+Math.round(dir.y/2 )), "16px Arial", "RED")
+      }
       i++;
+
+      if (l instanceof ComplexLine) {
+        i = HostParabola.paintLines(l, canvas, i, level+2);
+      }
+
     }
+
+    return i;
   }
 }

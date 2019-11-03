@@ -25,15 +25,21 @@ export default class VectorUtils {
   }
 
   static angle(p1: Point, p2: Point) {
-    return  (p1.x * p2.x + p1.y * p2.y) / (Math.sqrt(Math.pow(p1.x, 2) + Math.pow(p1.y, 2)) * Math.sqrt(Math.pow(p2.x, 2) + Math.pow(p2.y, 2)))
+    return (p1.x * p2.x + p1.y * p2.y) / (Math.sqrt(Math.pow(p1.x, 2) + Math.pow(p1.y, 2)) * Math.sqrt(Math.pow(p2.x, 2) + Math.pow(p2.y, 2)))
   }
 
   static reducedDirectionVector(p1: PointLine): Point {
     return VectorUtils.directionVector(p1.getFirstPoint(), p1.getLastPoint());
   }
 
-  static distance(p1: Point, p2: Point): number {
-    return Math.sqrt((p1.x - p2.x) ** 2 + (p1.y - p2.y) ** 2);
+
+  static distance(p1: Point): number
+  static distance(p1: Point, p2: Point): number
+  static distance(p1: Point, p2?: Point): number {
+    if (p2 === undefined)
+      return Math.sqrt((p1.x) ** 2 + (p1.y) ** 2);
+    else
+      return Math.sqrt((p1.x - p2.x) ** 2 + (p1.y - p2.y) ** 2);
   }
 
   static directionVector(p1: Point, p2: Point): Point {

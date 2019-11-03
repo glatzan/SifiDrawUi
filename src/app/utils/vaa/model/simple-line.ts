@@ -1,4 +1,4 @@
-import {Line} from "./line";
+import {Line, Orientation} from "./line";
 import {Vector} from "./vector";
 import VectorUtils from "../../vector-utils";
 
@@ -43,7 +43,9 @@ export class SimpleLine implements Line {
     return this.points;
   }
 
-  public getDirectionVector(): Vector {
+  getDirectionVector(): Vector
+  getDirectionVector(orientation: Orientation): Vector
+  getDirectionVector(orientation?: Orientation): Vector {
     return VectorUtils.directionVector(this.getFirstPoint(), this.getLastPoint());
   }
 }

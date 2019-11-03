@@ -281,7 +281,6 @@ export class FilterService {
 
             for (let res of json) {
               let contour = map.get(res['Contour ID']);
-
               const point = new Vector(Math.round(res['X']), Math.round(res['Y']), res['Pos.']);
 
               if (!contour) {
@@ -290,16 +289,24 @@ export class FilterService {
 
               contour.addPoint(point);
             }
-
             const dis = new ComplexLine();
             dis.addLines(Array.from(map.values()));
+
 
             for (let line of dis.lines) {
               if (line.getFirstPoint().x > line.getLastPoint().x)
                 line.reverse();
             }
 
-            console.log(dis)
+
+            dis.lines.sort((n1, n2) => {
+              if (n1.getFirstPoint().x > n2.getFirstPoint().x) {
+                return 1;
+              } else if (n1.getFirstPoint().x < n2.getFirstPoint().x) {
+                return -1;
+              } else
+                return 0;
+            });
 
             data.setData(dis, targetName);
             return data;
@@ -491,12 +498,19 @@ export class FilterService {
           const meanHostEpithelialValues = HostEpithelial.reduceMeanValues(hostEpithelialValues);
           const epithelialTopPoint = HostEpithelial.findTopPoint(meanHostEpithelialValues, canvas);
 
+
+          console.log("---")
+          console.log(complexLine);
           HostParabola.drawParabola(canvas, epithelialTopPoint);
           HostParabola.findTopPointEndothelial(complexLine, canvas, epithelialTopPoint.x);
 
-          HostParabola.paintLines(complexLine, canvas);
+          let lines = LineJoiner.joinComplexLine(complexLine, 25, null);
+          console.log("---------------")
+          // lines = LineJoiner.joinComplexLine(lines, 25, null);
+          // console.log("---------------")
+          lines = LineJoiner.joinComplexLine(lines, 150, canvas);
 
-          LineJoiner.joinComplexLine(complexLine, 25);
+          HostParabola.paintLines(lines, canvas);
         }
 
         // const sortedLines = data.getData(sourceName);
