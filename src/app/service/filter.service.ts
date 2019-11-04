@@ -505,10 +505,10 @@ export class FilterService {
           HostParabola.findTopPointEndothelial(complexLine, canvas, epithelialTopPoint.x);
 
           let lines = LineJoiner.joinComplexLine(complexLine, 25, null);
-          console.log("---------------")
-          // lines = LineJoiner.joinComplexLine(lines, 25, null);
           // console.log("---------------")
-          lines = LineJoiner.joinComplexLine(lines, 150, canvas);
+          // lines = LineJoiner.joinComplexLine(lines, 50, null);
+          console.log("---------------")
+          lines = LineJoiner.joinComplexLine(lines, 200, null,true);
 
           HostParabola.paintLines(lines, canvas);
         }

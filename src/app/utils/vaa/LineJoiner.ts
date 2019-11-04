@@ -6,39 +6,48 @@ import DrawUtil from "../draw-util";
 
 export class LineJoiner {
 
-  public static joinComplexLine(line: ComplexLine, maxDistance: number, canvas): ComplexLine {
+  public static joinComplexLine(line: ComplexLine, maxDistance: number, canvas, debug: boolean = false): ComplexLine {
+    console.log(`# Join Lines`)
     const sortedLIne = new ComplexLine();
     sortedLIne.id = line.id;
-    sortedLIne.addLines(this.joinLines( Object.assign([], line.lines), maxDistance, canvas));
+    sortedLIne.addLines(this.joinLines(Object.assign([], line.lines), maxDistance, canvas, debug));
     return sortedLIne;
   }
 
-  public static joinLines(lines: Line[], maxDistance: number, canvas): Line[] {
+  public static joinLines(lines: Line[], maxDistance: number, canvas, debug: boolean = false): Line[] {
     const result: Line[] = [];
 
     while (lines.length != 0) {
-      console.log(`-> Start Elements ${lines.length} Results ${result.length}`);
-      const res = LineJoiner.join(lines.splice(0,1)[0], lines, maxDistance, 0, canvas);
+      console.log(`## Start Elements ${lines[0].id}`);
+      const res = LineJoiner.join(lines.splice(0, 1)[0], lines, maxDistance, 0, canvas, 0.5, debug);
       result.push(res[0]);
       lines = res[1];
-      console.log(`-> End Elements ${lines.length} Results ${result.length}`)
     }
 
     return result;
   }
 
-  public static join(firstLine: Line, lines: Line[], maxDistance: number, depth: number, canvas, minJoinAngle: number = 0.5): [Line, Array<Line>] {
+  public static join(firstLine: Line, lines: Line[], maxDistance: number, depth: number, canvas, minJoinAngle: number = 0.5, debug: boolean = false): [Line, Array<Line>] {
 
-    console.log("Reclusive " + depth);
+
     let longestLine: [Line, Array<Line>] = null;
+
+    let i = 0;
 
     for (let secondLine of lines) {
       const distance = LineJoiner.findShortestDistance(firstLine, secondLine, maxDistance);
-      if (distance != null) {
-        console.log("Line " + distance.firstLine.id + " / " + distance.secondLine.id);
 
-        if(distance.secondLineOrientation === Orientation.LastPoint){
-          console.error(`Second Line should be first point ${distance.firstLine.id} / ${distance.secondLine.id}`)
+      if (debug)
+        if (distance === null)
+          console.error(`###${'#'.repeat(depth)}${i} Join Lines ${firstLine.id} -> ${secondLine.id} distance > ${maxDistance} (${VectorUtils.distance(firstLine.getLastPoint(), secondLine.getFirstPoint())})`);
+        else
+          console.log(`###${'#'.repeat(depth)}${i} Join Lines ${firstLine.id} -> ${secondLine.id} distance < ${maxDistance} (${VectorUtils.distance(firstLine.getLastPoint(), secondLine.getFirstPoint())})`);
+
+      if (distance != null) {
+
+        if (distance.secondLineOrientation === Orientation.LastPoint) {
+          if (debug)
+            console.error(`###${'#'.repeat(depth)}${i} - ${firstLine.id} / ${secondLine.id} Second Line should be first point`)
           continue;
         }
 
@@ -47,14 +56,15 @@ export class LineJoiner {
         const horizontalDistance = secondLine.getFirstPoint().x - firstLine.getLastPoint().x;
         const verticalDistance = firstLine.getLastPoint().y - secondLine.getFirstPoint().y;
 
-        if(horizontalDistance < -5){
-          console.log(distance)
-          console.error(`Second Line left of first left ${distance.firstLine.id} / ${distance.secondLine.id} (${firstLine.getLastPoint().x}/${secondLine.getFirstPoint().x}) ${horizontalDistance}`)
+        if (horizontalDistance < -5) {
+          if (debug)
+            console.error(`###${'#'.repeat(depth)}${i} - ${firstLine.id} / ${secondLine.id} Second Line left of first left (${firstLine.getLastPoint().x}/${secondLine.getFirstPoint().x})(${horizontalDistance})`)
           continue;
         }
 
-        if(horizontalDistance < 20 && Math.abs(verticalDistance) > 15){
-          console.error(`Second Line under/above first line ${distance.firstLine.id} / ${distance.secondLine.id}`)
+        if (horizontalDistance < 20 && Math.abs(verticalDistance) > 15) {
+          if (debug)
+            console.error(`###${'#'.repeat(depth)}${i} - ${firstLine.id} / ${secondLine.id} Second Line under/above first line (${firstLine.getLastPoint().x}/${secondLine.getFirstPoint().x})(${horizontalDistance})`)
           continue;
         }
 
@@ -63,16 +73,17 @@ export class LineJoiner {
         const intersectionVectorSecond = VectorUtils.angle(distance.secondLine.getDirectionVector(distance.secondLineOrientation), intersectionVector);
 
         const ss = VectorUtils.angle(distance.firstLine.getDirectionVector(distance.firstLineOrientation), distance.secondLine.getDirectionVector(distance.secondLineOrientation));
-
-        console.log(`Direction Vector first/intersection -> ${intersectionVectorFirst}, second/intersection -> ${intersectionVectorSecond}, TUT -> ${ss}`);
+        if (debug) {
+          console.log(`###${'#'.repeat(depth)}${i} - ${firstLine.id} / ${secondLine.id} Direction Vector first/intersection  ${intersectionVectorFirst}`);
+          console.log(`###${'#'.repeat(depth)}${i} - ${firstLine.id} / ${secondLine.id} Direction Vector first/intersection  ${intersectionVectorSecond}`);
+          console.log(`###${'#'.repeat(depth)}${i} - ${firstLine.id} / ${secondLine.id} Direction Vector intersection  ${ss}`);
+        }
 
         if (ss < minJoinAngle) {
-          console.error(`Abort angle : ${distance.firstLine.id} / ${distance.secondLine.id} angle: ${intersectionVectorFirst} / ${intersectionVectorSecond}`)
+          if (debug)
+            console.error(`###${'#'.repeat(depth)}${i} - ${firstLine.id} / ${secondLine.id} Abort angle`)
           if (canvas != null) {
-            if (distance.secondLineOrientation == Orientation.FirstPoint)
-              DrawUtil.drawPointLineOnCanvas(canvas, distance.firstLine.getLastPoint(), distance.secondLine.getFirstPoint(), "yellow", 1, false)
-            else
-              DrawUtil.drawPointLineOnCanvas(canvas, distance.firstLine.getFirstPoint(), distance.secondLine.getLastPoint(), "yellow", 1, false)
+            DrawUtil.drawPointLineOnCanvas(canvas, distance.firstLine.getLastPoint(), distance.secondLine.getFirstPoint(), "yellow", 1, false)
           }
           continue;
         }
@@ -81,15 +92,20 @@ export class LineJoiner {
         newComplexLine.addLines(LineJoiner.orderLines(distance.firstLine, distance.secondLine, distance.secondLineOrientation));
 
         // copy the line Array and remove the second line from it
-        const clonedLines = LineJoiner.removeLineFormArrayByIndex(distance.secondLine,  Object.assign([], lines));
-        console.log("Calling recursive with " + newComplexLine.id);
+        const clonedLines = LineJoiner.removeLineFormArrayByIndex(distance.secondLine, Object.assign([], lines));
 
-        const recursiveLine = this.join(newComplexLine, clonedLines, maxDistance, depth + 1, canvas);
+        const recursiveLine = this.join(newComplexLine, clonedLines, maxDistance, depth + 1, canvas, 0.5, debug);
 
         if (longestLine === null || recursiveLine[0].length > longestLine[0].length) {
           longestLine = recursiveLine;
+          if (debug)
+            console.log(`###${'#'.repeat(depth)}${i} !++ ${longestLine[0].id} new longest line ${longestLine[0].length}`);
+        } else {
+          if (debug)
+            console.log(`###${'#'.repeat(depth)}${i} !-- ${recursiveLine[0].id} discard longest line ${recursiveLine[0].length}`);
         }
       }
+      i++;
     }
 
     if (longestLine === null)
@@ -103,7 +119,6 @@ export class LineJoiner {
       if (l.id === line.id) {
         const index = lines.indexOf(l);
         if (index !== -1) {
-          console.log(`Removing second line ${line.id} `);
           lines.splice(index, 1);
           return lines;
         }
@@ -122,10 +137,10 @@ export class LineJoiner {
 
   private static getIntersectionVector(firstLine: Line, secondLine: Line, secondLinePosition: Orientation): Vector {
     if (secondLinePosition === Orientation.FirstPoint) {
-      console.log(`First ${firstLine.id} / ${secondLine.id} => ${secondLinePosition} L / F`)
+      // console.log(`First ${firstLine.id} / ${secondLine.id} => ${secondLinePosition} L / F`)
       return VectorUtils.directionVector(firstLine.getLastPoint(), secondLine.getFirstPoint())
     } else {
-      console.log(`First ${firstLine.id} / ${secondLine.id} => ${secondLinePosition} F / L`)
+      // console.log(`First ${firstLine.id} / ${secondLine.id} => ${secondLinePosition} F / L`)
       return VectorUtils.directionVector(secondLine.getLastPoint(), firstLine.getFirstPoint())
     }
   }
