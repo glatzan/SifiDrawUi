@@ -4,7 +4,7 @@ import {Line, Orientation} from "./model/line";
 import {Vector} from "./model/vector";
 import DrawUtil from "../draw-util";
 
-export class LineJoiner {
+export class RecuriveLineJoiner {
 
   public static joinComplexLine(line: ComplexLine, maxDistance: number, canvas, debug: boolean = false): ComplexLine {
     console.log(`# Join Lines`)
@@ -19,7 +19,7 @@ export class LineJoiner {
 
     while (lines.length != 0) {
       console.log(`## Start Elements ${lines[0].id}`);
-      const res = LineJoiner.join(lines.splice(0, 1)[0], lines, maxDistance, 0, canvas, 0.5, debug);
+      const res = RecuriveLineJoiner.join(lines.splice(0, 1)[0], lines, maxDistance, 0, canvas, 0.5, debug);
       result.push(res[0]);
       lines = res[1];
     }
@@ -35,7 +35,7 @@ export class LineJoiner {
     let i = 0;
 
     for (let secondLine of lines) {
-      const distance = LineJoiner.findShortestDistance(firstLine, secondLine, maxDistance);
+      const distance = RecuriveLineJoiner.findShortestDistance(firstLine, secondLine, maxDistance);
 
       if (debug)
         if (distance === null)
@@ -51,7 +51,7 @@ export class LineJoiner {
           continue;
         }
 
-        const intersectionVector = LineJoiner.getIntersectionVector(distance.firstLine, distance.secondLine, distance.secondLineOrientation);
+        const intersectionVector = RecuriveLineJoiner.getIntersectionVector(distance.firstLine, distance.secondLine, distance.secondLineOrientation);
         const directDistance = distance.distance;
         const horizontalDistance = secondLine.getFirstPoint().x - firstLine.getLastPoint().x;
         const verticalDistance = firstLine.getLastPoint().y - secondLine.getFirstPoint().y;
@@ -89,10 +89,10 @@ export class LineJoiner {
         }
 
         const newComplexLine = new ComplexLine(distance.firstLine.id + "-" + distance.secondLine.id);
-        newComplexLine.addLines(LineJoiner.orderLines(distance.firstLine, distance.secondLine, distance.secondLineOrientation));
+        newComplexLine.addLines(RecuriveLineJoiner.orderLines(distance.firstLine, distance.secondLine, distance.secondLineOrientation));
 
         // copy the line Array and remove the second line from it
-        const clonedLines = LineJoiner.removeLineFormArrayByIndex(distance.secondLine, Object.assign([], lines));
+        const clonedLines = RecuriveLineJoiner.removeLineFormArrayByIndex(distance.secondLine, Object.assign([], lines));
 
         const recursiveLine = this.join(newComplexLine, clonedLines, maxDistance, depth + 1, canvas, 0.5, debug);
 
