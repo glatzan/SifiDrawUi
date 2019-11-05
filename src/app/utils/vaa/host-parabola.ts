@@ -55,24 +55,30 @@ export class HostParabola {
     return value / count;
   }
 
-  public static paintLines(lines: ComplexLine, canvas, i: number = 0, level: number = 0): number {
+  public static paintLines(lines: ComplexLine, canvas, i: number = 0, level: number = 0, lastPoint: Vector = null): number {
+
     for (let l of lines.lines) {
-      DrawUtil.drawPointLinesOnCanvas(canvas, l.getPoints(), CImageUtil.colors[i + 1], 5-level);
-      if (level == 0) {
-        DrawUtil.drawPoint(canvas, new Point(l.getFirstPoint().x, l.getFirstPoint().y), "Green", 4)
-        DrawUtil.drawPoint(canvas, new Point(l.getLastPoint().x, l.getLastPoint().y), "Blue", 4)
-        DrawUtil.text(canvas, `Line (${i}) ${l.id}`, new Point(l.getFirstPoint().x + 5, l.getFirstPoint().y + 5), "16px Arial", "DarkOrange")
+
+      if(lastPoint != null){
+        DrawUtil.drawPointLineOnCanvas(canvas,lastPoint,l.getFirstPoint(), "blue", 3, false)
       }
 
+      DrawUtil.drawPointLinesOnCanvas(canvas, l.getPoints(), CImageUtil.colors[i + 1], 3);
+      DrawUtil.drawPoint(canvas, new Point(l.getFirstPoint().x, l.getFirstPoint().y), "Green", 4)
+      DrawUtil.drawPoint(canvas, new Point(l.getLastPoint().x, l.getLastPoint().y), "Blue", 4)
+      lastPoint = l.getLastPoint();
+      // DrawUtil.text(canvas, `Line (${i}) ${l.id}`, new Point(l.getFirstPoint().x + 5, l.getFirstPoint().y + 5), "16px Arial", "DarkOrange")
 
-      if(l.id.length === 3){
+
+      if (l.id.length === 3) {
         const dir = l.getDirectionVector();
-        DrawUtil.text(canvas, `${l.id}`, new Point(l.getLastPoint().x+ Math.round(dir.x/2), l.getLastPoint().y+Math.round(dir.y/2 )), "16px Arial", "RED")
+        DrawUtil.text(canvas, `${l.id}`, new Point(l.getLastPoint().x + Math.round(dir.x / 2), l.getLastPoint().y + Math.round(dir.y / 2)), "16px Arial", "RED")
       }
+
       i++;
 
       if (l instanceof ComplexLine) {
-        i = HostParabola.paintLines(l, canvas, i, level+2);
+        i = HostParabola.paintLines(l, canvas, i, level + 2, lastPoint);
       }
 
     }

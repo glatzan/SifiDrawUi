@@ -60,6 +60,7 @@ export class ComplexLine implements Line {
 
   public addLines(lines: Line[]) {
     for (let line of lines) {
+      console.log("Adding line " + line.id)
       this.addLine(line);
     }
   }

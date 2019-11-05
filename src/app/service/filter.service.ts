@@ -31,7 +31,7 @@ import {SimpleLine} from "../utils/vaa/model/simple-line";
 import {Vector} from "../utils/vaa/model/vector";
 import {ComplexLine} from "../utils/vaa/model/complex-line";
 import {HostParabola} from "../utils/vaa/host-parabola";
-import {RecuriveLineJoiner} from "../utils/vaa/recurive-line-joiner";
+import {LineJoiner} from "../utils/vaa/line-joiner";
 
 @Injectable({
   providedIn: 'root'
@@ -504,13 +504,18 @@ export class FilterService {
           HostParabola.drawParabola(canvas, epithelialTopPoint);
           HostParabola.findTopPointEndothelial(complexLine, canvas, epithelialTopPoint.x);
 
-          let lines = RecuriveLineJoiner.joinComplexLine(complexLine, 25, null);
+          //let lines = RecuriveLineJoiner.joinComplexLine(complexLine, 25, null);
           // console.log("---------------")
           // lines = RecuriveLineJoiner.joinComplexLine(lines, 50, null);
-          console.log("---------------")
-          lines = RecuriveLineJoiner.joinComplexLine(lines, 200, null,true);
+          //console.log("---------------")
+          //lines = RecuriveLineJoiner.joinComplexLine(lines, 200, null,true);
 
-          HostParabola.paintLines(lines, canvas);
+          const l = LineJoiner.joinComplexLine(complexLine, {
+            factor: 0.001,
+            xShift: epithelialTopPoint.x,
+            yShift: epithelialTopPoint.y
+          }, canvas);
+          HostParabola.paintLines(l, canvas);
         }
 
         // const sortedLines = data.getData(sourceName);
