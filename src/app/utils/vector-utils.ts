@@ -1,5 +1,10 @@
 import {Point} from '../model/point';
 import {PointLine} from "../model/point-line";
+import {Vector} from "./vaa/model/vector";
+import {Equation, parse} from 'algebra.js';
+import {Line} from "./vaa/model/line";
+import {ComplexLine} from "./vaa/model/complex-line";
+import {SimpleLine} from "./vaa/model/simple-line";
 
 export default class VectorUtils {
 
@@ -154,5 +159,53 @@ export default class VectorUtils {
 
     return change;
   }
+
+  static nearestLinePointDistance(startPoint: Vector, direction: Vector, point: Vector) {
+    const x = startPoint.x - point.x;
+    const y = startPoint.y - point.y;
+
+    const formula = `(((${x})+(${direction.x})*t)*(${direction.x}))+(((${y})+(${direction.y})*t)*(${direction.y}))`;
+    console.log(formula);
+    try {
+      const n1 = parse(formula);
+      const quad = new Equation(n1, 0);
+      const answers = quad.solveFor("t");
+      console.log(answers)
+      const factor = answers.numer / answers.denom;
+
+      return new Vector(startPoint.x + direction.x * factor, startPoint.y + direction.y * factor);
+    } catch (e) {
+      console.error("error");
+      console.error(e);
+    }
+  }
+
+  static reduceLinePoints(line: Line, maxDistanceBetweenPoints: number) {
+    if (line instanceof ComplexLine) {
+      for (let l of line.lines)
+        VectorUtils.reduceLinePoints(l, maxDistanceBetweenPoints);
+    } else {
+      if (line.getPoints().length <= 2)
+        return;
+      else {
+        const resultArr = [];
+        resultArr.push(line.getFirstPoint());
+
+        for (let i = 0; i < line.getPoints().length; i++) {
+          if (VectorUtils.distance(resultArr[resultArr.length - 1], line.getPoints()[i]) >= maxDistanceBetweenPoints) {
+            resultArr.push(line.getPoints()[i])
+          }
+        }
+
+        if(resultArr[resultArr.length-1] !== line.getLastPoint()){
+          resultArr[resultArr.length-1] = line.getLastPoint();
+        }
+
+        (line as SimpleLine).points = resultArr;
+      }
+
+    }
+  }
+
 }
 

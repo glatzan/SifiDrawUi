@@ -22,7 +22,7 @@ import {Point} from './model/point';
 import {CPolygon} from './utils/cpolygon';
 import {SplineUtil} from './utils/spline-util';
 import VectorUtils from './utils/vector-utils';
-import {DrawCanvasComponent} from './components/draw-canvas/draw-canvas.component';
+import {DrawCanvasComponent} from './components/workView/draw-canvas/draw-canvas.component';
 import {PointLineUtil} from "./utils/point-line-util";
 
 @Component({

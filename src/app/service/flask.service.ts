@@ -8,7 +8,8 @@ import {HttpClient, HttpHeaders} from "@angular/common/http";
 })
 export class FlaskService {
 
-  private serverURL = 'http://192.168.10.114:5000';
+  private serverURL = 'http://10.210.51.5:5000';
+  // private serverURL = 'http://192.168.10.114:5000';
   // private serverURL = 'http://127.0.0.1:5000';
 
   constructor(private _http: HttpClient) {

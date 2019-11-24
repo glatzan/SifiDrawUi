@@ -1,0 +1,5 @@
+<cdk-virtual-scroll-viewport itemSize="1" class="list">
+  <div *cdkVirtualFor="let img of imageArray" (click)="selectImage(img)" class="divContainer">
+    <img name="{{img.name}}" src="data:image/png;base64,{{img.data}}" class="image"/>
+  </div>
+</cdk-virtual-scroll-viewport>

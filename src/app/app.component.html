@@ -2,8 +2,8 @@
 
 <div class="bodyDiv">
   <app-case-list #caseListComponent [imageListComponent]="imageListComponent" class="caseLise"></app-case-list>
-  <app-image-list #imageListComponent [drawCanvasComponent]="drawCanvasComponent" class="imageList"></app-image-list>
-  <app-draw-canvas #drawCanvasComponent [imageListComponent]="imageListComponent" class="canvasDraw"></app-draw-canvas>
+  <app-image-list #imageListComponent class="imageList"></app-image-list>
+  <app-work-view class="canvasDraw"></app-work-view>
   <button mat-stroked-button [matMenuTriggerFor]="menu" class="menuBtn">Menu</button>
 </div>
 

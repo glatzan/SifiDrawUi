@@ -2,15 +2,63 @@ import DrawUtil from "../draw-util";
 import {Point} from "../../model/point";
 import {Vector} from "./model/vector";
 import {ComplexLine} from "./model/complex-line";
+import {Equation, parse} from 'algebra.js';
 import CImageUtil from "../cimage-util";
+import VectorUtils from "../vector-utils";
 
 export class HostParabola {
 
-  public static drawParabola(canvas, referencePoint: Vector, from: number = 0, to: number = 1350) {
-    for (let x = 0; x < 1351; x++) {
-      let y = 0.001 * Math.pow(x - referencePoint.x, 2) + referencePoint.y;
+  topPoint: Vector;
+  compress: number = 0.001;
+
+  constructor(topPoint: Vector, compress: number = 0.001) {
+    this.topPoint = topPoint;
+    this.compress = compress;
+  }
+
+  public drawParabola(canvas, {from = 0, last = 1350}: { from?: number; last?: number } = {}) {
+    for (let x = from; x < last; x++) {
+      let y = this.compress * (x - this.topPoint.x) ** 2 + this.topPoint.y;
       DrawUtil.drawPoint(canvas, new Point(x, y))
     }
+  }
+
+  public getY(x: number): number {
+    return this.compress * (x - this.topPoint.x) ** 2 + this.topPoint.y;
+  }
+
+  public getX(y: number): Array<number> {
+    const result = [];
+    result.push(Math.sqrt((y - this.topPoint.y) / this.compress) + this.topPoint.x);
+    result.push(-Math.sqrt((y - this.topPoint.y) / this.compress) + this.topPoint.x);
+    return result;
+  }
+
+  public getNormalPointAtLine(vector: Vector) {
+    const equation = `(-500/(x - ${this.topPoint.x}))*(%p.x%-x)+(${this.compress}*(x-${this.topPoint.x})*(x-${this.topPoint.x})+${this.topPoint.y})`;
+    const equation1 = equation.replace("%p.x%", String(vector.x));
+    try {
+      const n1 = parse(equation1);
+      const quad = new Equation(n1, vector.y);
+      const answers = quad.solveFor("x");
+      const y = this.getY(answers[0]);
+      return new Vector(answers[0], y);
+    } catch (e) {
+      console.error("error");
+    }
+  }
+
+  public distanceFromParabola(vector: Vector): number {
+    const parabolaPoint = this.getNormalPointAtLine(vector);
+    return VectorUtils.distance(vector, parabolaPoint);
+  }
+
+  public optimize(approximatedValues: Array<Vector>) {
+    // const firstDistance = approximatedValues[0].x - this.getY()
+    // console.log(approximatedValues[0])
+    // console.log(approximatedValues[approximatedValues.length - 1]);
+    // console.log(this.getX(approximatedValues[0].y));
+    // console.log(approximatedValues[0].y);
   }
 
   public static findTopPointEndothelial(lines: ComplexLine, canvas, centerPoint: number = 675, horizontalRange: number = 50) {
@@ -59,8 +107,8 @@ export class HostParabola {
 
     for (let l of lines.lines) {
 
-      if(lastPoint != null){
-        DrawUtil.drawPointLineOnCanvas(canvas,lastPoint,l.getFirstPoint(), "blue", 3, false)
+      if (lastPoint != null) {
+        DrawUtil.drawPointLineOnCanvas(canvas, lastPoint, l.getFirstPoint(), "blue", 3, false)
       }
 
       DrawUtil.drawPointLinesOnCanvas(canvas, l.getPoints(), CImageUtil.colors[i + 1], 3);

@@ -1,20 +1,20 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { FilterListComponent } from './filter-list.component';
+import { PaintControlComponent } from './paint-control.component';
 
-describe('FilterListComponent', () => {
-  let component: FilterListComponent;
-  let fixture: ComponentFixture<FilterListComponent>;
+describe('PaintControlComponent', () => {
+  let component: PaintControlComponent;
+  let fixture: ComponentFixture<PaintControlComponent>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ FilterListComponent ]
+      declarations: [ PaintControlComponent ]
     })
     .compileComponents();
   }));
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(FilterListComponent);
+    fixture = TestBed.createComponent(PaintControlComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

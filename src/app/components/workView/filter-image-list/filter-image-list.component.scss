@@ -1,0 +1,17 @@
+@import "../../../../styles";
+.list {
+  height: 90vh;
+  width: 100%;
+
+  .divContainer{
+    text-align: center;
+    &:hover {
+      cursor: pointer;
+      background: $dark-focused;
+    }
+  }
+
+  .image{
+    width: 90%;
+  }
+}

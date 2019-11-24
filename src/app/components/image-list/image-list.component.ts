@@ -2,7 +2,8 @@ import {Component, OnInit, EventEmitter, Input, Output} from '@angular/core';
 import {Dataset} from '../../model/dataset';
 import {DatasetService} from '../../service/dataset.service';
 import {ProjectData} from '../../model/project-data';
-import {DrawCanvasComponent} from '../draw-canvas/draw-canvas.component';
+import {DrawCanvasComponent} from '../workView/draw-canvas/draw-canvas.component';
+import {WorkViewService} from "../workView/work-view.service";
 
 @Component({
   selector: 'app-image-list',
@@ -17,9 +18,7 @@ export class ImageListComponent implements OnInit {
 
   private selectedImageId: string;
 
-  @Input() drawCanvasComponent: DrawCanvasComponent;
-
-  constructor(public datasetService: DatasetService) {
+  constructor(private datasetService: DatasetService, private workViewService : WorkViewService) {
   }
 
   ngOnInit() {
@@ -42,8 +41,9 @@ export class ImageListComponent implements OnInit {
   }
 
   private onSelectImage($event, id) {
+    console.log("Selecting img " + id)
     this.selectedImageId = id;
-    this.drawCanvasComponent.onSelectImage(id);
+    this.workViewService.displayImageById(id)
   }
 
   /**

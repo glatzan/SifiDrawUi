@@ -4,30 +4,25 @@ import VectorUtils from "../vector-utils";
 import {Vector} from "./model/vector";
 import {Equation, parse} from 'algebra.js';
 import DrawUtil from "../draw-util";
+import {HostParabola} from "./host-parabola";
 
 export class LineJoiner {
-  public static joinComplexLine(line: ComplexLine, parabola = {factor: 0.001, xShift: 675, yShift: 100}, canvas): ComplexLine {
+  public static joinComplexLine(line: ComplexLine, parabola: HostParabola, canvas): ComplexLine {
     console.log(`# Join Lines`)
     const sortedLIne = new ComplexLine();
     sortedLIne.id = line.id;
-    const l = LineJoiner.joinLines(Object.assign([], line.lines),parabola, canvas);
+    const l = LineJoiner.joinLines(Object.assign([], line.lines), parabola, canvas);
     console.log(l)
     sortedLIne.addLines(l)
     return sortedLIne;
   }
 
-  public static joinLines(lines: Line[], parabola = {factor: 0.001, xShift: 675, yShift: 100}, canvas): Line[] {
+  public static joinLines(lines: Line[], parabola: HostParabola, canvas): Line[] {
     const result: Line[] = [];
 
-    const f = lines.splice(0, 1)[0];
+    const optimizedParabola = new HostParabola(new Vector((parabola.topPoint.x / 5) * 5, parabola.topPoint.y), parabola.compress);
 
-    parabola.xShift = Math.ceil(parabola.xShift / 5) * 5;
-
-    const classificationLines: LineClassification[] = [];
-    let firstLine = new LineClassification();
-    firstLine.line = f;
-
-    result.push(f);
+    let classificationLines: LineClassification[] = [];
 
     let i = 0;
     for (let line of lines) {
@@ -36,7 +31,6 @@ export class LineJoiner {
       classification.stepsToParabola = 0;
       classification.correlation = LineJoiner.calculateCorrelation(line, parabola);
       classification.distanceToParabola = VectorUtils.mean([LineJoiner.calculateDistanceFromParabola(line.getFirstPoint(), parabola), LineJoiner.calculateDistanceFromParabola(line.getLastPoint(), parabola)]);
-      classification.numberInArray = i++;
       classificationLines.push(classification);
     }
 
@@ -48,7 +42,7 @@ export class LineJoiner {
         const startSecond = classificationLines[y].line.getFirstPoint();
         const endSecond = classificationLines[y].line.getLastPoint();
 
-        if ((startFirst.x < startSecond.x && startSecond.x < endFirst.x) || (startFirst.x < endSecond.x && endSecond.x < endFirst.x)) {
+        if ((startFirst.x <= startSecond.x && startSecond.x < endFirst.x) || (startFirst.x < endSecond.x && endSecond.x < endFirst.x)) {
           if (classificationLines[i].distanceToParabola > classificationLines[y].distanceToParabola)
             classificationLines[i].stepsToParabola++;
           else
@@ -61,6 +55,11 @@ export class LineJoiner {
       console.log(c);
     }
 
+
+    let firstLine = classificationLines.splice(0, 1)[0];
+
+    result.push(firstLine.line);
+
     while (classificationLines.length != 0) {
       console.log(`## Start Elements ${firstLine.line.id}`);
 
@@ -69,10 +68,11 @@ export class LineJoiner {
 
       const deletedLines: LineClassification[] = [];
 
+      classificationLines = LineJoiner.calculateAndSortDistance(firstLine, classificationLines);
+
       let i = 0;
       for (let classification of classificationLines) {
-        const prob = classification.caluclateProbabillity(firstLine);
-
+        const prob = classification.caluclateProbabillity();
         console.log(`${classification.line.id} porpb ${prob}`)
 
         if (prob <= -100) {
@@ -86,7 +86,7 @@ export class LineJoiner {
       }
 
       for (let del of deletedLines) {
-        console.log("Removing line " + del.line.id + " " +classificationLines.indexOf(del))
+        console.log("Removing line " + del.line.id + " " + classificationLines.indexOf(del))
         classificationLines.splice(classificationLines.indexOf(del), 1);
         DrawUtil.drawPointLineOnCanvas(canvas, del.line.getFirstPoint(), del.line.getLastPoint(), "red", 3, false)
       }
@@ -105,27 +105,27 @@ export class LineJoiner {
 
   }
 
-  public static calculateDistanceFromParabola(vector: Vector, parabola = {factor: 0.001, xShift: 675, yShift: 100}):
+  public static calculateDistanceFromParabola(vector: Vector, parabola: HostParabola):
     number {
     const parabolaPoint = LineJoiner.calculatePointAtParabola(vector, parabola);
     return VectorUtils.distance(vector, parabolaPoint);
   }
 
-  public static calculatePointAtParabola(vector: Vector, parabola = {factor: 0.001, xShift: 675, yShift: 100}) {
-    const equation = `(-500/(x - ${parabola.xShift}))*(%p.x%-x)+(0.001*(x-${parabola.xShift})*(x-${parabola.xShift})+${parabola.yShift})`;
+  public static calculatePointAtParabola(vector: Vector, parabola: HostParabola) {
+    const equation = `(-500/(x - ${parabola.topPoint.x}))*(%p.x%-x)+(0.001*(x-${parabola.topPoint.x})*(x-${parabola.topPoint.x})+${parabola.topPoint.y})`;
     const equation1 = equation.replace("%p.x%", String(vector.x));
     try {
       const n1 = parse(equation1);
       const quad = new Equation(n1, vector.y);
       const answers = quad.solveFor("x");
-      const y = parabola.factor * Math.pow(answers - parabola.xShift, 2) + parabola.yShift;
+      const y = parabola.getY(answers);
       return new Vector(answers, y);
     } catch (e) {
       console.error("error");
     }
   }
 
-  public static calculateCorrelation(line: Line, parabola = {factor: 0.001, xShift: 675, yShift: 100}):
+  public static calculateCorrelation(line: Line, parabola: HostParabola):
     number {
     const lineY = line.getPoints().map(x => x.y);
     const meanOfLine = VectorUtils.mean(lineY);
@@ -134,7 +134,7 @@ export class LineJoiner {
     const sdLine = VectorUtils.standardDeviation(lineY)
 
     for (let i = 0; i < line.getPoints().length; i++) {
-      let y = parabola.factor * Math.pow(line.getPoints()[i].x - parabola.xShift, 2) + parabola.yShift;
+      let y = parabola.getY(line.getPoints()[i].x)
       parabolaY.push(y);
     }
 
@@ -148,33 +148,50 @@ export class LineJoiner {
 
     res = res / lineY.length;
     res = res / (sdLine * sdParabola)
-    console.log(line.id + " " + res);
 
     return res;
+  }
+
+  public static calculateAndSortDistance(firstLine: LineClassification, lines: LineClassification[]): LineClassification[] {
+    const distanceMap = lines.map(x => Math.ceil(VectorUtils.distance(firstLine.line.getLastPoint(), x.line.getFirstPoint()) / 10) * 10);
+    let ranking = 0;
+    for (let i = 0; i < lines.length; i++) {
+
+      lines[i].firstLine = firstLine;
+      lines[i].ranking = ranking;
+      lines[i].distanceToFirstLine = distanceMap[i];
+
+      if (i + 1 >= distanceMap.length || distanceMap[i + 1] !== distanceMap[i]) {
+        ranking++;
+      }
+    }
+    return lines;
   }
 }
 
 class LineClassification {
   line: Line;
-  numberInArray: number;
   correlation: number;
   distanceToParabola;
   stepsToParabola: number;
 
-  public caluclateProbabillity(firstLine: LineClassification) {
+  ranking: number;
+  distanceToFirstLine: number;
+  firstLine: LineClassification;
+
+  public caluclateProbabillity() {
     let probabillity = 0;
-    const distance = VectorUtils.distance(firstLine.line.getLastPoint(), this.line.getFirstPoint())
 
-    if (this.correlation < 0)
-      probabillity -= 10;
-
-    if (this.correlation < 0.5)
-      probabillity--;
+    // if (this.correlation < 0)
+    //   probabillity -= 10;
+    //
+    // if (this.correlation < 0.5)
+    //   probabillity--;
 
     probabillity -= this.stepsToParabola;
-    probabillity -= this.numberInArray * 2;
+    probabillity -= this.ranking;
 
-    if (firstLine.line.getLastPoint().x > this.line.getLastPoint().x || firstLine.line.getLastPoint().x - 5 > this.line.getFirstPoint().x) {
+    if (this.firstLine.line.getLastPoint().x > this.line.getLastPoint().x || this.firstLine.line.getLastPoint().x - 5 > this.line.getFirstPoint().x) {
       probabillity -= 100;
     }
 

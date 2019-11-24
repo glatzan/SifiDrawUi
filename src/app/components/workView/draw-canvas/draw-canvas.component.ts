@@ -1,22 +1,15 @@
-import {Component, OnInit, Input, ElementRef, AfterViewInit, ViewChild} from '@angular/core';
-import {Layer} from '../../model/layer';
-import VectorUtils from '../../utils/vector-utils';
-import {Point} from '../../model/point';
-import DrawUtil from '../../utils/draw-util';
-import {ImageService} from '../../service/image.service';
-import {CImage} from '../../model/cimage';
-import CImageUtil from '../../utils/cimage-util';
-import {debounceTime, flatMap} from 'rxjs/operators';
-import {logger} from 'codelyzer/util/logger';
-import {PointTracker} from '../../utils/point-tracker';
+import {AfterViewInit, Component, ElementRef, Input, ViewChild} from '@angular/core';
+import {Layer} from '../../../model/layer';
+import VectorUtils from '../../../utils/vector-utils';
+import {Point} from '../../../model/point';
+import DrawUtil from '../../../utils/draw-util';
+import {ImageService} from '../../../service/image.service';
+import {CImage} from '../../../model/cimage';
+import CImageUtil from '../../../utils/cimage-util';
+import {PointTracker} from '../../../utils/point-tracker';
 import {MatSnackBar} from '@angular/material';
-import {ImageListComponent} from '../image-list/image-list.component';
-import {PNG} from 'pngjs';
-import {Readable} from 'stream';
-import {Observable} from 'rxjs';
-import {FilterData} from '../../worker/filter-data';
-import {CPolygon} from '../../utils/cpolygon';
-import {SplineUtil} from '../../utils/spline-util';
+import {ImageListComponent} from '../../image-list/image-list.component';
+import {WorkViewService} from "../work-view.service";
 
 @Component({
   selector: 'app-draw-canvas',
@@ -51,7 +44,6 @@ export class DrawCanvasComponent implements AfterViewInit {
   currentLayer: Layer;
 
   public drawImage = new Image();
-
 
   private event: MouseEvent;
 
@@ -88,11 +80,33 @@ export class DrawCanvasComponent implements AfterViewInit {
   private lastMousePoint = new Point(0, 0);
 
   constructor(public imageService: ImageService,
-              private snackBar: MatSnackBar) {
+              private snackBar: MatSnackBar, private workViewService: WorkViewService) {
     // draw on load
     this.drawImage.onload = () => {
       this.canvasRedraw();
     };
+  }
+
+  /**
+   * Event for loading a new Image
+   */
+  ngOnInit() {
+    this.workViewService.changeImage.subscribe(image => {
+      console.log(image);
+      console.log("Data Changed");
+      this.prepareImage(image);
+    });
+
+    this.workViewService.changeImageAndReload.subscribe(image => {
+      console.log(image);
+      console.log("Data Changed, No reload");
+      this.prepareImage(image);
+    });
+
+    this.workViewService.resetImageZoom.subscribe(x => {
+      if (x)
+        this.canvasResetZoom();
+    });
   }
 
   public ngAfterViewInit() {
@@ -157,6 +171,7 @@ export class DrawCanvasComponent implements AfterViewInit {
     const setLastPoint = (evt) => {
       this.lastMousePoint.x = evt.offsetX || (evt.pageX - me.canvas.nativeElement.offsetLeft);
       this.lastMousePoint.y = evt.offsetY || (evt.pageY - me.canvas.nativeElement.offsetTop);
+      this.workViewService.mousePositionOnImage(this.lastMousePoint);
     };
 
     this.canvas.nativeElement.addEventListener('DOMMouseScroll', scroll, false);
@@ -330,19 +345,6 @@ export class DrawCanvasComponent implements AfterViewInit {
     this.cx.restore();
   }
 
-  public onSelectImage(selectedImageId: string) {
-    if (selectedImageId !== undefined) {
-      this.imageService.getImage(selectedImageId).subscribe((data: CImage) => {
-        console.log('Image select');
-        console.log(data);
-        this.prepareImage(data);
-      }, error1 => {
-        console.log('Fehler beim laden der Dataset Datein');
-        console.error(error1);
-      });
-    }
-  }
-
   private prepareImage(image: CImage) {
     // save manually if image should be changed
     if (this.currentSaveTimeout !== undefined) {
@@ -411,36 +413,6 @@ export class DrawCanvasComponent implements AfterViewInit {
 
   private onFilterCompleted(image: CImage) {
     this.prepareImage(image);
-  }
-
-  public test() {
-    function RandomSplinePoly() {
-      const poly = new CPolygon();
-      for (let i = 0; i < 6; i++) {
-        poly.addPoint(Math.floor(Math.random() * 1300), Math.floor(Math.random() * 650));
-      }
-      return poly;
-    }
-
-    const splinePoly = RandomSplinePoly();
-
-    const bezierPoly = SplineUtil.computeSplineCurve(splinePoly, 0.5, true);
-
-    // draw each bezier segment
-    const last = bezierPoly.size - 1;
-    for (let i = 0; i < last; i += 3) {
-      this.cx.beginPath();
-      this.cx.moveTo(bezierPoly.x[i], bezierPoly.y[i]);
-      this.cx.bezierCurveTo(bezierPoly.x[i + 1], bezierPoly.y[i + 1], bezierPoly.x[i + 2], bezierPoly.y[i + 2], bezierPoly.x[i + 3], bezierPoly.y[i + 3]);
-      this.cx.stroke();
-      // this.cx.BezierCurve(
-      //   bezierPoly.x[i], bezierPoly.y[i],
-      //   bezierPoly.x[i + 1], bezierPoly.y[i + 1],
-      //   bezierPoly.x[i + 2], bezierPoly.y[i + 2],
-      //   bezierPoly.x[i + 3], bezierPoly.y[i + 3],
-      //   1 // -> draw contour only, no filling
-      // );
-    }
   }
 }
 

@@ -24,7 +24,7 @@ export class FilterData {
       this.img = img
   }
 
-  public setData(data: any, key: string) {
+  public setData(key: string, data: any) {
     this.dataStack.set(key, data)
   }
 

@@ -3,12 +3,12 @@ import {NgModule} from '@angular/core';
 import {HttpClientModule, HttpClient} from '@angular/common/http';
 
 import {AppComponent} from './app.component';
-import {DrawCanvasComponent} from './components/draw-canvas/draw-canvas.component';
+import {DrawCanvasComponent} from './components/workView/draw-canvas/draw-canvas.component';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {CaseListComponent} from './components/case-list/case-list.component';
 import {ImageListComponent} from './components/image-list/image-list.component';
 import {ExportDialogComponent} from './components/export-dialog/export-dialog.component';
-import {FilterListComponent} from './components/filter-list/filter-list.component';
+import {FilterControlComponent} from './components/workView/filter-control/filter-control.component';
 import {ScrollingModule} from '@angular/cdk/scrolling';
 import {
   MAT_SNACK_BAR_DEFAULT_OPTIONS,
@@ -34,6 +34,9 @@ import { ImportDialogComponent } from './components/import-dialog/import-dialog.
 import {MatSnackBarModule} from '@angular/material';
 import { FilterOverlayComponent } from './components/filter-overlay/filter-overlay.component';
 import {OverlayModule} from "@angular/cdk/overlay";
+import { WorkViewComponent } from './components/workView/work-view/work-view.component';
+import { FilterImageListComponent } from './components/workView/filter-image-list/filter-image-list.component';
+import { PaintControlComponent } from './components/workView/paint-control/paint-control.component';
 
 @NgModule({
   declarations: [
@@ -42,9 +45,12 @@ import {OverlayModule} from "@angular/cdk/overlay";
     CaseListComponent,
     ImageListComponent,
     ExportDialogComponent,
-    FilterListComponent,
+    FilterControlComponent,
     ImportDialogComponent,
     FilterOverlayComponent,
+    WorkViewComponent,
+    FilterImageListComponent,
+    PaintControlComponent,
   ],
   imports: [
     HttpClientModule,

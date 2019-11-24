@@ -3,7 +3,7 @@
   grid-template-columns: 20% auto 10% 10%;
   grid-template-rows: auto auto;
   grid-template-areas: "filter filter filter filter" "button spinner reset info";
-
+  height: 100%;
 
   .filter {
     width: 100%;
