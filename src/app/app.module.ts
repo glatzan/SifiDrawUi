@@ -37,6 +37,7 @@ import {OverlayModule} from "@angular/cdk/overlay";
 import { WorkViewComponent } from './components/workView/work-view/work-view.component';
 import { FilterImageListComponent } from './components/workView/filter-image-list/filter-image-list.component';
 import { PaintControlComponent } from './components/workView/paint-control/paint-control.component';
+import { LoginComponent } from './components/login/login.component';
 
 @NgModule({
   declarations: [
@@ -51,6 +52,7 @@ import { PaintControlComponent } from './components/workView/paint-control/paint
     WorkViewComponent,
     FilterImageListComponent,
     PaintControlComponent,
+    LoginComponent,
   ],
   imports: [
     HttpClientModule,

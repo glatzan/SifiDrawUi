@@ -1,5 +1,3 @@
-<!--The content below is only a placeholder and can be replaced.-->
-
 <div class="bodyDiv">
   <app-case-list #caseListComponent [imageListComponent]="imageListComponent" class="caseLise"></app-case-list>
   <app-image-list #imageListComponent class="imageList"></app-image-list>
@@ -11,6 +9,6 @@
   <mat-menu #menu="matMenu">
     <button mat-menu-item (click)="openImportDialog()">Import</button>
     <button mat-menu-item (click)="openExportDialog(caseListComponent.selectedProjectId)">Export</button>
-    <button mat-menu-item (click)="joinTest()">Test</button>
   </mat-menu>
 </div>
+

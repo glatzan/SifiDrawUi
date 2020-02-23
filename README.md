@@ -22,6 +22,8 @@ npm install buffer --save <br>
 npm install process --save <br>
 
 
+Patch algebra.js -> algebra.js/src/expressions.js: Term = function(variable) { to var Term = function(variable) { <br>
+
 
 npm install --save @angular/material @angular/cdk @angular/animations
 

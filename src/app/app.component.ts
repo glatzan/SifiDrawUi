@@ -1,29 +1,14 @@
 import {Component, Input} from '@angular/core';
-import {Dataset} from './model/dataset';
 import {ImportDialogComponent} from './components/import-dialog/import-dialog.component';
 import {MatDialog} from '@angular/material';
 import {ExportDialogComponent} from './components/export-dialog/export-dialog.component';
 import {FilterService} from './service/filter.service';
-import {FilterData} from './worker/filter-data';
-import {concatMap, delay, flatMap, map, mergeMap, switchMap, tap} from 'rxjs/operators';
 import {ImageService} from './service/image.service';
 import {ImageMagicService} from './service/image-magic.service';
-import {from, observable, Observable, of, pipe} from 'rxjs';
-import {pipeFromArray} from 'rxjs/internal/util/pipe';
-import {DatasetService} from './service/dataset.service';
-import {Layer} from './model/layer';
-import DrawUtil from './utils/draw-util';
-import {CImage} from './model/cimage';
-import {PNG} from 'pngjs';
 import {FlaskService} from './service/flask.service';
 import {ImageJService} from './service/image-j.service';
-import {PointLine} from './model/point-line';
-import {Point} from './model/point';
-import {CPolygon} from './utils/cpolygon';
-import {SplineUtil} from './utils/spline-util';
-import VectorUtils from './utils/vector-utils';
 import {DrawCanvasComponent} from './components/workView/draw-canvas/draw-canvas.component';
-import {PointLineUtil} from "./utils/point-line-util";
+import {DatasetService} from './service/dataset.service';
 
 @Component({
   selector: 'app-root',

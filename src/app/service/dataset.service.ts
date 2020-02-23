@@ -1,7 +1,6 @@
 import {Injectable} from '@angular/core';
 import {HttpClient, HttpHeaders} from "@angular/common/http";
 import {Observable} from "rxjs";
-import {ProjectData} from "../model/project-data";
 import {Dataset} from "../model/dataset";
 
 @Injectable({
@@ -9,12 +8,12 @@ import {Dataset} from "../model/dataset";
 })
 export class DatasetService {
 
-  private serverURL = "http://127.0.0.1:8080"
+  private serverURL = 'http://127.0.0.1:8080'
 
   constructor(private _http: HttpClient) {
   }
 
-  public getDataset(id: String): Observable<Dataset> {
+  public getDataset(id: string): Observable<Dataset> {
     console.log(id)
     const httpOptions = {
       headers: new HttpHeaders({
@@ -25,7 +24,7 @@ export class DatasetService {
     return this._http.get<Dataset>(`${this.serverURL}/dataset/${id}`, httpOptions);
   }
 
-  public getDatasets(id: String[]): Observable<Dataset[]> {
+  public getDatasets(id: string[]): Observable<Dataset[]> {
     console.log("id")
     const httpOptions = {
       headers: new HttpHeaders({
@@ -36,7 +35,7 @@ export class DatasetService {
     return this._http.get<Dataset[]>(`${this.serverURL}/datasets/${id.join("-")}`, httpOptions);
   }
 
-  public createDataset(id: String): Observable<any> {
+  public createDataset(id: string): Observable<any> {
     const httpOptions = {
       headers: new HttpHeaders({
         'Content-Type': 'application/json'
