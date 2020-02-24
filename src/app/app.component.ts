@@ -18,53 +18,6 @@ import {DatasetService} from './service/dataset.service';
 export class AppComponent {
   title = 'SifiDrawUi';
 
-  private selectedDatasetId: string;
-  private selectedImageId: string;
-
-  @Input() drawCanvasComponent: DrawCanvasComponent;
-
-  constructor(public dialog: MatDialog,
-              private filterService: FilterService,
-              private imageService: ImageService,
-              private imageMagicService: ImageMagicService,
-              private datasetSerive: DatasetService,
-              private falskService: FlaskService,
-              private imageJService: ImageJService) {
-  }
-
-  onDatasetSelect(id: string) {
-    console.log(id);
-    this.selectedDatasetId = id;
-  }
-
-  onImageSelect(id: string) {
-    console.log(`Select Image ${id}`);
-    this.selectedImageId = id;
-  }
-
-  openImportDialog(): void {
-    const dialogRef = this.dialog.open(ImportDialogComponent, {
-      height: '768px',
-      width: '1024px',
-    });
-
-    dialogRef.afterClosed().subscribe(result => {
-      console.log('The dialog was closed');
-    });
-  }
-
-
-  openExportDialog(id?: string): void {
-    const dialogRef = this.dialog.open(ExportDialogComponent, {
-      height: '768px',
-      width: '1024px',
-      data: {id}
-    });
-
-    dialogRef.afterClosed().subscribe(result => {
-      console.log('The dialog was closed');
-    });
-  }
 }
 
 
