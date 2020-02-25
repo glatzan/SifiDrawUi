@@ -1,0 +1,22 @@
+.body {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-gap: 10px;
+  grid-auto-rows: calc( 50vh - 10px );
+  width: calc( 100vw - 20px );
+  height: calc( 100vh - 20px );
+  grid-template-areas:
+    ". a a ."
+    ". a a .";
+
+  .loginForm {
+    grid-area: a;
+    align-self: center;
+    justify-self: center;
+
+    display: grid;
+    grid-template-columns: 100%;
+    justify-items: center;
+  }
+
+}

@@ -1,4 +1,4 @@
-import {BrowserModule, DomSanitizer} from '@angular/platform-browser';
+import {BrowserModule, DomSanitizer, HAMMER_GESTURE_CONFIG} from '@angular/platform-browser';
 import {NgModule} from '@angular/core';
 import {HTTP_INTERCEPTORS, HttpClientModule} from '@angular/common/http';
 
@@ -41,6 +41,10 @@ import {routes} from './app.routes';
 import {HomeComponent} from './components/home/home.component';
 import {AuthInterceptor} from "./helpers/AuthInterceptor";
 import {ErrorInterceptor} from "./helpers/ErrorInterceptor";
+import {MatToolbarModule} from "@angular/material/toolbar";
+import {MatSliderModule} from "@angular/material/slider";
+import {GestureConfig} from "@angular/material/core";
+import {MatSlideToggleModule} from "@angular/material/slide-toggle";
 
 @NgModule({
   declarations: [
@@ -81,13 +85,17 @@ import {ErrorInterceptor} from "./helpers/ErrorInterceptor";
     MatProgressBarModule,
     ReactiveFormsModule,
     ReactiveFormsModule,
-    RouterModule.forRoot(routes)
+    RouterModule.forRoot(routes),
+    MatToolbarModule,
+    MatSliderModule,
+    MatSlideToggleModule
   ],
   entryComponents: [ExportDialogComponent, ImportDialogComponent, FilterOverlayComponent],
   providers: [
     {provide: MAT_SNACK_BAR_DEFAULT_OPTIONS, useValue: {duration: 500}},
     {provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true},
-    {provide: HTTP_INTERCEPTORS, useClass: ErrorInterceptor, multi: true}],
+    {provide: HTTP_INTERCEPTORS, useClass: ErrorInterceptor, multi: true},
+    { provide: HAMMER_GESTURE_CONFIG, useClass: GestureConfig }],
   bootstrap: [AppComponent]
 })
 export class AppModule {

@@ -41,9 +41,9 @@ export class ImageListComponent implements OnInit {
   }
 
   private onSelectImage($event, id) {
-    console.log("Selecting img " + id)
+    console.log('Selecting img ' + id)
     this.selectedImageId = id;
-    this.workViewService.displayImageById(id)
+    this.workViewService.displayImageById(id);
   }
 
   /**

@@ -2,13 +2,12 @@ import { Injectable } from '@angular/core';
 import {HttpClient, HttpHeaders} from "@angular/common/http";
 import {CImage} from "../model/cimage";
 import {Observable} from "rxjs";
+import {environment} from "../../environments/environment";
 
 @Injectable({
   providedIn: 'root'
 })
 export class ImageMagicService {
-
-  private serverURL = 'http://127.0.0.1:8080';
 
   constructor(private _http: HttpClient) {
   }
@@ -17,7 +16,7 @@ export class ImageMagicService {
     const httpOptions = {
       headers: new HttpHeaders({})
     };
-    console.log(`${this.serverURL}/magic/${btoa(command)}`);
-    return this._http.post<CImage>(`${this.serverURL}/magic/${btoa(command)}`, image, httpOptions);
+    console.log(`${environment.backendUrl}/magic/${btoa(command)}`);
+    return this._http.post<CImage>(`${environment.backendUrl}/magic/${btoa(command)}`, image, httpOptions);
   }
 }

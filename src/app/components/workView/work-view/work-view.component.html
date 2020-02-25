@@ -1,34 +1,50 @@
-<h4>Bild {{currentImage !== undefined ? currentImage.name : ""}}</h4>
 <div class="content">
+  <div class="headline">Bild {{currentImage !== undefined ? currentImage.name : ""}}</div>
+  <div class="drawContent">
 
-  <div class="workView">
+    <div class="workView">
 
-    <div class="drawCanvas">
-      <app-draw-canvas></app-draw-canvas>
+      <div class="drawCanvas">
+        <app-draw-canvas></app-draw-canvas>
+      </div>
+
+      <div class="canvasControl">
+
+        <div class="contrast" *ngIf="currentImage !== undefined">
+          Zeichnen:
+          <mat-slide-toggle [(ngModel)]="drawMode" (change)="changeDrawMode()" class="drawMode"></mat-slide-toggle>
+        </div>
+
+        <div class="contrast" *ngIf="currentImage !== undefined">
+          Kontrast:
+          <mat-slider min="1" max="200" step="1" value="100"></mat-slider>
+        </div>
+
+        <span class="mouse" *ngIf="currentImage !== undefined">
+          X {{mousePositionInCanvas.x}} Y {{mousePositionInCanvas.y}}
+        </span>
+
+        <span class="zoom" *ngIf="currentImage !== undefined">
+          Zoom {{currentZoomLevel}} %
+        </span>
+
+        <i class="material-icons resetBtn" (click)="resetCanvasZoom()" title="Bild zurücksetzten"
+           *ngIf="currentImage !== undefined">
+          control_camera
+        </i>
+      </div>
+
+      <div class="drawControl">
+        <app-paint-control></app-paint-control>
+      </div>
+
+      <div class="filterControl">
+        <app-filter-control></app-filter-control>
+      </div>
     </div>
 
-    <div class="canvasControl">
-  <span class="mouse">
-      X {{mousePositionInCanvas.x}} Y {{mousePositionInCanvas.y}}
-    </span>
-      <span class="zoom">
-      Zoom {{currentZoomLevel}} %
-    </span>
-      <i class="material-icons resetBtn" (click)="resetCanvasZoom()" title="Bild zurücksetzten">
-        control_camera
-      </i>
+    <div class="filterImageList">
+      <app-filter-image-list></app-filter-image-list>
     </div>
-
-    <div class="drawControl">
-      <app-paint-control></app-paint-control>
-    </div>
-
-    <div class="filterControl">
-      <app-filter-control></app-filter-control>
-    </div>
-  </div>
-
-  <div class="filterImageList">
-    <app-filter-image-list></app-filter-image-list>
   </div>
 </div>

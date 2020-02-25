@@ -20,6 +20,7 @@ npm install rxjs-compat<br>
 npm install pngjs  --save<br>
 npm install buffer --save <br>
 npm install process --save <br>
+npm install hammerjs <br>
 
 
 Patch algebra.js -> algebra.js/src/expressions.js: Term = function(variable) { to var Term = function(variable) { <br>

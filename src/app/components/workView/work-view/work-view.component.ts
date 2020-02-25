@@ -14,20 +14,29 @@ export class WorkViewComponent implements OnInit {
   }
 
   private currentImage: CImage;
+  private drawMode = true;
   private mousePositionInCanvas: Vector = new Vector(0, 0);
-  private currentZoomLevel: number = 100;
+  private currentZoomLevel = 100;
 
   ngOnInit() {
     this.workViewService.changeImage.subscribe(image =>
       this.currentImage = image
     );
 
-    this.workViewService.mouseCoordinateOnImage.subscribe(v =>{
+    this.workViewService.changeImageAndReload.subscribe(image =>
+      this.currentImage = image
+    );
+
+    this.workViewService.mouseCoordinateOnImage.subscribe(v => {
       this.mousePositionInCanvas = v;
-    })
+    });
   }
 
   public resetCanvasZoom() {
     this.workViewService.resetCanvasZoom();
+  }
+
+  public changeDrawMode() {
+    this.workViewService.drawMode(this.drawMode);
   }
 }

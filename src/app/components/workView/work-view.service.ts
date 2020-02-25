@@ -1,7 +1,8 @@
 import {EventEmitter, Injectable, Output} from '@angular/core';
-import {CImage} from "../../model/cimage";
-import {ImageService} from "../../service/image.service";
-import {Vector} from "../../utils/vaa/model/vector";
+import {CImage} from '../../model/cimage';
+import {ImageService} from '../../service/image.service';
+import {Vector} from '../../utils/vaa/model/vector';
+import CImageUtil from "../../utils/cimage-util";
 
 @Injectable({
   providedIn: 'root'
@@ -15,6 +16,8 @@ export class WorkViewService {
 
   @Output() resetImageZoom: EventEmitter<boolean> = new EventEmitter();
   @Output() mouseCoordinateOnImage: EventEmitter<Vector> = new EventEmitter();
+
+  @Output() drawModeChanged: EventEmitter<boolean> = new EventEmitter();
 
   constructor(private imageService: ImageService) {
   }
@@ -30,10 +33,11 @@ export class WorkViewService {
   }
 
   public displayImage(image: CImage, reload = true) {
-    if (reload)
-      this.changeImageAndReload.emit(image)
-    else
+    if (reload) {
+      this.changeImageAndReload.emit(CImageUtil.prepareImage(image));
+    } else {
       this.changeImage.emit(image);
+    }
   }
 
   public filterImageList(imgs: Array<CImage>) {
@@ -50,5 +54,9 @@ export class WorkViewService {
 
   public resetCanvasZoom() {
     this.resetImageZoom.emit(true);
+  }
+
+  public drawMode(enable: boolean) {
+    this.drawModeChanged.emit(enable);
   }
 }

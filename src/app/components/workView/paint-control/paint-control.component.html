@@ -1,1 +1,61 @@
-<p>paint-control works!</p>
+<div class="settings" *ngIf="renderContext">
+  <div class="modeGroup">
+    <mat-label class="modeLabel">
+      Modus
+    </mat-label>
+
+    <mat-button-toggle-group #group="matButtonToggleGroup" class="modeBtn" [(value)]="pointMode">
+      <mat-button-toggle value="false">
+        Linie
+      </mat-button-toggle>
+      <mat-button-toggle value="true">
+        Punkt
+      </mat-button-toggle>
+    </mat-button-toggle-group>
+  </div>
+  <div class="hideLinesGroup">
+    <mat-checkbox [(ngModel)]="hideLines" (change)="onHideLines($event)">Linien verstecken</mat-checkbox>
+  </div>
+
+  <mat-form-field>
+    <mat-select [(ngModel)]="currentLayer" placeholder="Label">
+      <mat-option *ngFor="let layer of layers" [value]="layer">
+        {{layer.id}}
+      </mat-option>
+    </mat-select>
+  </mat-form-field>
+
+  <button mat-icon-button color="primary" class="addButton" (click)="onAddLayer($event)">
+    <mat-icon>playlist_add</mat-icon>
+  </button>
+
+  <mat-form-field>
+    <input matInput [(ngModel)]="currentLayer.color" placeholder="Farbe" (change)="onChangeColor($event)"
+           type="color"/>
+  </mat-form-field>
+
+  <mat-form-field>
+    <input matInput [(ngModel)]="currentLayer.size" placeholder="Dicke"
+           type="number" min="1"
+           id="myNumber"/>
+  </mat-form-field>
+
+
+  <mat-form-field floatLabel="always" class="lines">
+    <mat-label>Linien</mat-label>
+    <span *ngFor="let x of currentLayer.lines; let idx = index">
+                       <a style="text-decoration: underline" href="#"
+                          (mouseenter)='onHighlightLine(idx,true)'
+                          (mouseleave)="onHighlightLine(idx,false)"
+                          (click)="onSelectLine($event, idx)">[{{x.length}}]</a>
+                     </span>
+    <input matInput style="display: none"/>
+  </mat-form-field>
+
+  <mat-form-field>
+    <input matInput [(ngModel)]="rightClickCircle" placeholder="Radierer"
+           type="number" min="1"
+    />
+  </mat-form-field>
+  <label class="deleteLabel">(strg: löschen)</label>
+</div>

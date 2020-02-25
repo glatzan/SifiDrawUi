@@ -1,80 +1,112 @@
 @import "../../../../styles";
 
 .content {
-  height: 90vh;
-  display: grid;
-  grid-template-columns: 90% 10%;
-  grid-column-gap: 10px;
+  height: 100%;
+  width: 100%;
+  position: relative;
 
-  .workView {
-    display: grid;
-    grid-template-columns: 50% 50%;
-    grid-template-rows: fit-content(650px) 30px auto;
-    grid-row-gap: 5px;
-    grid-column-gap: 5px;
-    grid-template-areas: "canvasContainer canvasContainer" "canvasControl canvasControl" "drawControl filterControl";
-    min-width: 1300px;
-
-    .drawCanvas {
-      border: 1px solid LightGray;
-      border-radius: 3px;
-      grid-area: canvasContainer;
-    }
-
-    .canvasControl {
-      border: 1px solid LightGray;
-      border-radius: 3px;
-
-      grid-area: canvasControl;
-      display: grid;
-      grid-template-columns: auto 10% 10% 10% 10%;
-      grid-template-areas: ". contrast mouse zoom resetBtn";
-
-      .mouse {
-        justify-self: right;
-        align-self: center;
-      }
-
-      .zoom {
-        justify-self: right;
-        grid-area: zoom;
-        align-self: center;
-        white-space: nowrap;
-      }
-
-      .resetBtn {
-        grid-area: resetBtn;
-        justify-self: center;
-        align-self: center;
-
-        &:hover {
-          cursor: pointer;
-          color: $dark-focused;
-        }
-      }
-    }
-
-    .drawControl{
-      grid-area: drawControl;
-      border: 1px solid LightGray;
-      border-radius: 3px;
-    }
-
-    .filterControl{
-      grid-area: filterControl;
-      border: 1px solid LightGray;
-      border-radius: 3px;
-      border-radius: 3px;
-      border-spacing: 0px;
-      padding: 3px;
-    }
+  .headline {
+    padding-top: 5px;
+    height: 30px;
+    font-family: Roboto, Helvetica Neue Light, Helvetica Neue, Helvetica, Arial, Lucida Grande, sans-serif;
+    font-size: 20px;
   }
 
-  .filterImageList {
-    border: 1px solid LightGray;
-    border-radius: 3px;
-    width: 200px;
-    padding-top: 5px;
+  .drawContent {
+    position: absolute;
+    width: 100%;
+    bottom: 0;
+    top: 35px;
+    display: grid;
+    grid-template-columns: 90% 10%;
+    grid-column-gap: 10px;
+
+    .workView {
+      display: grid;
+      grid-template-columns: 50% 50%;
+      grid-template-rows: fit-content(650px) 50px auto;
+      grid-row-gap: 5px;
+      grid-column-gap: 5px;
+      grid-template-areas: "c c" "cc cc" "dc fc";
+      min-width: 1300px;
+
+      .drawCanvas {
+        border: 1px solid LightGray;
+        border-radius: 3px;
+        grid-area: c;
+        display: flex;
+        justify-content: center;
+        align-content: center;
+      }
+
+      .canvasControl {
+        border: 1px solid LightGray;
+        border-radius: 3px;
+        padding-left: 15px;
+
+        grid-area: cc;
+        display: grid;
+        grid-template-columns: 150px 400px 150px auto 100px 50px;
+        grid-template-areas: "drawMode contrast mouse .   zoom resetBtn";
+
+        .drawMode {
+          grid-area: drawMode;
+          align-self: center;
+        }
+
+        .contrast {
+          align-self: center;
+          .mat-slider-horizontal {
+            padding: 0;
+            width: 300px;
+          }
+        }
+
+        .mouse {
+          align-self: center;
+        }
+
+        .zoom {
+          justify-self: center;
+          grid-area: zoom;
+          align-self: center;
+          white-space: nowrap;
+        }
+
+        .resetBtn {
+          grid-area: resetBtn;
+          justify-self: center;
+          align-self: center;
+
+          &:hover {
+            cursor: pointer;
+            color: $dark-focused;
+          }
+        }
+      }
+
+      .drawControl {
+        grid-area: dc;
+        border: 1px solid LightGray;
+        border-radius: 3px;
+      }
+
+      .filterControl {
+        grid-area: fc;
+        border: 1px solid LightGray;
+        border-radius: 3px;
+        border-radius: 3px;
+        border-spacing: 0px;
+        padding: 3px;
+      }
+    }
+
+    .filterImageList {
+      border: 1px solid LightGray;
+      border-radius: 3px;
+      width: 200px;
+      padding-top: 5px;
+    }
   }
 }
 

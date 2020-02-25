@@ -1,18 +1,29 @@
-<form [formGroup]="form">
-  <fieldset>
-    <legend>Login</legend>
-    <div class="form-field">
-      <label>Email:</label>
-      <input name="email" formControlName="email">
+<div class="body">
+  <form class="loginForm" [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+    <h4 class="card-header">SifiDraw</h4>
+    <div class="form-group">
+      <mat-form-field [ngClass]="{ 'is-invalid': submitted && f.username?.errors }">
+        <input matInput placeholder="Name" type="text"
+               formControlName="username">
+        <mat-error *ngIf="submitted && f.username?.errors">
+          <div *ngIf="f.username?.errors.required">Username is required</div>
+        </mat-error>
+      </mat-form-field>
     </div>
-    <div class="form-field">
-      <label>Password:</label>
-      <input name="password" formControlName="password"
-             type="password">
+    <div class="form-group">
+      <mat-form-field [ngClass]="{ 'is-invalid': submitted && f.password?.errors }">
+        <input matInput placeholder="Passwort" type="password"
+               formControlName="password">
+        <mat-error *ngIf="submitted && f.password?.errors">
+          <div *ngIf="f.password?.errors.required">Password is required</div>
+        </mat-error>
+      </mat-form-field>
     </div>
-  </fieldset>
-  <div class="form-buttons">
-    <button class="button button-primary"
-            (click)="login()">Login</button>
-  </div>
-</form>
+    <button mat-stroked-button [disabled]="loading">
+      <span *ngIf="loading" class="spinner-border spinner-border-sm mr-1"></span>
+      Login
+    </button>
+    <div *ngIf="error" class="alert alert-danger mt-3 mb-0">{{error}}</div>
+
+  </form>
+</div>

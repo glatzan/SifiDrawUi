@@ -1,18 +1,20 @@
-<h4>Projekte</h4>
-<cdk-virtual-scroll-viewport itemSize="30" class="caseList">
-  <div *cdkVirtualFor="let pD of projectData">
-    <div class="projectDiv">
-      <div class="box">
-        {{pD.id}}
+<div class="caseList">
+  <div class="headline">Projekte</div>
+  <cdk-virtual-scroll-viewport itemSize="30" class="caseScroll">
+    <div *cdkVirtualFor="let pD of projectData">
+      <div class="projectDiv">
+        <div class="box">
+          {{pD.id}}
+        </div>
       </div>
-    </div>
 
-    <ul>
-      <li *ngFor="let dataset of pD.datasets" (click)="onSelectDataset($event,dataset.id)" class="clickAble"
-          [ngClass]="selectedProjectId === dataset.id ? 'selectedElement' : ''">
-        {{dataset.name}}
-      </li>
-    </ul>
-    <mat-divider></mat-divider>
-  </div>
-</cdk-virtual-scroll-viewport>
+      <ul>
+        <li *ngFor="let dataset of pD.datasets" (click)="onSelectDataset($event,dataset.id)" class="clickAble"
+            [ngClass]="selectedProjectId === dataset.id ? 'selectedElement' : ''">
+          {{dataset.name}}
+        </li>
+      </ul>
+      <mat-divider></mat-divider>
+    </div>
+  </cdk-virtual-scroll-viewport>
+</div>

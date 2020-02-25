@@ -3,15 +3,14 @@ import {HttpClient, HttpHeaders} from '@angular/common/http';
 import {Observable} from 'rxjs';
 import {ProjectData} from '../model/project-data';
 import {CImage} from '../model/cimage';
+import {environment} from "../../environments/environment";
 
 @Injectable({
   providedIn: 'root'
 })
 export class ImageService {
 
-  private serverURL = 'http://127.0.0.1:8080';
-
-  constructor(private _http: HttpClient) {
+  constructor(private http: HttpClient) {
   }
 
   public getImage(id: string): Observable<CImage> {
@@ -21,22 +20,21 @@ export class ImageService {
       })
     };
 
-    // console.log(`${this.serverURL}/image/${id}`)
-    return this._http.get<CImage>(`${this.serverURL}/image/${id}`, httpOptions);
+    return this.http.get<CImage>(`${environment.backendUrl}/image/${id}`, httpOptions);
   }
 
   public setImage(image: CImage): Observable<any> {
     const httpOptions = {
       headers: new HttpHeaders({})
     };
-    return this._http.put<CImage>(`${this.serverURL}/image`, image, httpOptions);
+    return this.http.put<CImage>(`${environment.backendUrl}/image`, image, httpOptions);
   }
 
   public createImage(image: CImage, type : string): Observable<any> {
     const httpOptions = {
       headers: new HttpHeaders({})
     };
-    console.log(`${this.serverURL}/image/${type}`);
-    return this._http.post<CImage>(`${this.serverURL}/image/${type}`, image, httpOptions);
+    console.log(`${environment.backendUrl}}/image/${type}`);
+    return this.http.post<CImage>(`${environment.backendUrl}/image/${type}`, image, httpOptions);
   }
 }

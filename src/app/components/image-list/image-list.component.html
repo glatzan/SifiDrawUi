@@ -1,10 +1,11 @@
-<h4>Dataset {{dataset.name}}</h4>
-
-<cdk-virtual-scroll-viewport itemSize="1" class="imageList">
-  <ul>
-    <li *cdkVirtualFor="let img of dataset.images" (click)="onSelectImage($event, img.id)" class="clickAble"
-        [ngClass]="selectedImageId === img.id ? 'selectedElement' : ''">
-      {{img.name}}
-    </li>
-  </ul>
-</cdk-virtual-scroll-viewport>
+<div class="imageList">
+  <div class="headline">Dataset {{dataset.name}}</div>
+  <cdk-virtual-scroll-viewport itemSize="1" class="imageScroll">
+    <ul>
+      <li *cdkVirtualFor="let img of dataset.images" (click)="onSelectImage($event, img.id)" class="clickAble"
+          [ngClass]="selectedImageId === img.id ? 'selectedElement' : ''">
+        {{img.name}}
+      </li>
+    </ul>
+  </cdk-virtual-scroll-viewport>
+</div>

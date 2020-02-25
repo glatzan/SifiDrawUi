@@ -15,7 +15,7 @@ export default class CImageUtil {
     '#FF3380', '#CCCC00', '#66E64D', '#4D80CC', '#9900B3',
     '#E64D66', '#4DB380', '#FF4D4D', '#99E6E6', '#6666FF'];
 
-  static prepareImage(image: CImage) {
+  static prepareImage(image: CImage): CImage {
     if (!CImageUtil.hasLayer(image)) {
       CImageUtil.addLayer(image);
     }
@@ -29,6 +29,8 @@ export default class CImageUtil {
         }
       }
     }
+
+    return image;
   }
 
   static initFirstLineOfLayer(layer: Layer): Point[] {

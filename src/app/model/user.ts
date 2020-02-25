@@ -1,4 +1,5 @@
 export class User {
-  public name: string;
-  public password: string;
+  name: string;
+  password: string;
+  authdata?: string;
 }
