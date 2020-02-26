@@ -4,16 +4,10 @@ import {ProjectService} from '../../service/project.service';
 import {Dataset} from '../../model/dataset';
 import {Layer} from '../../model/layer';
 import {DatasetService} from '../../service/dataset.service';
-import {delay, flatMap} from 'rxjs/operators';
 import {ImageService} from '../../service/image.service';
-import {CImage} from '../../model/cimage';
-import DrawUtil from '../../utils/draw-util';
 import {MAT_DIALOG_DATA, MatDialogRef, MatSnackBar} from '@angular/material';
-import CImageUtil from "../../utils/cimage-util";
 import {FilterService} from "../../service/filter.service";
-import {forkJoin} from "rxjs";
 import {ProcessCallback} from "../../worker/processCallback";
-import {DisplayCallback} from "../../worker/display-callback";
 
 @Component({
   selector: 'app-export-dialog',

@@ -1,11 +1,8 @@
-import {Component, OnInit, EventEmitter, Output, Input} from '@angular/core';
+import {Component, Input, OnInit} from '@angular/core';
 import {ProjectData} from '../../model/project-data';
 import {ProjectService} from '../../service/project.service';
-import {Subscribable} from 'rxjs';
-import {ExportDialogComponent} from '../export-dialog/export-dialog.component';
-import {MatDialog} from '@angular/material';
 import {ImageListComponent} from '../image-list/image-list.component';
-import {ImportDialogComponent} from "../import-dialog/import-dialog.component";
+import {WorkViewService} from "../workView/work-view.service";
 
 @Component({
   selector: 'app-case-list',
@@ -20,9 +17,18 @@ export class CaseListComponent implements OnInit {
 
   @Input() imageListComponent: ImageListComponent;
 
-  constructor(public projectService: ProjectService,
-              public dialog: MatDialog) {
+  constructor(private projectService: ProjectService,
+              private workViewService: WorkViewService) {
     this.loadData();
+  }
+
+  ngOnInit() {
+    this.workViewService.reloadCaseList.subscribe(x => {
+      this.loadData();
+      if (this.selectedProjectId != null) {
+        this.imageListComponent.onDatasetSelection(this.selectedProjectId);
+      }
+    });
   }
 
   private loadData() {
@@ -35,8 +41,6 @@ export class CaseListComponent implements OnInit {
     });
   }
 
-  ngOnInit() {
-  }
 
   private onSelectDataset(event, id) {
     this.selectedProjectId = id;

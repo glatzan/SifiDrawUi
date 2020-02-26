@@ -1,0 +1,33 @@
+<div class="dialog">
+  <div mat-dialog-title>File Upload</div>
+
+  <div mat-dialog-content class="dialogContent" [formGroup]="form">
+    <mat-form-field class="projectObj">
+
+      <mat-select formControlName="selectedProject" placeholder="Projekt" (selectionChange)="onSelectProject()">
+        <mat-option *ngFor="let project of projects" [value]="project">
+          {{project.id}}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field class="datasetObj">
+      <mat-label>Datasets</mat-label>
+      <mat-select formControlName="selectedDataset">
+        <mat-option *ngFor="let dataset of datasets" [value]="dataset">{{dataset.name}}</mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field>
+      <ngx-mat-file-input formControlName="files" placeholder="Bilder" multiple [accept]="'.png'"></ngx-mat-file-input>
+      <mat-icon matSuffix>folder</mat-icon>
+    </mat-form-field>
+  </div>
+
+  <div class="spacer"></div>
+
+  <div mat-dialog-actions class="btnContainer">
+    <button mat-stroked-button class="addBtn" (click)="upload()">Hochladen</button>
+    <button mat-stroked-button class="addBtn" (click)="close()">Close</button>
+  </div>
+</div>

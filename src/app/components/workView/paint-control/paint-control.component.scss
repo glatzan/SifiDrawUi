@@ -1,0 +1,96 @@
+.selectImage {
+  width: 100%;
+  height: 100%;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 25px;
+  font-weight: bold;
+}
+
+.paintControl {
+  padding: 5px 20px;
+  display: grid;
+  grid-template-columns: repeat(4, 4fr);
+  grid-template-rows: repeat(5, 70px) auto;
+  grid-column-gap: 5px;
+  align-content: center;
+  grid-template-areas: "mode mode hide hide" "labelSelectText labelSelect . ." "labelSettingsText labelSettings . ." "sublinesText sublines sublines sublinesHelp" "eraserText eraser eraserHelp eraserHelp";
+
+  .modus {
+    grid-area: mode;
+    align-self: center;
+
+    .modusBtn {
+      margin-left: 15px;
+    }
+  }
+
+  .hideLine {
+    grid-area: hide;
+    align-self: center;
+  }
+
+  .labelSelectText {
+    grid-area: labelSelectText;
+    align-self: center;
+  }
+
+  .labelSelect {
+    grid-area: labelSelect;
+
+    .settingElement {
+      margin-left: 15px;
+      width: 50px;
+    }
+  }
+
+  .labelSettingsText {
+    grid-area: labelSettingsText;
+    align-self: center;
+  }
+
+  .labelSettings {
+    grid-area: labelSettings;
+
+    .settingElement {
+      margin-left: 15px;
+      width: 50px;
+    }
+  }
+
+  .sublinesText {
+    grid-area: sublinesText;
+    align-self: center;
+  }
+
+  .sublines {
+    grid-area: sublines;
+    margin-left: 15px;
+    width: 80%;
+  }
+
+  .sublinesHelp{
+    grid-area: sublinesHelp;
+    align-self: center;
+    justify-self: right;
+  }
+
+  .eraserText {
+    grid-area: eraserText;
+    align-self: center;
+  }
+
+  .eraser {
+    margin-left: 15px;
+    grid-area: eraser;
+    width: 50px;
+  }
+
+  .eraserHelp{
+    grid-area: eraserHelp;
+    align-self: center;
+    justify-self: right;
+  }
+}

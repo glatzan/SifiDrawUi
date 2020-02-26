@@ -1,0 +1,43 @@
+<div class="dialog">
+  <div mat-dialog-title>Scripts</div>
+
+  <div mat-dialog-content class="dialogContent">
+    <mat-form-field>
+      <mat-select [(ngModel)]="selectedFilterSet" placeholder="Skripte" (selectionChange)="onChangeFilterSet()">
+        <mat-option *ngFor="let filterSet of filterSets" [value]="filterSet">
+          {{filterSet.name}}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field>
+      <input matInput placeholder="Script-Name" [(ngModel)]="selectedFilterSet.name" (change)="onContentChange()"
+             [disabled]="disabled">
+    </mat-form-field>
+
+    <mat-form-field floatLabel="always" style=" width: 100%">
+          <textarea matInput placeholder="Kommentar" rows="5" style="white-space: nowrap;" (change)="onContentChange()"
+                    [disabled]="disabled"
+                    [(ngModel)]="selectedFilterSet.comment"></textarea>
+    </mat-form-field>
+
+    <mat-form-field floatLabel="always" style=" width: 100%">
+          <textarea matInput placeholder="Script" rows="18" style="white-space: nowrap;" (change)="onContentChange()"
+                    [disabled]="disabled"
+                    [(ngModel)]="selectedFilterSet.filters"></textarea>
+    </mat-form-field>
+  </div>
+
+  <div class="spacer"></div>
+
+  <div mat-dialog-actions class="btnContainer">
+    <div class="addBtn">
+      <button mat-stroked-button class="addBtn" (click)="onNewScript()">New Script</button>
+      <button mat-stroked-button class="addBtn" (click)="delete()" [disabled]="disabled">Delete</button>
+    </div>
+    <div class="createAbortBtn">
+      <button mat-stroked-button class="addBtn" (click)="save()" [disabled]="!contentChanged">Save</button>
+      <button mat-stroked-button class="addBtn" (click)="close()">Close</button>
+    </div>
+  </div>
+</div>

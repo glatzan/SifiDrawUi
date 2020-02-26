@@ -1,0 +1,46 @@
+.navbar {
+  width: 100%;
+  background-color: #3f51b5;
+  font-size: 20px;
+  color: #fff;
+  height: 65px;
+  font-family: Roboto, Helvetica Neue Light, Helvetica Neue, Helvetica, Arial, Lucida Grande, sans-serif;
+
+  .fill-remaining-space {
+    flex: 1 1 auto;
+  }
+
+  .logoutBtn {
+    margin-left: 10px;
+  }
+
+  .btn {
+    color: #000;
+    background-color: white;
+  }
+}
+
+.bodyDiv {
+  display: grid;
+  grid-template-columns: fit-content(300px) fit-content(300px) auto;
+  grid-template-rows: auto;
+  grid-column-gap: 5px;
+  width: calc( 100vw - 15px );
+  height: calc( 100vh - 80px );
+  padding: 5px;
+
+  .caseLise {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .imageList {
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  .canvasDraw {
+    grid-column: 3;
+    grid-row: 1;
+  }
+}

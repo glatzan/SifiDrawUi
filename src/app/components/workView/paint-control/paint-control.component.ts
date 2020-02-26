@@ -1,7 +1,8 @@
 import {Component, OnInit} from '@angular/core';
-import {Layer} from "../../../model/layer";
-import {WorkViewService} from "../work-view.service";
-import {CImage} from "../../../model/cimage";
+import {Layer} from '../../../model/layer';
+import {WorkViewService} from '../work-view.service';
+import {CImage} from '../../../model/cimage';
+import CImageUtil from '../../../utils/cimage-util';
 
 @Component({
   selector: 'app-paint-control',
@@ -12,15 +13,13 @@ export class PaintControlComponent implements OnInit {
 
   private image: CImage;
 
-  private pointMode = false;
+  private pointMode = 'false';
 
   private hideLines = false;
 
   private currentLayer: Layer;
 
-  private layers: Layer[];
-
-  private rightClickCircle = 10;
+  private rightClickCircle = 40;
 
   private renderContext = false;
 
@@ -42,28 +41,59 @@ export class PaintControlComponent implements OnInit {
 
   private init(image: CImage) {
     this.image = image;
-    this.layers = image.layers;
     this.currentLayer = image.layers[0];
     this.renderContext = true;
   }
 
-  public onHideLines($event) {
+  public onChangeMode($event) {
+    this.workViewService.pointModeChanged.emit(this.pointMode === 'true');
+  }
 
+  public onHideLines($event) {
+    console.log(this.hideLines);
+    this.workViewService.hideLines.emit(this.hideLines);
+  }
+
+  public onLayerChange($event) {
+    this.workViewService.selectLayer.emit(this.currentLayer);
+    console.log('chage to' + this.currentLayer.id);
   }
 
   public onAddLayer($event) {
-
+    this.currentLayer = CImageUtil.addLayer(this.image);
+    this.workViewService.selectLayer.emit(this.currentLayer);
   }
 
-  public onChangeColor($event) {
-
+  public onChangeColorOrThickness($event) {
+    console.log('redarw');
+    this.workViewService.saveAndRedrawImage.emit(true);
   }
 
   public onHighlightLine(id: number, highlight: boolean) {
-
+    if (highlight) {
+      this.workViewService.highlightLine.emit(this.currentLayer.lines[id]);
+    } else {
+      this.workViewService.highlightLine.emit(null);
+    }
   }
 
-  public onSelectLine($event, id: number) {
+  public onSelectSubLine($event, id: number) {
+    if ($event.ctrlKey) {
+      CImageUtil.removeLine(this.currentLayer, this.currentLayer.lines[id]);
+      this.workViewService.saveAndRedrawImage.emit(true);
+    } else {
+      this.currentLayer.line = this.currentLayer.lines[id];
+    }
 
+    // preventing default ctrl click
+    return $event.preventDefault() && false;
   }
+
+  public onEraserSizeChange($event) {
+    console.log(this.rightClickCircle)
+    this.workViewService.eraserSizeChange.emit(this.rightClickCircle);
+  }
+
+
 }
+

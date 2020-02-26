@@ -1,9 +1,9 @@
 import {Injectable} from '@angular/core';
 import {HttpClient, HttpHeaders} from '@angular/common/http';
-import {Observable} from 'rxjs';
-import {ProjectData} from '../model/project-data';
+import {Observable, of} from 'rxjs';
 import {CImage} from '../model/cimage';
 import {environment} from "../../environments/environment";
+import {catchError, map} from "rxjs/operators";
 
 @Injectable({
   providedIn: 'root'
@@ -30,11 +30,19 @@ export class ImageService {
     return this.http.put<CImage>(`${environment.backendUrl}/image`, image, httpOptions);
   }
 
-  public createImage(image: CImage, type : string): Observable<any> {
-    const httpOptions = {
-      headers: new HttpHeaders({})
-    };
+  public createImage(image: CImage, type: string): Observable<any> {
     console.log(`${environment.backendUrl}}/image/${type}`);
-    return this.http.post<CImage>(`${environment.backendUrl}/image/${type}`, image, httpOptions);
+    return this.http.post<CImage>(`${environment.backendUrl}/image/${type}`, image);
+  }
+
+  public uploadImage(file, path: string, overwrite: boolean): Observable<boolean> {
+    const formData: FormData = new FormData();
+    formData.append('file', file, file.name);
+    console.log(`Upload ${file.name} to ${path}`)
+    return this.http.post(`${environment.backendUrl}/image/upload/${btoa(path)}&${overwrite ? 'o' : ''}`, formData).pipe(
+      map(() => {
+        return true;
+      }), catchError(_ => of(false))
+    );
   }
 }

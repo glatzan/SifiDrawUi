@@ -29,9 +29,9 @@ import {
   MatSnackBarModule,
   MatTabsModule
 } from '@angular/material';
-import {FormsModule, ReactiveFormsModule} from "@angular/forms";
+import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {ImportDialogComponent} from './components/import-dialog/import-dialog.component';
-import {FilterOverlayComponent} from './components/filter-overlay/filter-overlay.component';
+import {FilterOverlayComponent} from './components/workView/filter-overlay/filter-overlay.component';
 import {WorkViewComponent} from './components/workView/work-view/work-view.component';
 import {FilterImageListComponent} from './components/workView/filter-image-list/filter-image-list.component';
 import {PaintControlComponent} from './components/workView/paint-control/paint-control.component';
@@ -39,12 +39,16 @@ import {LoginComponent} from './components/login/login.component';
 import {RouterModule} from '@angular/router';
 import {routes} from './app.routes';
 import {HomeComponent} from './components/home/home.component';
-import {AuthInterceptor} from "./helpers/AuthInterceptor";
-import {ErrorInterceptor} from "./helpers/ErrorInterceptor";
-import {MatToolbarModule} from "@angular/material/toolbar";
-import {MatSliderModule} from "@angular/material/slider";
-import {GestureConfig} from "@angular/material/core";
-import {MatSlideToggleModule} from "@angular/material/slide-toggle";
+import {AuthInterceptor} from './helpers/AuthInterceptor';
+import {ErrorInterceptor} from './helpers/ErrorInterceptor';
+import {MatToolbarModule} from '@angular/material/toolbar';
+import {MatSliderModule} from '@angular/material/slider';
+import {GestureConfig} from '@angular/material/core';
+import {MatSlideToggleModule} from '@angular/material/slide-toggle';
+import {FilterSetDialogComponent} from './components/filter-set-dialog/filter-set-dialog.component';
+import {CreateProjectDialogComponent} from './components/create-project-dialog/create-project-dialog.component';
+import {FileUploadDialogComponent} from './components/file-upload-dialog/file-upload-dialog.component';
+import {MaterialFileInputModule} from 'ngx-material-file-input';
 
 @NgModule({
   declarations: [
@@ -61,6 +65,9 @@ import {MatSlideToggleModule} from "@angular/material/slide-toggle";
     PaintControlComponent,
     LoginComponent,
     HomeComponent,
+    FilterSetDialogComponent,
+    CreateProjectDialogComponent,
+    FileUploadDialogComponent,
   ],
   imports: [
     HttpClientModule,
@@ -88,14 +95,15 @@ import {MatSlideToggleModule} from "@angular/material/slide-toggle";
     RouterModule.forRoot(routes),
     MatToolbarModule,
     MatSliderModule,
-    MatSlideToggleModule
+    MatSlideToggleModule,
+    MaterialFileInputModule
   ],
-  entryComponents: [ExportDialogComponent, ImportDialogComponent, FilterOverlayComponent],
+  entryComponents: [ExportDialogComponent, ImportDialogComponent, FilterOverlayComponent, FilterSetDialogComponent, CreateProjectDialogComponent, FileUploadDialogComponent],
   providers: [
     {provide: MAT_SNACK_BAR_DEFAULT_OPTIONS, useValue: {duration: 500}},
     {provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true},
     {provide: HTTP_INTERCEPTORS, useClass: ErrorInterceptor, multi: true},
-    { provide: HAMMER_GESTURE_CONFIG, useClass: GestureConfig }],
+    {provide: HAMMER_GESTURE_CONFIG, useClass: GestureConfig}],
   bootstrap: [AppComponent]
 })
 export class AppModule {

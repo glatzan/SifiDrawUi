@@ -1,8 +1,8 @@
 import {ElementRef, Injectable} from '@angular/core';
 import {ConnectionPositionPair, Overlay, OverlayConfig, OverlayRef} from "@angular/cdk/overlay";
 import {ComponentPortal} from "@angular/cdk/portal";
-import {FilterOverlayComponent} from "../components/filter-overlay/filter-overlay.component";
-import {FilterOverlayDialogRef} from "../components/filter-overlay/filter-overlay-dialog-ref";
+import {FilterOverlayComponent} from "../components/workView/filter-overlay/filter-overlay.component";
+import {FilterOverlayDialogRef} from "../components/workView/filter-overlay/filter-overlay-dialog-ref";
 
 
 interface CustomOverlayConfig {

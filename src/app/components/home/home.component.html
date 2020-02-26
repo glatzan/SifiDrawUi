@@ -1,0 +1,28 @@
+<mat-toolbar class="navbar">
+  <span>SifiDraw</span>
+  <span class="fill-remaining-space"></span>
+  <span *ngIf="currentUser">
+    <button mat-button [matMenuTriggerFor]="menu" class="btn">Menu</button>
+    <button mat-button (click)="logout()" class="logoutBtn btn">Logout</button>
+    <mat-menu #menu="matMenu">
+      <button mat-menu-item (click)="openCreateProjectDialog()">Projekt/Datenset erstellen</button>
+      <button mat-menu-item (click)="openFileUploadDialog()">Bilder hochladen</button>
+      <mat-divider> </mat-divider>
+       <button mat-menu-item (click)="openFilterSetDialog()">Scripte verwalten</button>
+      <mat-divider> </mat-divider>
+      <button mat-menu-item (click)="openImportDialog()">Import aus Argos</button>
+      <button mat-menu-item (click)="openExportDialog(caseListComponent.selectedProjectId)">Script auf Projekt anwenden</button>
+    </mat-menu>
+  </span>
+</mat-toolbar>
+
+<div class="bodyDiv">
+  <app-case-list #caseListComponent [imageListComponent]="imageListComponent" class="caseLise"></app-case-list>
+  <app-image-list #imageListComponent class="imageList"></app-image-list>
+  <app-work-view class="canvasDraw"></app-work-view>
+</div>
+
+<div class="menuBar">
+
+</div>
+

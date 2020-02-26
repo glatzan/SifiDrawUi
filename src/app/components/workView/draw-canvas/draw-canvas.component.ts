@@ -253,6 +253,37 @@ export class DrawCanvasComponent implements AfterViewInit, OnInit {
       this.drawMode = x;
       this.setMouseListeners(this.drawMode);
     });
+
+    this.workViewService.pointModeChanged.subscribe(x => {
+      this.pointMode = x;
+    });
+
+    this.workViewService.hideLines.subscribe(x => {
+      this.hideLines = x;
+      this.canvasRedraw();
+    });
+
+    this.workViewService.selectLayer.subscribe(x => {
+      this.currentLayer = x;
+    });
+
+    this.workViewService.saveAndRedrawImage.subscribe(x => {
+      this.canvasRedraw();
+      this.saveContent();
+    });
+
+    this.workViewService.highlightLine.subscribe(x => {
+      if (x === null) {
+        this.canvasRedraw();
+      } else {
+        DrawUtil.drawLineOnCanvas(this.cx, x, 'yellow', 4);
+      }
+    });
+
+    this.workViewService.eraserSizeChange.subscribe(x => {
+      this.rightClickCircleSize = x;
+      this.canvasRedraw();
+    });
   }
 
   public ngAfterViewInit() {
@@ -380,28 +411,8 @@ export class DrawCanvasComponent implements AfterViewInit, OnInit {
     this.cx.fillStyle = image.layers[0].color || '#fff';
   }
 
-  public addLayer(event) {
-    this.currentLayer = CImageUtil.addLayer(this.image);
-  }
-
-  public selectLine($event, index: number) {
-    if ($event.ctrlKey) {
-      CImageUtil.removeLine(this.currentLayer, this.currentLayer.lines[index]);
-      this.saveContent();
-      this.canvasRedraw();
-    } else {
-      this.currentLayer.line = this.currentLayer.lines[index];
-    }
-    // preventing default ctrl click
-    return $event.preventDefault() && false;
-  }
-
   public onEvent(event: MouseEvent): boolean {
     return false;
-  }
-
-  private highLightLine(index: number) {
-    DrawUtil.drawLineOnCanvas(this.cx, this.currentLayer.lines[index], 'yellow', 4);
   }
 
   private saveContent() {
