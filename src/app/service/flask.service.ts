@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import {CImage} from "../model/cimage";
+import {CImage} from "../model/CImage";
 import {Observable} from "rxjs";
 import {HttpClient, HttpHeaders} from "@angular/common/http";
 

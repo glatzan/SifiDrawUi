@@ -1,4 +1,4 @@
-import {CImage} from '../model/cimage';
+import {CImage} from '../model/CImage';
 import {Layer} from '../model/layer';
 import {Point} from '../model/point';
 

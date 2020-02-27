@@ -1,7 +1,7 @@
 import {ImageFilter} from "./image-filter";
 import {Filter} from "./filter";
 import DrawUtil from "../utils/draw-util";
-import {CImage} from "../model/cimage";
+import {CImage} from "../model/CImage";
 import {EventEmitter} from "@angular/core";
 
 export class ImageEventFilter extends ImageFilter {

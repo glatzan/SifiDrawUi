@@ -4,7 +4,7 @@ import VectorUtils from '../../../utils/vector-utils';
 import {Point} from '../../../model/point';
 import DrawUtil from '../../../utils/draw-util';
 import {ImageService} from '../../../service/image.service';
-import {CImage} from '../../../model/cimage';
+import {CImage} from '../../../model/CImage';
 import CImageUtil from '../../../utils/cimage-util';
 import {PointTracker} from '../../../utils/point-tracker';
 import {MatSnackBar} from '@angular/material';

@@ -1,4 +1,4 @@
-import {CImage} from "../model/cimage";
+import {CImage} from "../model/CImage";
 
 export interface DisplayCallback {
   displayCallBack(image: CImage): void;

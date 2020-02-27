@@ -1,5 +1,5 @@
 import {Component, ElementRef, OnInit} from '@angular/core';
-import {CImage} from '../../../model/cimage';
+import {CImage} from '../../../model/CImage';
 import {ImageService} from '../../../service/image.service';
 import {ImageMagicService} from '../../../service/image-magic.service';
 import {FilterService} from '../../../service/filter.service';

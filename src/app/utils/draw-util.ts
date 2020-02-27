@@ -1,6 +1,6 @@
 import {Point} from '../model/point';
 import {Layer} from '../model/layer';
-import {CImage} from '../model/cimage';
+import {CImage} from '../model/CImage';
 import {Observable, fromEvent} from 'rxjs';
 import {promise} from "selenium-webdriver";
 import {flatMap} from "rxjs/operators";

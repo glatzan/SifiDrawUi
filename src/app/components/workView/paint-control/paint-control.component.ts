@@ -1,7 +1,7 @@
 import {Component, OnInit} from '@angular/core';
 import {Layer} from '../../../model/layer';
 import {WorkViewService} from '../work-view.service';
-import {CImage} from '../../../model/cimage';
+import {CImage} from '../../../model/CImage';
 import CImageUtil from '../../../utils/cimage-util';
 
 @Component({

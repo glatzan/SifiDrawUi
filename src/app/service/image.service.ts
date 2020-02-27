@@ -1,9 +1,10 @@
 import {Injectable} from '@angular/core';
 import {HttpClient, HttpHeaders} from '@angular/common/http';
 import {Observable, of} from 'rxjs';
-import {CImage} from '../model/cimage';
+import {CImage} from '../model/CImage';
 import {environment} from "../../environments/environment";
 import {catchError, map} from "rxjs/operators";
+import {Dataset} from "../model/dataset";
 
 @Injectable({
   providedIn: 'root'

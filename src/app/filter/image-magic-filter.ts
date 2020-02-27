@@ -1,7 +1,7 @@
 import {ImageFilter} from "./image-filter";
 import {ImageMagicService} from "../service/image-magic.service";
 import DrawUtil from "../utils/draw-util";
-import {CImage} from "../model/cimage";
+import {CImage} from "../model/CImage";
 import {Filter} from "./filter";
 
 export class ImageMagicFilter extends ImageFilter {

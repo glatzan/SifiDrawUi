@@ -49,6 +49,7 @@ import {FilterSetDialogComponent} from './components/filter-set-dialog/filter-se
 import {CreateProjectDialogComponent} from './components/create-project-dialog/create-project-dialog.component';
 import {FileUploadDialogComponent} from './components/file-upload-dialog/file-upload-dialog.component';
 import {MaterialFileInputModule} from 'ngx-material-file-input';
+import {DragDropModule} from "@angular/cdk/drag-drop";
 
 @NgModule({
   declarations: [
@@ -96,7 +97,8 @@ import {MaterialFileInputModule} from 'ngx-material-file-input';
     MatToolbarModule,
     MatSliderModule,
     MatSlideToggleModule,
-    MaterialFileInputModule
+    MaterialFileInputModule,
+    DragDropModule
   ],
   entryComponents: [ExportDialogComponent, ImportDialogComponent, FilterOverlayComponent, FilterSetDialogComponent, CreateProjectDialogComponent, FileUploadDialogComponent],
   providers: [

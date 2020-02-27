@@ -3,7 +3,7 @@ import {ImageMagicFilter} from "../filter/image-magic-filter";
 import {ImageFilter} from "../filter/image-filter";
 import {ImageMagicService} from "./image-magic.service";
 import {Filter} from "../filter/filter";
-import {CImage} from "../model/cimage";
+import {CImage} from "../model/CImage";
 import {ImageEventFilter} from "../filter/image-event-filter";
 import {ImageService} from "./image.service";
 import {Dataset} from "../model/dataset";
@@ -149,7 +149,8 @@ export class FilterService {
       for (let y = 0; y < datasets.length; y++) {
         for (let i = 0; i < datasets[y].images.length; i++) {
           const data = new FilterData();
-          data.pushIMG(datasets[y].images[i]);
+          // TODO cast!
+          data.pushIMG(datasets[y].images[i] as CImage);
           data.origName = atob(datasets[y].images[i].id);
 
           data.numberInBatch = count;

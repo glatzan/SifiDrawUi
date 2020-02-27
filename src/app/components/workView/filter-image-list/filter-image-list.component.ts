@@ -1,5 +1,5 @@
 import {Component, OnInit} from '@angular/core';
-import {CImage} from "../../../model/cimage";
+import {CImage} from "../../../model/CImage";
 import {WorkViewService} from "../work-view.service";
 
 @Component({

@@ -1,5 +1,5 @@
 import {EventEmitter, Injectable, Output} from '@angular/core';
-import {CImage} from '../../model/cimage';
+import {CImage} from '../../model/CImage';
 import {ImageService} from '../../service/image.service';
 import {Vector} from '../../utils/vaa/model/vector';
 import CImageUtil from "../../utils/cimage-util";

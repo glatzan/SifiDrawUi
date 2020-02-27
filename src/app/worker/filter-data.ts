@@ -1,5 +1,5 @@
-import {CImage} from "../model/cimage";
-import {PointLine} from "../model/point-line";
+import {CImage} from '../model/CImage';
+import {PointLine} from '../model/point-line';
 
 export class FilterData {
   /**
@@ -20,12 +20,13 @@ export class FilterData {
 
   public pushIMG(img: CImage, selectImage: boolean = true) {
     this.imgStack.push(img);
-    if (selectImage)
-      this.img = img
+    if (selectImage) {
+      this.img = img;
+    }
   }
 
   public setData(key: string, data: any) {
-    this.dataStack.set(key, data)
+    this.dataStack.set(key, data);
   }
 
   public getData(key: string): any {
@@ -34,7 +35,7 @@ export class FilterData {
 
 
   public popIMG() {
-    this.imgStack.splice(-1, 1)
+    this.imgStack.splice(-1, 1);
   }
 
 }

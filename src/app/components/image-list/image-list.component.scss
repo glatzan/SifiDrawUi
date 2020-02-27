@@ -2,21 +2,42 @@
   height: 100%;
   min-width: 200px;
   position: relative;
+  display: grid;
+  grid-template-columns: fit-content(160px) auto;
+  grid-template-rows: 35px auto;
+  grid-template-areas: "h b" "c c";
 
   .headline {
     padding-top: 5px;
     height: 30px;
     font-family: Roboto, Helvetica Neue Light, Helvetica Neue, Helvetica, Arial, Lucida Grande, sans-serif;
     font-size: 20px;
+    width: 150px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    grid-area: h;
+  }
+
+  .addImgGroup {
+    grid-area: b;
+    justify-self: right;
+    align-self: center;
+
+    mat-icon {
+      font-size: 20px;
+    }
   }
 
   .imageScroll {
     border: 1px solid LightGray;
     border-radius: 3px;
-    position: absolute;
     width: 100%;
-    bottom: 0;
-    top: 35px;
+    grid-area: c;
+
+    .listContainer {
+      padding: 5px 5px 0 15px;
+    }
 
     ul {
       padding: 10px 5px 0px 15px;

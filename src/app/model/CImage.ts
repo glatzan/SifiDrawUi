@@ -1,6 +1,7 @@
 import {Layer} from './layer';
+import {ICImage} from "./ICImage";
 
-export class CImage {
+export class CImage implements ICImage{
   public id: string;
   public name: string;
   public data: string;

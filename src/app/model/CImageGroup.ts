@@ -1,8 +1,8 @@
 import {CImage} from './CImage';
 import {ICImage} from './ICImage';
 
-export class Dataset {
+export class CImageGroup implements ICImage {
   public id: string;
   public name: string;
-  public images: ICImage[];
+  public images: CImage[];
 }

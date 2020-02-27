@@ -1,6 +1,6 @@
 import {Component, OnInit} from '@angular/core';
 import {Vector} from "../../../utils/vaa/model/vector";
-import {CImage} from "../../../model/cimage";
+import {CImage} from "../../../model/CImage";
 import {WorkViewService} from "../work-view.service";
 
 @Component({
