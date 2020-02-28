@@ -24,11 +24,14 @@ export class ImageService {
     return this.http.get<CImage>(`${environment.backendUrl}/image/${id}`, httpOptions);
   }
 
-  public setImage(image: CImage): Observable<any> {
+  public updateImage(image: CImage): Observable<any> {
     const httpOptions = {
-      headers: new HttpHeaders({})
+      headers: new HttpHeaders({
+        'Content-Type': 'application/json'
+      })
     };
-    return this.http.put<CImage>(`${environment.backendUrl}/image`, image, httpOptions);
+    console.log(`${environment.backendUrl}/image/update`);
+    return this.http.put<CImage>(`${environment.backendUrl}/image/update`, image, httpOptions);
   }
 
   public createImage(image: CImage, type: string): Observable<any> {

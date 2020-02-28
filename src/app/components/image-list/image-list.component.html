@@ -6,30 +6,90 @@
   </button>
 
   <cdk-virtual-scroll-viewport itemSize="1" class="imageScroll" cdkDropListGroup>
-    <div *ngFor="let img of dataset.images" class="listContainer">
-      <div *ngIf="img.images != undefined" cdkDropList (cdkDropListDropped)="drop($event, img)" [cdkDropListData]="img"
-           (contextmenu)="onContextMenu($event)"
-           style="background-color: green">{{img.name}}
+    <ng-container *ngFor="let img of dataset.images">
 
-        <div *ngFor="let subimg of img.images" (click)="onSelectImage($event, subimg.id)"
-             cdkDrag style="margin-left: 10px;"
-             class="clickAble"
-             (contextmenu)="onContextMenu($event)"
-             [cdkDragData]="subimg"
-             [ngClass]="selectedImageId === subimg.id ? 'selectedElement' : ''">{{subimg.name}}</div>
-      </div>
+      <div *ngIf="img.type === 'group'" cdkDropList
+           (cdkDropListDropped)="drop($event, img)"
+           [cdkDropListData]="img"
+           class="listContainer">
 
-    </div>
-    <div cdkDropList (cdkDropListDropped)="drop($event,dataset)" [cdkDropListData]="dataset">
-      <div *ngFor="let img of dataset.images" class="listContainer">
-        <div *ngIf="img.images == undefined" (click)="onSelectImage($event, img.id)"
-             cdkDrag
-             (contextmenu)="onContextMenu($event)"
-             [cdkDragData]="img"
-             class="clickAble"
-             [ngClass]="selectedImageId === img.id ? 'selectedElement' : ''">
-          {{img.name}}
+        <!-- folder -->
+        <app-editable #imageGroup
+                      (update)="updateField(getIndex(img), 'name')"
+                      (contextmenu)="onContextMenu($event)"
+                      appEditableOnEnter>
+          <ng-template appViewMode>
+            <div class="holderGrid">
+              <mat-icon class="list-icons">folder open icon</mat-icon>
+              {{img.name}}
+            </div>
+          </ng-template>
+          <ng-template appEditMode>
+            <div class="holderGrid">
+              <mat-icon class="list-icons">folder open icon</mat-icon>
+              <input [formControl]="getControl(getIndex(img), 'name')" appPrefixFocusAndSelect style="width:80%"/>
+            </div>
+          </ng-template>
+        </app-editable>
+
+        <!-- subimages -->
+        <div *ngFor="let subimage of img.images; " class="listContainer">
+          <app-editable *ngIf="subimage.type === 'img'"
+                        #imageEdit
+                        (update)="updateField(getIndex(subimage), 'name')"
+                        (click)="onSelectImage($event, subimage.id)"
+                        appEditableOnEnter
+                        cdkDrag
+                        [cdkDragData]="subimage"
+                        [cdkDragDisabled]="'edit'===imageEdit.mode"
+                        [ngClass]="selectedImageId === subimage.id ? 'selectedElement' : ''"
+                        (contextmenu)="onContextMenu($event)"
+                        class="subImage">
+            <ng-template appViewMode>
+              <div class="holderGrid clickAble">
+                <mat-icon class="list-icons">image icon</mat-icon>
+                {{subimage.name}}
+              </div>
+            </ng-template>
+            <ng-template appEditMode>
+              <div class="holderGrid">
+                <mat-icon class="list-icons">image icon</mat-icon>
+                <input [formControl]="getControl(getIndex(subimage), 'name')" appPrefixFocusAndSelect
+                       style="width:70%"/>
+              </div>
+            </ng-template>
+          </app-editable>
         </div>
+      </div>
+    </ng-container>
+
+    <!-- images without group-->
+    <div cdkDropList (cdkDropListDropped)="drop($event,dataset)" [cdkDropListData]="dataset" style="margin-top: 15px">
+      <div *ngFor="let img of dataset.images;" class="listContainer">
+        <app-editable *ngIf="img.type === 'img'"
+                      #imageEdit
+                      (update)="updateField(getIndex(img), 'name')"
+                      (contextmenu)="onContextMenu($event)"
+                      (click)="onSelectImage($event, img.id)"
+                      appEditableOnEnter
+                      cdkDrag
+                      [cdkDragData]="img"
+                      [cdkDragDisabled]="'edit'===imageEdit.mode"
+                      [ngClass]="selectedImageId === img.id ? 'selectedElement' : ''">
+          <ng-template appViewMode>
+            <div class="holderGrid clickAble">
+              <mat-icon class="list-icons">image icon</mat-icon>
+              {{img.name}}
+            </div>
+          </ng-template>
+          <ng-template appEditMode>
+            <div class="holderGrid">
+              <mat-icon class="list-icons">image icon</mat-icon>
+              <input [formControl]="getControl(getIndex(img), 'name')" appPrefixFocusAndSelect style="width: 80%"/>
+            </div>
+
+          </ng-template>
+        </app-editable>
       </div>
     </div>
   </cdk-virtual-scroll-viewport>
@@ -42,7 +102,6 @@
 </div>
 <mat-menu #contextMenu="matMenu">
   <ng-template matMenuContent let-item="item">
-    <button mat-menu-item>Umbennen</button>
     <button mat-menu-item>Löschen</button>
   </ng-template>
 </mat-menu>

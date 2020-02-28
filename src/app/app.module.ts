@@ -50,6 +50,12 @@ import {CreateProjectDialogComponent} from './components/create-project-dialog/c
 import {FileUploadDialogComponent} from './components/file-upload-dialog/file-upload-dialog.component';
 import {MaterialFileInputModule} from 'ngx-material-file-input';
 import {DragDropModule} from "@angular/cdk/drag-drop";
+import {EditableComponent} from './components/editable/editable.component';
+import {ViewModeDirective} from "./components/editable/view-mode-directive";
+import {EditModeDirective} from "./components/editable/edit-mode-directive";
+import {EditableOnEnterDirective} from "./components/editable/editable-on-enter-directive";
+import {FocusOnShowDirective} from './components/editable/focus-on-show-directive.directive';
+import { CounterPipe } from './components/editable/counter.pipe';
 
 @NgModule({
   declarations: [
@@ -69,6 +75,11 @@ import {DragDropModule} from "@angular/cdk/drag-drop";
     FilterSetDialogComponent,
     CreateProjectDialogComponent,
     FileUploadDialogComponent,
+    EditableComponent,
+    ViewModeDirective,
+    EditModeDirective,
+    EditableOnEnterDirective,
+    FocusOnShowDirective,
   ],
   imports: [
     HttpClientModule,

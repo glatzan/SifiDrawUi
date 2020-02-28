@@ -429,7 +429,7 @@ export class DrawCanvasComponent implements AfterViewInit, OnInit {
 
   private save() {
     console.log(this.image.id);
-    this.imageService.setImage(this.image).subscribe(() => {
+    this.imageService.updateImage(this.image).subscribe(() => {
       console.log('saved');
     }, error1 => {
       console.log('Fehler beim laden der Dataset Datein');

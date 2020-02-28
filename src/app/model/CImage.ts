@@ -6,4 +6,5 @@ export class CImage implements ICImage{
   public name: string;
   public data: string;
   public layers: Layer[] = Layer[1];
+  public type = 'img';
 }

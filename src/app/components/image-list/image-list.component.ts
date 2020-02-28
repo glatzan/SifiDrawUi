@@ -4,6 +4,10 @@ import {DatasetService} from '../../service/dataset.service';
 import {WorkViewService} from '../workView/work-view.service';
 import {ImageGroupService} from '../../service/image-group.service';
 import {MatMenuTrigger} from '@angular/material/menu';
+import {FormArray, FormBuilder, FormControl, FormGroup, Validators} from "@angular/forms";
+import {ICImage} from "../../model/ICImage";
+import {ImageService} from "../../service/image.service";
+import {CImageGroup} from "../../model/CImageGroup";
 
 @Component({
   selector: 'app-image-list',
@@ -19,38 +23,91 @@ export class ImageListComponent implements OnInit {
 
   private dataset: Dataset = new Dataset();
 
+  controls: FormArray;
+
   private datasetSelected = false;
 
   private selectedImageId: string;
 
   constructor(private datasetService: DatasetService,
               private workViewService: WorkViewService,
-              private imageGroupService: ImageGroupService) {
-  }
-
-  ngOnInit() {
+              private imageGroupService: ImageGroupService,
+              private formBuilder: FormBuilder,
+              private imageService: ImageService) {
   }
 
   public onDatasetSelection(id: string) {
-    if (id !== undefined) {
-      this.datasetService.getDataset(id).subscribe((data: Dataset) => {
-        this.dataset = data;
-        if (data.images.length > 0) {
-          this.onSelectImage('', data.images[0].id);
+    this.datasetService.getDataset(id).subscribe((data: Dataset) => {
+      if (this.dataset.id !== data.id && data.images.length > 0) {
+        this.onSelectImage('', data.images[0].id);
+      }
+      this.dataset = data;
+      this.datasetSelected = true;
+      this.controls = this.formBuilder.array(this.addFormGroups(this.dataset.images));
+    }, error1 => {
+      console.log('Fehler beim laden der Dataset Datein');
+      console.error(error1);
+      this.datasetSelected = false;
+    });
+  }
+
+  private addFormGroups(data: ICImage[]): FormGroup[] {
+    console.log(data)
+    let result = [];
+    if (data === undefined) {
+      return result;
+    }
+    data.forEach(x => {
+      result.push(this.formBuilder.group({
+          name: [x.name, Validators.required],
+          item: [x],
         }
-        this.datasetSelected = true;
-      }, error1 => {
-        console.log('Fehler beim laden der Dataset Datein');
-        console.error(error1);
-        this.datasetSelected = false;
-      });
+      ));
+      if (x.type === 'group') {
+        result = result.concat(this.addFormGroups((x).images));
+      }
+    });
+    return result;
+  }
+
+  public getControl(index: number, field: string): FormControl {
+    return this.controls.at(index).get(field) as FormControl;
+  }
+
+  updateField(index: number, field: string) {
+    const control = this.getControl(index, field);
+    if (control.valid) {
+      const item = this.getControl(index, 'item');
+      item.value.name = control.value;
+      if (item.value.type === 'group') {
+        this.imageGroupService.updateImageGroup(item.value).subscribe();
+      } else {
+        this.imageService.updateImage(item.value).subscribe();
+      }
+
+    }
+  }
+
+  public getIndex(element: ICImage) {
+    let counter = 0;
+    for (const img of this.dataset.images) {
+      if (img.id === element.id) {
+        return counter;
+      }
+      counter++;
+      if (img.type === 'group') {
+        for (const subimg of (img as CImageGroup).images) {
+          if (subimg.id === element.id) {
+            return counter;
+          }
+          counter++;
+        }
+      }
     }
   }
 
   public reload() {
-    this.datasetService.getDataset(this.dataset.id).subscribe((data: Dataset) => {
-      this.dataset = data;
-    });
+    this.onDatasetSelection(this.dataset.id);
   }
 
   private onSelectImage($event, id) {
@@ -117,6 +174,10 @@ export class ImageListComponent implements OnInit {
     // }
     //
     // newElement.images.push(img)
+    console.log($event)
+    if ($event.previousContainer.data === $event.container.data) {
+      return;
+    }
 
     this.imageGroupService.addImageToGroup(imageGroup, $event.item.data).subscribe(_ => {
       this.reload();

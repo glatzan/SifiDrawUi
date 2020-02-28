@@ -72,7 +72,7 @@ export class ScImportService {
     return simpleObservable.pipe(flatMap(arr => {
       let result = []
       for (let imgToSave of Object.keys(arr)) {
-        result.push(this.imageService.setImage(arr[imgToSave]));
+        result.push(this.imageService.updateImage(arr[imgToSave]));
       }
       console.log("forkjoin")
       console.log(arr)

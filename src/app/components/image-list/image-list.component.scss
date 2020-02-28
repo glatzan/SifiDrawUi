@@ -37,15 +37,23 @@
 
     .listContainer {
       padding: 5px 5px 0 15px;
-    }
 
-    ul {
-      padding: 10px 5px 0px 15px;
-      list-style-type: none;
 
-      li {
-        margin: 2px;
-        list-style-image: none;
+
+      .subImage{
+        padding-left: 10px;
+      }
+
+      .holderGrid{
+        display: grid;
+        grid-template-columns: fit-content(1px) auto;
+        grid-template-rows: auto;
+
+        .list-icons{
+          height: auto;
+          font-size: 15px;
+          align-self: center;
+        }
       }
     }
 

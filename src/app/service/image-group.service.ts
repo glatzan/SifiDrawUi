@@ -4,6 +4,7 @@ import {Dataset} from '../model/dataset';
 import {environment} from '../../environments/environment';
 import {CImageGroup} from "../model/CImageGroup";
 import {CImage} from "../model/CImage";
+import {Observable} from "rxjs";
 
 @Injectable({
   providedIn: 'root'
@@ -31,5 +32,15 @@ export class ImageGroupService {
     };
     console.log(`${environment.backendUrl}}/imagegroup/create`);
     return this.http.post<any>(`${environment.backendUrl}/imagegroup/addImage`, `{"group" : ${JSON.stringify(imageGroup)}, "image" : ${JSON.stringify(image)}}`, httpOptions);
+  }
+
+  public updateImageGroup(group: CImageGroup): Observable<CImageGroup> {
+    const httpOptions = {
+      headers: new HttpHeaders({
+        'Content-Type': 'application/json'
+      })
+    };
+    console.log(`${environment.backendUrl}/imagegroup/update`);
+    return this.http.put<CImageGroup>(`${environment.backendUrl}/imagegroup/update`, group, httpOptions);
   }
 }
