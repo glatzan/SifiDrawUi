@@ -1,5 +1,6 @@
 <div class="content">
-  <div class="headline">Bild {{currentImage !== undefined ? currentImage.name : ""}}</div>
+  <div class="headline">
+    Bild {{image !== undefined ? image.name : ""}} {{activeImage !== undefined && activeImage !== image ? " - Aktives Bild " + activeImage.name : ""}}</div>
   <div class="drawContent">
 
     <div class="workView">
@@ -10,32 +11,32 @@
 
       <div class="canvasControl">
 
-        <div class="contrast" *ngIf="currentImage !== undefined">
+        <div class="contrast" *ngIf="activeImage !== undefined">
           Zeichnen:
           <mat-slide-toggle [(ngModel)]="drawMode" (change)="changeDrawMode()" class="drawMode"></mat-slide-toggle>
         </div>
 
-        <div class="contrast" *ngIf="currentImage !== undefined">
+        <div class="contrast" *ngIf="activeImage !== undefined">
           Kontrast:
           <mat-slider min="1" max="200" step="1" value="100"></mat-slider>
         </div>
 
-        <span class="mouse" *ngIf="currentImage !== undefined">
+        <span class="mouse" *ngIf="activeImage !== undefined">
           X {{mousePositionInCanvas.x}} Y {{mousePositionInCanvas.y}}
         </span>
 
-        <span class="zoom" *ngIf="currentImage !== undefined">
+        <span class="zoom" *ngIf="activeImage !== undefined">
           Zoom {{currentZoomLevel}} %
         </span>
 
         <i class="material-icons resetBtn" (click)="resetCanvasZoom()" title="Bild zurücksetzten"
-           *ngIf="currentImage !== undefined">
+           *ngIf="activeImage !== undefined">
           control_camera
         </i>
       </div>
 
       <div class="drawControl">
-        <app-paint-control></app-paint-control>
+        <app-draw-control></app-draw-control>
       </div>
 
       <div class="filterControl">
@@ -44,7 +45,7 @@
     </div>
 
     <div class="filterImageList">
-      <app-filter-image-list></app-filter-image-list>
+      <app-sub-image-list></app-sub-image-list>
     </div>
   </div>
 </div>

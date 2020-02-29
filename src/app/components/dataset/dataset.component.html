@@ -17,9 +17,11 @@
         <app-editable #imageGroup
                       (update)="updateField(getIndex(img), 'name')"
                       (contextmenu)="onContextMenu($event)"
+                      [ngClass]="selectedImageId === img.id ? 'selectedElement' : ''"
+                      (click)="onSelectImage($event, img)"
                       appEditableOnEnter>
           <ng-template appViewMode>
-            <div class="holderGrid">
+            <div class="holderGrid  clickAble">
               <mat-icon class="list-icons">folder open icon</mat-icon>
               {{img.name}}
             </div>
@@ -37,7 +39,7 @@
           <app-editable *ngIf="subimage.type === 'img'"
                         #imageEdit
                         (update)="updateField(getIndex(subimage), 'name')"
-                        (click)="onSelectImage($event, subimage.id)"
+                        (click)="onSelectImage($event, subimage)"
                         appEditableOnEnter
                         cdkDrag
                         [cdkDragData]="subimage"
@@ -70,7 +72,7 @@
                       #imageEdit
                       (update)="updateField(getIndex(img), 'name')"
                       (contextmenu)="onContextMenu($event)"
-                      (click)="onSelectImage($event, img.id)"
+                      (click)="onSelectImage($event, img)"
                       appEditableOnEnter
                       cdkDrag
                       [cdkDragData]="img"

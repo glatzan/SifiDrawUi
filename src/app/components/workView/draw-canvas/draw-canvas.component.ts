@@ -1,4 +1,4 @@
-import {AfterViewInit, Component, ElementRef, Input, OnInit, ViewChild} from '@angular/core';
+import {AfterViewInit, Component, ElementRef, OnInit, ViewChild} from '@angular/core';
 import {Layer} from '../../../model/layer';
 import VectorUtils from '../../../utils/vector-utils';
 import {Point} from '../../../model/point';
@@ -8,8 +8,11 @@ import {CImage} from '../../../model/CImage';
 import CImageUtil from '../../../utils/cimage-util';
 import {PointTracker} from '../../../utils/point-tracker';
 import {MatSnackBar} from '@angular/material';
-import {ImageListComponent} from '../../image-list/image-list.component';
 import {WorkViewService} from '../work-view.service';
+import {ICImage} from '../../../model/ICImage';
+import {ImageGroupService} from '../../../service/image-group.service';
+import {CImageGroup} from '../../../model/CImageGroup';
+import {NavigationEnd, Router} from "@angular/router";
 
 @Component({
   selector: 'app-draw-canvas',
@@ -22,9 +25,26 @@ export class DrawCanvasComponent implements AfterViewInit, OnInit {
   // a reference to the canvas element from our template
   @ViewChild('canvas', {static: false}) public canvas: ElementRef;
 
-  private img: string;
+  /**
+   * Original Image
+   */
+  private image: ICImage;
 
-  @Input() imageListComponent: ImageListComponent;
+  /**
+   * Image Data from Backend, display image
+   */
+  private activeImage: ICImage;
+
+  /**
+   * Current layer
+   */
+  private currentLayer: Layer;
+
+  /**
+   * Base64 to Image Converter
+   */
+  private drawImage = new Image();
+
 
   readonly MOUSE_LEFT_BTN = 0;
 
@@ -34,16 +54,6 @@ export class DrawCanvasComponent implements AfterViewInit, OnInit {
 
   private pointTracker: PointTracker;
 
-  /**
-   * Image Data from Backend
-   */
-  private image: CImage;
-
-  private currentLayerId = 1;
-
-  currentLayer: Layer;
-
-  public drawImage = new Image();
 
   private event: MouseEvent;
 
@@ -222,24 +232,33 @@ export class DrawCanvasComponent implements AfterViewInit, OnInit {
 
   constructor(public imageService: ImageService,
               private snackBar: MatSnackBar,
-              private workViewService: WorkViewService) {
+              private workViewService: WorkViewService,
+              private imageGroupService: ImageGroupService,
+              private router: Router) {
     // draw on load
     this.drawImage.onload = () => {
       this.canvasRedraw();
     };
+
+    // router.events.subscribe(e => {
+    //   if (e instanceof NavigationEnd) {
+    //     console.log(e);
+    //     console.log("--------");
+    //     this.initializeCanvas();
+    //   }
+    // });
   }
 
   /**
    * Event for loading a new Image
    */
   ngOnInit() {
-    this.workViewService.changeImage.subscribe(image => {
-      console.log(image);
+    this.workViewService.changeDisplayImage.subscribe(image => {
       this.prepareImage(image);
     });
 
-    this.workViewService.changeImageAndReload.subscribe(image => {
-      console.log(image);
+    this.workViewService.changeParentImageOrGroup.subscribe(image => {
+      this.image = image;
       this.prepareImage(image);
     });
 
@@ -287,24 +306,17 @@ export class DrawCanvasComponent implements AfterViewInit, OnInit {
   }
 
   public ngAfterViewInit() {
-    console.log('Image load');
     this.cx = this.canvas.nativeElement.getContext('2d');
     this.initializeCanvas();
   }
 
   private initializeCanvas() {
     const me = this;
-
+    this.cx = this.canvas.nativeElement.getContext('2d');
     this.pointTracker = new PointTracker(this.cx);
 
-    this.canvas.nativeElement.addEventListener('DOMMouseScroll', scroll, false);
-    this.canvas.nativeElement.addEventListener('mousewheel', scroll, false);
-
-    this.canvas.nativeElement.addEventListener('keydown', ($event) => {
-      console.log($event.key);
-      console.log('hallo');
-      return $event.preventDefault() && false;
-    }, false);
+    this.canvas.nativeElement.addEventListener('DOMMouseScroll', this.imageSettings.scroll, false);
+    this.canvas.nativeElement.addEventListener('mousewheel', this.imageSettings.scroll, false);
 
     this.canvas.nativeElement.addEventListener('mouseenter', ($event) => {
       me.imageSettings.acceptKeyInput = true;
@@ -318,16 +330,13 @@ export class DrawCanvasComponent implements AfterViewInit, OnInit {
       if (me.renderContext && me.imageSettings.acceptKeyInput) {
         if ($event.key === ' ' || $event.key === 'ArrowDown') {
           // next image
-          if (this.imageListComponent.onSelectNextImage() != null) {
-            this.snackBar.open('Nächstes Bild');
-          }
+          this.workViewService.nextSelectImageInDataset.emit();
+
         } else if ($event.key === 'ArrowUp') {
           // previouse image
-          if (this.imageListComponent.onSelectPrevImage() != null) {
-            this.snackBar.open('Vorheriges Bild');
-          }
+          this.workViewService.prevSelectImageInDataset.emit();
         } else if (!isNaN(Number($event.key))) {
-          const layer = CImageUtil.findOrAddLayer(this.image, $event.key);
+          const layer = CImageUtil.findOrAddLayer(this.activeImage, $event.key);
           this.currentLayer = layer;
           this.snackBar.open(`Layer ${layer.id} ausgewählt`);
         } else if ($event.key === 'h') {
@@ -370,7 +379,7 @@ export class DrawCanvasComponent implements AfterViewInit, OnInit {
     this.cx.drawImage(this.drawImage, 0, 0);
 
     if (!this.hideLines) {
-      DrawUtil.redrawCanvas(this.cx, this.image.layers);
+      DrawUtil.redrawCanvas(this.cx, this.activeImage.getLayers());
     }
   }
 
@@ -392,23 +401,29 @@ export class DrawCanvasComponent implements AfterViewInit, OnInit {
     this.cx.restore();
   }
 
-  private prepareImage(image: CImage) {
+  private prepareImage(image: ICImage) {
     // save manually if image should be changed
     if (this.currentSaveTimeout !== undefined) {
       this.cancelSaveTimeout();
       this.save();
     }
 
-    this.image = image;
-    this.currentLayer = image.layers[0];
-    this.renderContext = true;
-    this.drawImage.src = 'data:image/png;base64,' + this.image.data;
+    this.activeImage = image;
 
-    // setting layer settings
-    this.cx.lineWidth = image.layers[0].size || 1;
-    this.cx.lineCap = 'round';
-    this.cx.strokeStyle = image.layers[0].color || '#fff';
-    this.cx.fillStyle = image.layers[0].color || '#fff';
+    if (image.getData() === '') {
+      console.log('Empty Image');
+      this.currentLayer = new Layer('-');
+    } else {
+      this.currentLayer = image.getLayers()[0];
+      this.renderContext = true;
+      this.drawImage.src = 'data:image/png;base64,' + this.activeImage.getData();
+
+      // setting layer settings
+      this.cx.lineWidth = image.getLayers()[0].size || 1;
+      this.cx.lineCap = 'round';
+      this.cx.strokeStyle = image.getLayers()[0].color || '#fff';
+      this.cx.fillStyle = image.getLayers()[0].color || '#fff';
+    }
   }
 
   public onEvent(event: MouseEvent): boolean {
@@ -428,13 +443,18 @@ export class DrawCanvasComponent implements AfterViewInit, OnInit {
   }
 
   private save() {
-    console.log(this.image.id);
-    this.imageService.updateImage(this.image).subscribe(() => {
-      console.log('saved');
-    }, error1 => {
-      console.log('Fehler beim laden der Dataset Datein');
-      console.error(error1);
-    });
+    console.log(this.activeImage.id);
+
+    if (this.activeImage instanceof CImage) {
+      this.imageService.updateImage(this.activeImage).subscribe(() => {
+        console.log('saved');
+      }, error1 => {
+        console.log('Fehler beim laden der Dataset Datein');
+        console.error(error1);
+      });
+    } else {
+      this.imageGroupService.updateImageGroup(this.activeImage as CImageGroup);
+    }
   }
 
   private onFilterCompleted(image: CImage) {

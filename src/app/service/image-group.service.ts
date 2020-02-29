@@ -2,45 +2,48 @@ import {Injectable} from '@angular/core';
 import {HttpClient, HttpHeaders} from '@angular/common/http';
 import {Dataset} from '../model/dataset';
 import {environment} from '../../environments/environment';
-import {CImageGroup} from "../model/CImageGroup";
-import {CImage} from "../model/CImage";
-import {Observable} from "rxjs";
+import {CImageGroup} from '../model/CImageGroup';
+import {CImage} from '../model/CImage';
+import {Observable} from 'rxjs';
+import {map} from 'rxjs/operators';
+import {CImageMapper} from '../utils/cimage-mapper';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ImageGroupService {
 
+  private static httpJsonContent = {
+    headers: new HttpHeaders({
+      'Content-Type': 'application/json'
+    })
+  };
+
   constructor(private http: HttpClient) {
   }
 
   public createImageGroup(dataset: Dataset, name: string) {
-    const httpOptions = {
-      headers: new HttpHeaders({
-        'Content-Type': 'application/json'
-      })
-    };
     console.log(`${environment.backendUrl}}/imagegroup/create`);
-    return this.http.post<any>(`${environment.backendUrl}/imagegroup/create`, `{"datasetpath" : "${atob(dataset.id)}", "groupName" : "${name}"}`, httpOptions);
+    return this.http.post<any>(`${environment.backendUrl}/imagegroup/create`,
+      `{"datasetpath" : "${atob(dataset.id)}", "groupName" : "${name}"}`, ImageGroupService.httpJsonContent);
   }
 
   public addImageToGroup(imageGroup: CImageGroup, image: CImage) {
-    const httpOptions = {
-      headers: new HttpHeaders({
-        'Content-Type': 'application/json'
-      })
-    };
     console.log(`${environment.backendUrl}}/imagegroup/create`);
-    return this.http.post<any>(`${environment.backendUrl}/imagegroup/addImage`, `{"group" : ${JSON.stringify(imageGroup)}, "image" : ${JSON.stringify(image)}}`, httpOptions);
+    return this.http.post<any>(`${environment.backendUrl}/imagegroup/addImage`,
+      `{"group" : ${JSON.stringify(imageGroup)}, "image" : ${JSON.stringify(image)}}`, ImageGroupService.httpJsonContent);
   }
 
   public updateImageGroup(group: CImageGroup): Observable<CImageGroup> {
-    const httpOptions = {
-      headers: new HttpHeaders({
-        'Content-Type': 'application/json'
-      })
-    };
     console.log(`${environment.backendUrl}/imagegroup/update`);
-    return this.http.put<CImageGroup>(`${environment.backendUrl}/imagegroup/update`, group, httpOptions);
+    return this.http.put<CImageGroup>(`${environment.backendUrl}/imagegroup/update`, group, ImageGroupService.httpJsonContent);
+  }
+
+  public getImageGroup(id: string): Observable<CImageGroup> {
+    return this.http.get<CImageGroup>(`${environment.backendUrl}/imagegroup/${id}`, ImageGroupService.httpJsonContent).pipe(
+      map(x => {
+        return CImageMapper.mapToTypescriptObject<CImageGroup>(x);
+      })
+    );
   }
 }

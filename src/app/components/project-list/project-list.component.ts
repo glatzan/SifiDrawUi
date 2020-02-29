@@ -1,21 +1,22 @@
 import {Component, Input, OnInit} from '@angular/core';
 import {ProjectData} from '../../model/project-data';
 import {ProjectService} from '../../service/project.service';
-import {ImageListComponent} from '../image-list/image-list.component';
+import {DatasetComponent} from '../dataset/dataset.component';
 import {WorkViewService} from "../workView/work-view.service";
+import {Dataset} from "../../model/dataset";
 
 @Component({
-  selector: 'app-case-list',
-  templateUrl: './case-list.component.html',
-  styleUrls: ['./case-list.component.scss']
+  selector: 'app-project-list',
+  templateUrl: './project-list.component.html',
+  styleUrls: ['./project-list.component.scss']
 })
-export class CaseListComponent implements OnInit {
+export class ProjectListComponent implements OnInit {
 
   private projectData: ProjectData[];
 
-  public selectedProjectId: string;
+  public selectedDataset: Dataset;
 
-  @Input() imageListComponent: ImageListComponent;
+  @Input() imageListComponent: DatasetComponent;
 
   constructor(private projectService: ProjectService,
               private workViewService: WorkViewService) {
@@ -23,10 +24,10 @@ export class CaseListComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.workViewService.reloadCaseList.subscribe(x => {
+    this.workViewService.reloadProjectList.subscribe(x => {
       this.loadData();
-      if (this.selectedProjectId != null) {
-        this.imageListComponent.onDatasetSelection(this.selectedProjectId);
+      if (this.selectedDataset != null) {
+        this.workViewService.selectDataset.emit(this.selectedDataset);
       }
     });
   }
@@ -35,16 +36,15 @@ export class CaseListComponent implements OnInit {
     this.projectData = [];
     this.projectService.getProjects().subscribe((data: ProjectData[]) => {
       this.projectData = data;
-      console.log('Loading data ' + data.length);
     }, error1 => {
       console.log('Fehler beim laden der Project Datein');
     });
   }
 
 
-  private onSelectDataset(event, id) {
-    this.selectedProjectId = id;
-    this.imageListComponent.onDatasetSelection(id);
+  private onSelectDataset(event, dataset) {
+    this.selectedDataset = dataset;
+    this.workViewService.selectDataset.emit(dataset);
   }
 }
 

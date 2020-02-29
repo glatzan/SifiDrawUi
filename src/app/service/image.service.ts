@@ -4,34 +4,33 @@ import {Observable, of} from 'rxjs';
 import {CImage} from '../model/CImage';
 import {environment} from "../../environments/environment";
 import {catchError, map} from "rxjs/operators";
-import {Dataset} from "../model/dataset";
+import {CImageMapper} from "../utils/cimage-mapper";
 
 @Injectable({
   providedIn: 'root'
 })
 export class ImageService {
 
+  private static httpJsonContent = {
+    headers: new HttpHeaders({
+      'Content-Type': 'application/json'
+    })
+  };
+
   constructor(private http: HttpClient) {
   }
 
   public getImage(id: string): Observable<CImage> {
-    const httpOptions = {
-      headers: new HttpHeaders({
-        'Content-Type': 'application/json'
+    return this.http.get<CImage>(`${environment.backendUrl}/image/${id}`, ImageService.httpJsonContent).pipe(
+      map(x => {
+        return CImageMapper.mapToTypescriptObject<CImage>(x);
       })
-    };
-
-    return this.http.get<CImage>(`${environment.backendUrl}/image/${id}`, httpOptions);
+    );
   }
 
   public updateImage(image: CImage): Observable<any> {
-    const httpOptions = {
-      headers: new HttpHeaders({
-        'Content-Type': 'application/json'
-      })
-    };
     console.log(`${environment.backendUrl}/image/update`);
-    return this.http.put<CImage>(`${environment.backendUrl}/image/update`, image, httpOptions);
+    return this.http.put<CImage>(`${environment.backendUrl}/image/update`, image, ImageService.httpJsonContent);
   }
 
   public createImage(image: CImage, type: string): Observable<any> {

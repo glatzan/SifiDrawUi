@@ -1,6 +1,8 @@
 import {CImage} from '../model/CImage';
 import {Layer} from '../model/layer';
 import {Point} from '../model/point';
+import {ICImage} from '../model/ICImage';
+import {CImageGroup} from '../model/CImageGroup';
 
 export default class CImageUtil {
 
@@ -15,6 +17,12 @@ export default class CImageUtil {
     '#FF3380', '#CCCC00', '#66E64D', '#4D80CC', '#9900B3',
     '#E64D66', '#4DB380', '#FF4D4D', '#99E6E6', '#6666FF'];
 
+  static prepareImageGroup(group: CImageGroup): CImageGroup {
+    for (const img of group.images) {
+      CImageUtil.prepareImage(img);
+    }
+    return group;
+  }
   static prepareImage(image: CImage): CImage {
     if (!CImageUtil.hasLayer(image)) {
       CImageUtil.addLayer(image);
@@ -84,7 +92,7 @@ export default class CImageUtil {
     line.push(new Point(x, y));
   }
 
-  static findOrAddLayer(image: CImage, layerID: string) {
+  static findOrAddLayer(image: ICImage, layerID: string) {
     if (!CImageUtil.hasLayer(image)) {
       return CImageUtil.addLayer(image, layerID);
     } else {
@@ -96,8 +104,8 @@ export default class CImageUtil {
     }
   }
 
-  static findLayer(image: CImage, layerID: string) {
-    for (const layer of image.layers) {
+  static findLayer(image: ICImage, layerID: string) {
+    for (const layer of image.getLayers()) {
       if (layer.id === layerID) {
         return layer;
       }
@@ -105,16 +113,16 @@ export default class CImageUtil {
     return null;
   }
 
-  static addLayer(img: CImage, layerID?: string): Layer {
+  static addLayer(img: ICImage, layerID?: string): Layer {
     if (!CImageUtil.hasLayer(img)) {
-      img.layers = [new Layer(layerID ? layerID : '1')];
-      return img.layers[0];
+      img.setLayers([new Layer(layerID ? layerID : '1')]);
+      return img.getLayers()[0];
     }
 
     let color = '#ffffff';
 
     try {
-      const c = parseInt(layerID);
+      const c = parseInt(layerID, 10);
       console.log('---' + c);
       if (c - 1 > 0 && c - 1 < CImageUtil.colors.length) {
         color = CImageUtil.colors[c - 1];
@@ -122,12 +130,12 @@ export default class CImageUtil {
     } catch (e) {
     }
 
-    img.layers = [...img.layers, (new Layer(layerID ? layerID : '' + (img.layers.length + 1)))];
-    img.layers[img.layers.length - 1].color = color;
-    return img.layers[img.layers.length - 1];
+    img.setLayers([...img.getLayers(), (new Layer(layerID ? layerID : '' + (img.getLayers().length + 1)))]);
+    img.getLayers()[img.getLayers().length - 1].color = color;
+    return img.getLayers()[img.getLayers().length - 1];
   }
 
-  static hasLayer(img: CImage) {
-    return img.layers !== undefined && img.layers.length !== 0
+  static hasLayer(img: ICImage) {
+    return img.getLayers() !== undefined && img.getLayers().length !== 0;
   }
 }

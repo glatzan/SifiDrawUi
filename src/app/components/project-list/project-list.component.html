@@ -9,8 +9,8 @@
       </div>
 
       <ul>
-        <li *ngFor="let dataset of pD.datasets" (click)="onSelectDataset($event,dataset.id)" class="clickAble"
-            [ngClass]="selectedProjectId === dataset.id ? 'selectedElement' : ''">
+        <li *ngFor="let dataset of pD.datasets" (click)="onSelectDataset($event,dataset)" class="clickAble"
+            [ngClass]="selectedDataset === dataset ? 'selectedElement' : ''">
           {{dataset.name}}
         </li>
       </ul>

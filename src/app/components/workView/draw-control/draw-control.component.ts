@@ -3,15 +3,17 @@ import {Layer} from '../../../model/layer';
 import {WorkViewService} from '../work-view.service';
 import {CImage} from '../../../model/CImage';
 import CImageUtil from '../../../utils/cimage-util';
+import {ICImage} from "../../../model/ICImage";
+import {CImageGroup} from "../../../model/CImageGroup";
 
 @Component({
-  selector: 'app-paint-control',
-  templateUrl: './paint-control.component.html',
-  styleUrls: ['./paint-control.component.scss']
+  selector: 'app-draw-control',
+  templateUrl: './draw-control.component.html',
+  styleUrls: ['./draw-control.component.scss']
 })
-export class PaintControlComponent implements OnInit {
+export class DrawControlComponent implements OnInit {
 
-  private image: CImage;
+  private image: ICImage;
 
   private pointMode = 'false';
 
@@ -30,19 +32,24 @@ export class PaintControlComponent implements OnInit {
    * Event for loading a new Image
    */
   ngOnInit() {
-    this.workViewService.changeImage.subscribe(image => {
+    this.workViewService.changeDisplayImage.subscribe(image => {
       this.init(image);
     });
 
-    this.workViewService.changeImageAndReload.subscribe(image => {
+    this.workViewService.changeParentImageOrGroup.subscribe(image => {
       this.init(image);
     });
   }
 
-  private init(image: CImage) {
+  private init(image: ICImage) {
     this.image = image;
-    this.currentLayer = image.layers[0];
-    this.renderContext = true;
+    if (image instanceof  CImageGroup && image.images.length === 0) {
+      console.log('Empty Image');
+      this.currentLayer = new Layer('-');
+    } else {
+      this.currentLayer = image.getLayers()[0];
+      this.renderContext = true;
+    }
   }
 
   public onChangeMode($event) {

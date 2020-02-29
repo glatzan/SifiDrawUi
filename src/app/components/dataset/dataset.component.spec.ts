@@ -1,20 +1,20 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { ImageListComponent } from './image-list.component';
+import { DatasetComponent } from './dataset.component';
 
 describe('ImageListComponent', () => {
-  let component: ImageListComponent;
-  let fixture: ComponentFixture<ImageListComponent>;
+  let component: DatasetComponent;
+  let fixture: ComponentFixture<DatasetComponent>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ ImageListComponent ]
+      declarations: [ DatasetComponent ]
     })
     .compileComponents();
   }));
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(ImageListComponent);
+    fixture = TestBed.createComponent(DatasetComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

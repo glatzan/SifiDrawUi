@@ -1,20 +1,9 @@
-import {
-  Component,
-  ContentChild,
-  HostListener,
-  ElementRef,
-  EventEmitter,
-  Output,
-  ChangeDetectionStrategy,
-  ChangeDetectorRef,
-  OnInit, OnDestroy
-} from '@angular/core';
-import { NgControl } from '@angular/forms';
-import { fromEvent, Subject } from 'rxjs';
-import { switchMap, takeUntil, filter, take, switchMapTo } from 'rxjs/operators';
+import {Component, ContentChild, ElementRef, EventEmitter, OnDestroy, OnInit, Output} from '@angular/core';
+import {fromEvent, Subject} from 'rxjs';
+import {filter, switchMapTo, take} from 'rxjs/operators';
 import {ViewModeDirective} from './view-mode-directive';
 import {EditModeDirective} from './edit-mode-directive';
-import {untilDestroyed} from "ngx-take-until-destroy";
+import {untilDestroyed} from 'ngx-take-until-destroy';
 
 @Component({
   selector: 'app-editable',
@@ -24,8 +13,8 @@ import {untilDestroyed} from "ngx-take-until-destroy";
   styleUrls: ['./editable.component.css']
 })
 export class EditableComponent implements OnInit, OnDestroy {
-  @ContentChild(ViewModeDirective) viewModeTpl: ViewModeDirective;
-  @ContentChild(EditModeDirective) editModeTpl: EditModeDirective;
+  @ContentChild(ViewModeDirective, {static: false}) viewModeTpl: ViewModeDirective;
+  @ContentChild(EditModeDirective, {static: false}) editModeTpl: EditModeDirective;
   @Output() update = new EventEmitter();
 
   editMode = new Subject();

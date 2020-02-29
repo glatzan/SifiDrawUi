@@ -97,7 +97,7 @@ export class HomeComponent implements OnInit {
     });
 
     dialogRef.afterClosed().subscribe(result => {
-      this.workViewService.reloadCaseList.emit();
+      this.workViewService.reloadProjectList.emit();
     });
   }
 
@@ -108,7 +108,7 @@ export class HomeComponent implements OnInit {
     });
 
     dialogRef.afterClosed().subscribe(result => {
-      this.workViewService.reloadCaseList.emit();
+      this.workViewService.reloadProjectList.emit();
     });
   }
 

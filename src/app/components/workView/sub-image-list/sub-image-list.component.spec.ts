@@ -1,20 +1,20 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { FilterImageListComponent } from './filter-image-list.component';
+import { SubImageListComponent } from './sub-image-list.component';
 
 describe('FilterImageListComponent', () => {
-  let component: FilterImageListComponent;
-  let fixture: ComponentFixture<FilterImageListComponent>;
+  let component: SubImageListComponent;
+  let fixture: ComponentFixture<SubImageListComponent>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ FilterImageListComponent ]
+      declarations: [ SubImageListComponent ]
     })
     .compileComponents();
   }));
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(FilterImageListComponent);
+    fixture = TestBed.createComponent(SubImageListComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

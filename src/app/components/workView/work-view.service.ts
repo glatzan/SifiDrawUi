@@ -4,18 +4,21 @@ import {ImageService} from '../../service/image.service';
 import {Vector} from '../../utils/vaa/model/vector';
 import CImageUtil from "../../utils/cimage-util";
 import {Layer} from "../../model/layer";
-import {PointLine} from "../../model/point-line";
 import {Point} from "../../model/point";
+import {ICImage} from "../../model/ICImage";
+import {CImageGroup} from "../../model/CImageGroup";
+import {ImageGroupService} from "../../service/image-group.service";
+import {Dataset} from "../../model/dataset";
 
 @Injectable({
   providedIn: 'root'
 })
 export class WorkViewService {
 
-  @Output() changeImage: EventEmitter<CImage> = new EventEmitter();
-  @Output() changeImageAndReload: EventEmitter<CImage> = new EventEmitter();
-  @Output() changeFilterList: EventEmitter<Array<CImage>> = new EventEmitter();
-  @Output() addImageToFilterList: EventEmitter<CImage> = new EventEmitter();
+  @Output() changeDisplayImage: EventEmitter<ICImage> = new EventEmitter();
+  @Output() changeParentImageOrGroup: EventEmitter<ICImage> = new EventEmitter();
+  @Output() changeFilterList: EventEmitter<Array<ICImage>> = new EventEmitter();
+  @Output() addImageToFilterList: EventEmitter<ICImage> = new EventEmitter();
 
   @Output() resetImageZoom: EventEmitter<boolean> = new EventEmitter();
   @Output() mouseCoordinateOnImage: EventEmitter<Vector> = new EventEmitter();
@@ -28,27 +31,38 @@ export class WorkViewService {
   @Output() saveAndRedrawImage: EventEmitter<boolean> = new EventEmitter();
   @Output() highlightLine: EventEmitter<Point[]> = new EventEmitter();
 
-  @Output() reloadCaseList: EventEmitter<void> = new EventEmitter();
+  @Output() reloadProjectList: EventEmitter<void> = new EventEmitter();
 
+  @Output() nextSelectImageInDataset: EventEmitter<void> = new EventEmitter();
+  @Output() prevSelectImageInDataset: EventEmitter<void> = new EventEmitter();
 
-  constructor(private imageService: ImageService) {
+  @Output() selectDataset: EventEmitter<Dataset> = new EventEmitter();
+
+  constructor(private imageService: ImageService,
+              private imageGroupService: ImageGroupService) {
   }
 
-  public displayImageById(imageID: string) {
-    this.imageService.getImage(imageID).subscribe((data: CImage) => {
-      console.log(`Selecting Image ${imageID}`);
-      this.displayImage(data);
-    }, message => {
-      console.error(`Error: On loading Image ${imageID}`);
-      console.error(message);
-    });
-  }
-
-  public displayImage(image: CImage, reload = true) {
+  public displayImage(image: ICImage, reload = true) {
     if (reload) {
-      this.changeImageAndReload.emit(CImageUtil.prepareImage(image));
+      if (image instanceof CImageGroup) {
+        this.imageGroupService.getImageGroup(image.id).subscribe((data: CImageGroup) => {
+          console.log(`Selecting ImageGroup ${image.id}`);
+          this.changeParentImageOrGroup.emit(CImageUtil.prepareImageGroup(data));
+        }, message => {
+          console.error(`Error: On loading ImageGroup ${image.id}`);
+          console.error(message);
+        });
+      } else {
+        this.imageService.getImage(image.id).subscribe((data: CImage) => {
+          console.log(`Selecting Image ${image.id}`);
+          this.changeParentImageOrGroup.emit(CImageUtil.prepareImage(data));
+        }, message => {
+          console.error(`Error: On loading Image ${image.id}`);
+          console.error(message);
+        });
+      }
     } else {
-      this.changeImage.emit(image);
+      this.changeDisplayImage.emit(image);
     }
   }
 

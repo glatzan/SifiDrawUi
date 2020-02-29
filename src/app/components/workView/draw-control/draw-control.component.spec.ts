@@ -1,20 +1,20 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { PaintControlComponent } from './paint-control.component';
+import { DrawControlComponent } from './draw-control.component';
 
 describe('PaintControlComponent', () => {
-  let component: PaintControlComponent;
-  let fixture: ComponentFixture<PaintControlComponent>;
+  let component: DrawControlComponent;
+  let fixture: ComponentFixture<DrawControlComponent>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ PaintControlComponent ]
+      declarations: [ DrawControlComponent ]
     })
     .compileComponents();
   }));
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(PaintControlComponent);
+    fixture = TestBed.createComponent(DrawControlComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

@@ -1,7 +1,7 @@
 import {Component, OnInit} from '@angular/core';
-import {Vector} from "../../../utils/vaa/model/vector";
-import {CImage} from "../../../model/CImage";
-import {WorkViewService} from "../work-view.service";
+import {Vector} from '../../../utils/vaa/model/vector';
+import {WorkViewService} from '../work-view.service';
+import {ICImage} from '../../../model/ICImage';
 
 @Component({
   selector: 'app-work-view',
@@ -13,19 +13,23 @@ export class WorkViewComponent implements OnInit {
   constructor(private workViewService: WorkViewService) {
   }
 
-  private currentImage: CImage;
+  private image: ICImage;
+  private activeImage: ICImage;
+
+
   private drawMode = true;
   private mousePositionInCanvas: Vector = new Vector(0, 0);
   private currentZoomLevel = 100;
 
   ngOnInit() {
-    this.workViewService.changeImage.subscribe(image =>
-      this.currentImage = image
+    this.workViewService.changeDisplayImage.subscribe(image =>
+      this.activeImage = image
     );
 
-    this.workViewService.changeImageAndReload.subscribe(image =>
-      this.currentImage = image
-    );
+    this.workViewService.changeParentImageOrGroup.subscribe(image => {
+      this.image = image;
+      this.activeImage = image;
+    });
 
     this.workViewService.mouseCoordinateOnImage.subscribe(v => {
       this.mousePositionInCanvas = v;

@@ -3,7 +3,9 @@ import {HttpClient, HttpHeaders} from '@angular/common/http';
 import {Observable} from 'rxjs';
 import {Dataset} from '../model/dataset';
 import {environment} from '../../environments/environment';
-import {CImage} from "../model/CImage";
+import {CImage} from '../model/CImage';
+import {map} from 'rxjs/operators';
+import {CImageMapper} from "../utils/cimage-mapper";
 
 @Injectable({
   providedIn: 'root'
@@ -16,11 +18,19 @@ export class DatasetService {
 
   public getDataset(id: string): Observable<Dataset> {
     console.log(`${environment.backendUrl}/dataset/${id}`);
-    return this.http.get<Dataset>(`${environment.backendUrl}/dataset/${id}`);
+    return this.http.get<Dataset>(`${environment.backendUrl}/dataset/${id}`).pipe(
+      map(x => {
+        let i = 0;
+        for (const img of x.images) {
+          x.images[i] = CImageMapper.mapToTypescriptObject(img);
+          i++;
+        }
+        return x;
+      })
+    );
   }
 
   public getDatasets(id: string[]): Observable<Dataset[]> {
-    console.log('id');
     console.log(`${environment.backendUrl}/dataset`);
     const datasets = btoa(id.join('-'));
     return this.http.get<Dataset[]>(`${environment.backendUrl}/datasets/${datasets}`);

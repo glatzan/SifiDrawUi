@@ -11,14 +11,14 @@
        <button mat-menu-item (click)="openFilterSetDialog()">Scripte verwalten</button>
       <mat-divider> </mat-divider>
       <button mat-menu-item (click)="openImportDialog()">Import aus Argos</button>
-      <button mat-menu-item (click)="openExportDialog(caseListComponent.selectedProjectId)">Script auf Projekt anwenden</button>
+      <button mat-menu-item (click)="openExportDialog(projectListComponent.selectedDataset)">Script auf Projekt anwenden</button>
     </mat-menu>
   </span>
 </mat-toolbar>
 
 <div class="bodyDiv">
-  <app-case-list #caseListComponent [imageListComponent]="imageListComponent" class="caseLise"></app-case-list>
-  <app-image-list #imageListComponent class="imageList"></app-image-list>
+  <app-project-list #projectListComponent class="caseLise"></app-project-list>
+  <app-dataset class="imageList"></app-dataset>
   <app-work-view class="canvasDraw"></app-work-view>
 </div>
 

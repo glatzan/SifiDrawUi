@@ -34,7 +34,7 @@ export class FilterControlComponent implements OnInit, DisplayCallback {
   ngOnInit() {
     this.reloadDefaultFilter();
 
-    this.workViewService.changeImageAndReload.subscribe(image => {
+    this.workViewService.changeParentImageOrGroup.subscribe(image => {
       this.reloadDefaultFilter();
       this.image = image;
     });
@@ -63,7 +63,7 @@ export class FilterControlComponent implements OnInit, DisplayCallback {
   }
 
   public resetImage() {
-    this.workViewService.displayImageById(this.image.id);
+    this.workViewService.displayImage(this.image);
   }
 
   public displayCallBack(image: CImage): void {

@@ -38,8 +38,6 @@
     .listContainer {
       padding: 5px 5px 0 15px;
 
-
-
       .subImage{
         padding-left: 10px;
       }
@@ -59,7 +57,7 @@
 
     .clickAble {
       &:hover {
-        text-decoration: underline;
+        font-weight: bold;
         cursor: pointer;
       }
     }

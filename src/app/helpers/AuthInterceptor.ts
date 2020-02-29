@@ -17,7 +17,6 @@ export class AuthInterceptor implements HttpInterceptor {
           Authorization: `${window.atob(currentUser.authdata)}`
         }
       });
-      console.log(request);
     }
 
     return next.handle(request);

@@ -5,8 +5,8 @@ import {HTTP_INTERCEPTORS, HttpClientModule} from '@angular/common/http';
 import {AppComponent} from './app.component';
 import {DrawCanvasComponent} from './components/workView/draw-canvas/draw-canvas.component';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
-import {CaseListComponent} from './components/case-list/case-list.component';
-import {ImageListComponent} from './components/image-list/image-list.component';
+import {ProjectListComponent} from './components/project-list/project-list.component';
+import {DatasetComponent} from './components/dataset/dataset.component';
 import {ExportDialogComponent} from './components/export-dialog/export-dialog.component';
 import {FilterControlComponent} from './components/workView/filter-control/filter-control.component';
 import {ScrollingModule} from '@angular/cdk/scrolling';
@@ -33,8 +33,8 @@ import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {ImportDialogComponent} from './components/import-dialog/import-dialog.component';
 import {FilterOverlayComponent} from './components/workView/filter-overlay/filter-overlay.component';
 import {WorkViewComponent} from './components/workView/work-view/work-view.component';
-import {FilterImageListComponent} from './components/workView/filter-image-list/filter-image-list.component';
-import {PaintControlComponent} from './components/workView/paint-control/paint-control.component';
+import {SubImageListComponent} from './components/workView/sub-image-list/sub-image-list.component';
+import {DrawControlComponent} from './components/workView/draw-control/draw-control.component';
 import {LoginComponent} from './components/login/login.component';
 import {RouterModule} from '@angular/router';
 import {routes} from './app.routes';
@@ -49,27 +49,26 @@ import {FilterSetDialogComponent} from './components/filter-set-dialog/filter-se
 import {CreateProjectDialogComponent} from './components/create-project-dialog/create-project-dialog.component';
 import {FileUploadDialogComponent} from './components/file-upload-dialog/file-upload-dialog.component';
 import {MaterialFileInputModule} from 'ngx-material-file-input';
-import {DragDropModule} from "@angular/cdk/drag-drop";
+import {DragDropModule} from '@angular/cdk/drag-drop';
 import {EditableComponent} from './components/editable/editable.component';
-import {ViewModeDirective} from "./components/editable/view-mode-directive";
-import {EditModeDirective} from "./components/editable/edit-mode-directive";
-import {EditableOnEnterDirective} from "./components/editable/editable-on-enter-directive";
+import {ViewModeDirective} from './components/editable/view-mode-directive';
+import {EditModeDirective} from './components/editable/edit-mode-directive';
+import {EditableOnEnterDirective} from './components/editable/editable-on-enter-directive';
 import {FocusOnShowDirective} from './components/editable/focus-on-show-directive.directive';
-import { CounterPipe } from './components/editable/counter.pipe';
 
 @NgModule({
   declarations: [
     AppComponent,
     DrawCanvasComponent,
-    CaseListComponent,
-    ImageListComponent,
+    ProjectListComponent,
+    DatasetComponent,
     ExportDialogComponent,
     FilterControlComponent,
     ImportDialogComponent,
     FilterOverlayComponent,
     WorkViewComponent,
-    FilterImageListComponent,
-    PaintControlComponent,
+    SubImageListComponent,
+    DrawControlComponent,
     LoginComponent,
     HomeComponent,
     FilterSetDialogComponent,
