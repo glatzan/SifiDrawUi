@@ -115,7 +115,7 @@ export class FilterService {
   public runFilterOnDataset(dataset: Dataset, func: string, env: { processCallback?: ProcessCallback, displayCallback?: DisplayCallback }) {
 
     const display = env.displayCallback;
-    const process = env.displayCallback;
+    const process = env.processCallback;
 
     const splittedString = func.split('\n');
     const ops = [];
@@ -201,7 +201,7 @@ export class FilterService {
     return flatMap((data: ICImage) => this.loadICImage(data).pipe(map(cimg => {
       console.log(`Load img ${atob(cimg.id)}`);
       const filterData = new FilterData();
-      filterData.pushIMG(cimg);
+      filterData.pushICIMG(cimg);
       filterData.origName = atob(cimg.id);
       return filterData;
     })));
@@ -263,9 +263,11 @@ export class FilterService {
 
           for (const res of json) {
             let contour = map.get(res['Contour ID']);
+            // @ts-ignore
             const point = new Vector(Math.round(res.X), Math.round(res.Y), res['Pos.']);
 
             if (!contour) {
+              // @ts-ignore
               contour = map.set(res['Contour ID'], new SimpleLine(res['Contour ID'], res.Length)).get(res['Contour ID']);
             }
 

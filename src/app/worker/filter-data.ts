@@ -1,15 +1,17 @@
 import {ICImage} from '../model/ICImage';
+import {CImage} from "../model/CImage";
+import {CImageGroup} from "../model/CImageGroup";
 
 export class FilterData {
   /**
    * Stack containing images to work with
    */
-  public imgStack: ICImage[] = [];
+  public imgStack: CImage[] = [];
 
   /**
    * Currently selected image
    */
-  public img: ICImage;
+  public img: CImage;
 
   public origName: string;
   public batchSize: number;
@@ -17,10 +19,22 @@ export class FilterData {
 
   public dataStack: Map<string, any> = new Map<string, any>();
 
-  public pushIMG(img: ICImage, selectImage: boolean = true) {
+  public pushIMG(img: CImage, selectImage: boolean = true) {
     this.imgStack.push(img);
     if (selectImage) {
       this.img = img;
+    }
+  }
+
+  public pushICIMG(img: ICImage, selectImage: boolean = true) {
+    if (img instanceof CImageGroup) {
+      this.imgStack.concat((img as CImageGroup).images)
+    } else {
+      this.imgStack.push(img as CImage);
+    }
+
+    if (selectImage) {
+      this.img = this.imgStack[0];
     }
   }
 

@@ -12,6 +12,7 @@ import {WorkViewService} from '../work-view.service';
 import {FilterSetService} from "../../../service/filter-set.service";
 import {FilterSet} from "../../../model/FilterSet";
 import {ICImage} from "../../../model/ICImage";
+import {ProcessCallback} from "../../../worker/processCallback";
 
 @Component({
   selector: 'app-filter-control',
@@ -89,12 +90,14 @@ export class FilterControlComponent implements OnInit, DisplayCallback {
       return;
     }
 
+    const me = this;
+
     const dataset = new Dataset();
     dataset.images = [new CImage()];
     dataset.images[0].id = this.image.id;
 
     this.filterService.runFilterOnDataset(dataset, this.filterValue, {
-      displayCallback: this, processCallback : {
+      displayCallback: this, processCallback : <ProcessCallback>{
         callback(): void {
         }
       }

@@ -2,15 +2,14 @@ import { Injectable } from '@angular/core';
 import {CImage} from "../model/CImage";
 import {Observable} from "rxjs";
 import {HttpClient, HttpHeaders} from "@angular/common/http";
+import {error} from "selenium-webdriver";
+import ElementNotVisibleError = error.ElementNotVisibleError;
+import {environment} from "../../environments/environment";
 
 @Injectable({
   providedIn: 'root'
 })
 export class FlaskService {
-
-  private serverURL = 'http://10.210.51.5:5000';
-  // private serverURL = 'http://192.168.10.114:5000';
-  // private serverURL = 'http://127.0.0.1:5000';
 
   constructor(private _http: HttpClient) {
   }
@@ -19,7 +18,7 @@ export class FlaskService {
     const httpOptions = {
       headers: new HttpHeaders({})
     };
-    console.log(`${this.serverURL}/${endpoint}`);
-    return this._http.post<CImage>(`${this.serverURL}/${endpoint}`, image, httpOptions);
+    console.log(`${environment.flaskServer}/${endpoint}`);
+    return this._http.post<CImage>(`${environment.flaskServer}/${endpoint}`, image, httpOptions);
   }
 }
