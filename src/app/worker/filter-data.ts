@@ -1,16 +1,15 @@
-import {CImage} from '../model/CImage';
-import {PointLine} from '../model/point-line';
+import {ICImage} from '../model/ICImage';
 
 export class FilterData {
   /**
    * Stack containing images to work with
    */
-  public imgStack: CImage[] = [];
+  public imgStack: ICImage[] = [];
 
   /**
    * Currently selected image
    */
-  public img: CImage;
+  public img: ICImage;
 
   public origName: string;
   public batchSize: number;
@@ -18,7 +17,7 @@ export class FilterData {
 
   public dataStack: Map<string, any> = new Map<string, any>();
 
-  public pushIMG(img: CImage, selectImage: boolean = true) {
+  public pushIMG(img: ICImage, selectImage: boolean = true) {
     this.imgStack.push(img);
     if (selectImage) {
       this.img = img;

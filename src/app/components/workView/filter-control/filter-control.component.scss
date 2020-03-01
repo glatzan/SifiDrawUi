@@ -1,18 +1,27 @@
 .content {
   display: grid;
-  grid-template-columns: 20% auto 10% 10%;
-  grid-template-rows: auto 40px;
-  grid-template-areas: "filter filter filter filter" "button spinner reset info";
-  height: 100%;
+  grid-template-columns: 100px 100px 100px auto 200px 100px;
+  grid-template-rows: auto 50px;
+  grid-template-areas: "filterlist filterlist filterlist filterlist filterlist filterlist" "button save spinner . filterSelect reset";
+  height: 99%;
 
   .filter {
     width: 100%;
-    grid-area: filter;
+    grid-area: filterlist;
   }
 
-  .button {
+  .start {
     grid-area: button;
-    width: 100px;
+    width: 90px;
+    height: 40px;
+    align-self: center;
+  }
+
+  .save {
+    grid-area: save;
+    width: 90px;
+    height: 40px;
+    align-self: center;
   }
 
   .spinner {
@@ -21,14 +30,16 @@
     margin-left: 10px;
   }
 
-  .reset {
-    grid-area: reset;
+  .filterSelect {
+    grid-area: filterSelect;
+    height: 40px;
   }
 
-  .info {
-    grid-area: info;
+  .reset {
+    width: 90px;
+    height: 40px;
     align-self: center;
-    justify-self: center;
+    grid-area: reset;
   }
 }
 

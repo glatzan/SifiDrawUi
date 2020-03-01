@@ -1,13 +1,24 @@
 <div class="content">
   <mat-form-field floatLabel="always" class="filter">
-    <textarea matInput placeholder="Filter" rows="18" style="white-space: nowrap;" [(ngModel)]="filterValue"></textarea>
+    <textarea matInput placeholder="Filter" style="white-space: nowrap;" [(ngModel)]="filterValue" rows="20"
+              (change)="onFilterChange()"></textarea>
   </mat-form-field>
 
-  <button mat-stroked-button (click)="runFilter()" class="button">Filtern</button>
+  <button mat-stroked-button (click)="runFilter()" class="start" [disabled]="!filterSelected">Filtern</button>
+  <button mat-stroked-button (click)="runFilter()" class="save" [disabled]="!filterValueChanged">Speichern</button>
   <mat-spinner class="spinner" *ngIf="filterIsRunning" [diameter]="30"></mat-spinner>
+  <div class="filterSelect">
+    <mat-form-field>
+      <mat-select [(ngModel)]="selectedFilter" placeholder="Skripte" (selectionChange)="onChangeFilterSet()">
+        <mat-option *ngFor="let filterSet of filterSetList" [value]="filterSet">
+          {{filterSet.name}}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+  </div>
   <button mat-stroked-button (click)="resetImage()" class="reset">Reset</button>
 
-  <button class="info" mat-icon-button  #filterOverlayButtonRef (click)="openFilterOverlay(filterOverlayButtonRef._elementRef)">
-    <mat-icon> info</mat-icon>
-  </button>
+  <!--  <button class="info" mat-icon-button  #filterOverlayButtonRef (click)="openFilterOverlay(filterOverlayButtonRef._elementRef)">-->
+  <!--    <mat-icon> info</mat-icon>-->
+  <!--  </button>-->
 </div>
