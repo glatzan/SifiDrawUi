@@ -10,13 +10,13 @@ import {FilterSetService} from '../../service/filter-set.service';
 })
 export class FilterSetDialogComponent implements OnInit {
 
-  private filterSets: FilterSet[];
+   filterSets: FilterSet[];
 
-  private selectedFilterSet: FilterSet = new FilterSet();
+  selectedFilterSet: FilterSet = new FilterSet();
 
-  private contentChanged = false;
+  contentChanged = false;
 
-  private disabled = true;
+  disabled = true;
 
   constructor(public dialogRef: MatDialogRef<FilterSetDialogComponent>,
               private filterSetService: FilterSetService) {

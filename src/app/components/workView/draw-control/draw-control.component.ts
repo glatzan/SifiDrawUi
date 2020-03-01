@@ -13,17 +13,17 @@ import {CImageGroup} from "../../../model/CImageGroup";
 })
 export class DrawControlComponent implements OnInit {
 
-  private image: ICImage;
+  image: ICImage;
 
-  private pointMode = 'false';
+  pointMode = 'false';
 
-  private hideLines = false;
+  hideLines = false;
 
-  private currentLayer: Layer;
+  currentLayer: Layer;
 
-  private rightClickCircle = 40;
+  rightClickCircle = 40;
 
-  private renderContext = false;
+  renderContext = false;
 
   constructor(private workViewService: WorkViewService) {
   }

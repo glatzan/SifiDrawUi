@@ -9,11 +9,11 @@ import {ScImportService} from "../../service/sc-import.service";
 })
 export class ImportDialogComponent implements OnInit {
 
-  private mapping: string = '{"maxX" : 1300, "maxY" :650, "maps" : [{"name" : "21328", "path" : "imgs/21328/"}]}';
+  mapping = '{"maxX" : 1300, "maxY" :650, "maps" : [{"name" : "21328", "path" : "imgs/21328/"}]}';
 
-  private data: string;
+  data: string;
 
-  private importIsRunning: boolean;
+  importIsRunning: boolean;
 
   constructor(public dialogRef: MatDialogRef<ImportDialogComponent>,
               public scImportService: ScImportService,
@@ -24,7 +24,7 @@ export class ImportDialogComponent implements OnInit {
     this.importIsRunning = false;
   }
 
-  private import() {
+  import() {
     this.importIsRunning = true;
 
 

@@ -7,12 +7,11 @@ import {HttpClient} from '@angular/common/http';
 import {Dataset} from '../../../model/dataset';
 import {DisplayCallback} from '../../../worker/display-callback';
 
-import {OverlayServiceService} from '../../../service/overlay-service.service';
 import {WorkViewService} from '../work-view.service';
-import {FilterSetService} from "../../../service/filter-set.service";
-import {FilterSet} from "../../../model/FilterSet";
-import {ICImage} from "../../../model/ICImage";
-import {ProcessCallback} from "../../../worker/processCallback";
+import {FilterSetService} from '../../../service/filter-set.service';
+import {FilterSet} from '../../../model/FilterSet';
+import {ICImage} from '../../../model/ICImage';
+import {ProcessCallback} from '../../../worker/processCallback';
 
 @Component({
   selector: 'app-filter-control',
@@ -21,22 +20,22 @@ import {ProcessCallback} from "../../../worker/processCallback";
 })
 export class FilterControlComponent implements OnInit, DisplayCallback {
 
-  private filterSetList: FilterSet[];
+  filterSetList: FilterSet[];
 
-  private selectedFilter: FilterSet;
+  selectedFilter: FilterSet;
 
-  private filterValue: string;
+  filterValue: string;
 
-  private filterValueChanged = false;
+  filterValueChanged = false;
 
-  private filterSelected = false;
+  filterSelected = false;
 
   private image: ICImage;
 
   private currentImage: ICImage;
 
 
-  private filterIsRunning = false;
+  filterIsRunning = false;
 
   private doNotResetFilter = false;
 
@@ -45,7 +44,6 @@ export class FilterControlComponent implements OnInit, DisplayCallback {
               private filterService: FilterService,
               private http: HttpClient,
               private filterSetService: FilterSetService,
-              private overlayServiceService: OverlayServiceService,
               private workViewService: WorkViewService) {
   }
 
@@ -71,12 +69,12 @@ export class FilterControlComponent implements OnInit, DisplayCallback {
     });
   }
 
-  private onChangeFilterSet() {
+  onChangeFilterSet() {
     this.filterValue = this.selectedFilter.filters;
     this.filterSelected = true;
   }
 
-  private onFilterChange() {
+  onFilterChange() {
     this.filterValueChanged = true;
     if (this.filterValue !== null && this.filterValue !== '') {
       this.filterSelected = true;
@@ -97,10 +95,10 @@ export class FilterControlComponent implements OnInit, DisplayCallback {
     dataset.images[0].id = this.image.id;
 
     this.filterService.runFilterOnDataset(dataset, this.filterValue, {
-      displayCallback: this, processCallback : <ProcessCallback>{
+      displayCallback: this, processCallback : {
         callback(): void {
         }
-      }
+      } as ProcessCallback
     });
   }
 
@@ -114,9 +112,5 @@ export class FilterControlComponent implements OnInit, DisplayCallback {
 
   public addImage(imgae: CImage): void {
     this.workViewService.filterImageListAdd(imgae);
-  }
-
-  private openFilterOverlay(elemt: ElementRef) {
-    this.overlayServiceService.open({}, elemt);
   }
 }

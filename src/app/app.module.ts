@@ -31,7 +31,6 @@ import {
 } from '@angular/material';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {ImportDialogComponent} from './components/import-dialog/import-dialog.component';
-import {FilterOverlayComponent} from './components/workView/filter-overlay/filter-overlay.component';
 import {WorkViewComponent} from './components/workView/work-view/work-view.component';
 import {SubImageListComponent} from './components/workView/sub-image-list/sub-image-list.component';
 import {DrawControlComponent} from './components/workView/draw-control/draw-control.component';
@@ -65,7 +64,6 @@ import {FocusOnShowDirective} from './components/editable/focus-on-show-directiv
     ExportDialogComponent,
     FilterControlComponent,
     ImportDialogComponent,
-    FilterOverlayComponent,
     WorkViewComponent,
     SubImageListComponent,
     DrawControlComponent,
@@ -110,7 +108,7 @@ import {FocusOnShowDirective} from './components/editable/focus-on-show-directiv
     MaterialFileInputModule,
     DragDropModule
   ],
-  entryComponents: [ExportDialogComponent, ImportDialogComponent, FilterOverlayComponent, FilterSetDialogComponent, CreateProjectDialogComponent, FileUploadDialogComponent],
+  entryComponents: [ExportDialogComponent, ImportDialogComponent, FilterSetDialogComponent, CreateProjectDialogComponent, FileUploadDialogComponent],
   providers: [
     {provide: MAT_SNACK_BAR_DEFAULT_OPTIONS, useValue: {duration: 500}},
     {provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true},

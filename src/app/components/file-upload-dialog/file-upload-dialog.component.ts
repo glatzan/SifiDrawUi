@@ -13,11 +13,11 @@ import {ProjectService} from '../../service/project.service';
 })
 export class FileUploadDialogComponent implements OnInit {
 
-  private form: FormGroup;
+   form: FormGroup;
 
-  private projects: ProjectData[];
+  projects: ProjectData[];
 
-  private datasets: Dataset[];
+  datasets: Dataset[];
 
   constructor(public dialogRef: MatDialogRef<FileUploadDialogComponent>,
               private formBuilder: FormBuilder,

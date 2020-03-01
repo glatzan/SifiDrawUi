@@ -13,13 +13,13 @@ export class WorkViewComponent implements OnInit {
   constructor(private workViewService: WorkViewService) {
   }
 
-  private image: ICImage;
-  private activeImage: ICImage;
+  image: ICImage;
+  activeImage: ICImage;
 
 
-  private drawMode = true;
-  private mousePositionInCanvas: Vector = new Vector(0, 0);
-  private currentZoomLevel = 100;
+  drawMode = true;
+  mousePositionInCanvas: Vector = new Vector(0, 0);
+  currentZoomLevel = 100;
 
   ngOnInit() {
     this.workViewService.changeDisplayImage.subscribe(image =>

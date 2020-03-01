@@ -12,9 +12,9 @@ import {Dataset} from "../../model/dataset";
 })
 export class ProjectListComponent implements OnInit {
 
-  private projectData: ProjectData[];
+  projectData: ProjectData[];
 
-  public selectedDataset: Dataset;
+  selectedDataset: Dataset;
 
   @Input() imageListComponent: DatasetComponent;
 
@@ -42,7 +42,7 @@ export class ProjectListComponent implements OnInit {
   }
 
 
-  private onSelectDataset(event, dataset) {
+  public onSelectDataset(event, dataset) {
     this.selectedDataset = dataset;
     this.workViewService.selectDataset.emit(dataset);
   }

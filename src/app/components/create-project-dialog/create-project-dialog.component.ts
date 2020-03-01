@@ -9,7 +9,7 @@ import {ProjectService} from '../../service/project.service';
 })
 export class CreateProjectDialogComponent implements OnInit {
 
-  private projectName = '';
+  projectName = '';
 
   constructor(public dialogRef: MatDialogRef<CreateProjectDialogComponent>,
               private projectService: ProjectService) {

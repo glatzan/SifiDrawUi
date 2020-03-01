@@ -20,15 +20,15 @@ export class DatasetComponent implements OnInit {
   @ViewChild(MatMenuTrigger, {static: false})
   contextMenu: MatMenuTrigger;
 
-  contextMenuPosition = {x: '0px', y: '0px'};
+   contextMenuPosition = {x: '0px', y: '0px'};
 
-  private dataset: Dataset = new Dataset();
+  dataset: Dataset = new Dataset();
 
   controls: FormArray;
 
-  private datasetSelected = false;
+  datasetSelected = false;
 
-  private selectedImageId: string;
+  selectedImageId: string;
 
   constructor(private datasetService: DatasetService,
               private workViewService: WorkViewService,
@@ -73,7 +73,7 @@ export class DatasetComponent implements OnInit {
     this.loadDataset(this.dataset.id);
   }
 
-  private onSelectImage($event, image: ICImage) {
+  onSelectImage($event, image: ICImage) {
     this.selectedImageId = image.id;
     this.workViewService.displayImage(image, true);
   }
@@ -97,11 +97,11 @@ export class DatasetComponent implements OnInit {
     return result;
   }
 
-  private getControl(index: number, field: string): FormControl {
+  getControl(index: number, field: string): FormControl {
     return this.controls.at(index).get(field) as FormControl;
   }
 
-  private updateField(index: number, field: string) {
+  updateField(index: number, field: string) {
     const control = this.getControl(index, field);
     if (control.valid) {
       const item = this.getControl(index, 'item');
@@ -115,7 +115,7 @@ export class DatasetComponent implements OnInit {
     }
   }
 
-  private getIndex(element: ICImage) {
+  getIndex(element: ICImage) {
     let counter = 0;
     for (const img of this.dataset.images) {
       if (img.id === element.id) {
@@ -137,7 +137,7 @@ export class DatasetComponent implements OnInit {
   /**
    * Selects the next image. If no image is selected the first image will be selected
    */
-  public onSelectNextImage(): string {
+  onSelectNextImage(): string {
     if (this.dataset.images === undefined || this.dataset.images.length === 0) {
       return;
     }
@@ -160,7 +160,7 @@ export class DatasetComponent implements OnInit {
   /**
    * Selected the previous image. If no image is selected the first image will be selected
    */
-  public onSelectPrevImage() {
+  onSelectPrevImage() {
     if (this.dataset.images == undefined || this.dataset.images.length == 0) {
       return;
     }
@@ -180,7 +180,7 @@ export class DatasetComponent implements OnInit {
     return this.dataset.images[0].id;
   }
 
-  public drop($event, imageGroup) {
+  drop($event, imageGroup) {
     // let img = $event.item.data;
     // let preElement = $event.previousContainer.data
     // let newElement = imageGroup

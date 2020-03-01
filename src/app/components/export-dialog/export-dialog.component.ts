@@ -16,35 +16,35 @@ import {ProcessCallback} from "../../worker/processCallback";
 })
 export class ExportDialogComponent implements OnInit, ProcessCallback {
 
-  private projects: ProjectData[];
+   projects: ProjectData[];
 
-  private selectedProject: ProjectData;
+  selectedProject: ProjectData;
 
-  private datasets: Dataset[];
+  datasets: Dataset[];
 
-  private selectedDatasets: Dataset[];
+  selectedDatasets: Dataset[];
 
-  private targetProject: ProjectData;
+  targetProject: ProjectData;
 
-  private targetDataset: string;
+  targetDataset: string;
 
-  private simpleMode: boolean = true;
+  simpleMode: boolean = true;
 
-  private simpleCopyOrigImage: boolean = false;
+  simpleCopyOrigImage: boolean = false;
 
-  private simpleCustomBackgroundColor: string = "#000000"
+  simpleCustomBackgroundColor: string = "#000000"
 
-  private simpleKeepLayerSettings: boolean = false;
+  simpleKeepLayerSettings: boolean = false;
 
-  private simpleLayerSettings: { selected: boolean, layer: Layer }[];
+  simpleLayerSettings: { selected: boolean, layer: Layer }[];
 
-  private simpleCopyLayersToNewImage: boolean = false;
+  simpleCopyLayersToNewImage: boolean = false;
 
-  private simpleFlattenColorSpace: boolean = true;
+  simpleFlattenColorSpace: boolean = true;
 
-  private simpleImageSuffix: string = "";
+  simpleImageSuffix: string = "";
 
-  private complexFilters: string = "";
+  complexFilters: string = "";
 
   exportIsRunning: boolean = false;
 

@@ -10,7 +10,7 @@ import {CImageGroup} from '../../../model/CImageGroup';
 })
 export class SubImageListComponent implements OnInit {
 
-  private imageArray: Array<CImage> = [];
+  imageArray: Array<CImage> = [];
 
   constructor(private workViewService: WorkViewService) {
   }

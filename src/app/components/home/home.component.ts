@@ -9,13 +9,13 @@ import {ImageJService} from '../../service/image-j.service';
 import {ImportDialogComponent} from '../import-dialog/import-dialog.component';
 import {ExportDialogComponent} from '../export-dialog/export-dialog.component';
 import {MatDialog} from '@angular/material/dialog';
-import {User} from "../../model/user";
-import {AuthenticationService} from "../../service/authentication.service";
-import {Router} from "@angular/router";
-import {FilterSetDialogComponent} from "../filter-set-dialog/filter-set-dialog.component";
-import {CreateProjectDialogComponent} from "../create-project-dialog/create-project-dialog.component";
-import {WorkViewService} from "../workView/work-view.service";
-import {FileUploadDialogComponent} from "../file-upload-dialog/file-upload-dialog.component";
+import {User} from '../../model/user';
+import {AuthenticationService} from '../../service/authentication.service';
+import {Router} from '@angular/router';
+import {FilterSetDialogComponent} from '../filter-set-dialog/filter-set-dialog.component';
+import {CreateProjectDialogComponent} from '../create-project-dialog/create-project-dialog.component';
+import {WorkViewService} from '../workView/work-view.service';
+import {FileUploadDialogComponent} from '../file-upload-dialog/file-upload-dialog.component';
 
 @Component({
   selector: 'app-home',
@@ -33,21 +33,15 @@ export class HomeComponent implements OnInit {
               private datasetService: DatasetService,
               private router: Router,
               private authenticationService: AuthenticationService,
-              private workViewService : WorkViewService) {
+              private workViewService: WorkViewService) {
     this.authenticationService.currentUser.subscribe(x => this.currentUser = x);
   }
 
-  private selectedDatasetId: string;
   private selectedImageId: string;
 
   @Input() drawCanvasComponent: DrawCanvasComponent;
 
   ngOnInit(): void {
-  }
-
-  onDatasetSelect(id: string) {
-    console.log(id);
-    this.selectedDatasetId = id;
   }
 
   onImageSelect(id: string) {
