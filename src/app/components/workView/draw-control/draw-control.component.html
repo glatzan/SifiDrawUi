@@ -21,15 +21,34 @@
   <div class="labelSelect">
     <mat-form-field class="settingElement">
       <mat-select [(ngModel)]="currentLayer" (ngModelChange)="onLayerChange($event)">
-        <mat-option *ngFor="let layer of image.layers" [value]="layer">
-          {{layer.id}}
+        <mat-option *ngFor="let layer of image.getLayers()" [value]="layer">
+          {{layer.id}} - {{layer.name}}
         </mat-option>
       </mat-select>
     </mat-form-field>
 
-    <button mat-icon-button color="primary" class="addButton" (click)="onAddLayer($event)">
+    <button mat-icon-button class="addButton" (click)="onAddLayer($event)">
       <mat-icon>playlist_add</mat-icon>
     </button>
+    <button mat-icon-button class="removeButton" (click)="onRemoveLayer($event)">
+      <mat-icon>delete sweep icon</mat-icon>
+    </button>
+
+  </div>
+
+  <div class="layerID">
+    ID:
+    <mat-form-field class="idInput">
+      <input matInput [(ngModel)]="currentLayer.id" (ngModelChange)="onChangeColorOrThickness($event)">
+    </mat-form-field>
+  </div>
+
+
+  <div class="name">
+    Name:
+    <mat-form-field class="nameInput">
+      <input matInput [(ngModel)]="currentLayer.name" (ngModelChange)="onChangeColorOrThickness($event)">
+    </mat-form-field>
   </div>
 
   <div class="labelSettingsText">
@@ -45,6 +64,17 @@
       <input matInput [(ngModel)]="currentLayer.size" placeholder="Dicke" (change)="onChangeColorOrThickness($event)"
              type="number" min="1"
              id="myNumber"/>
+    </mat-form-field>
+  </div>
+
+  <div class="layerType">
+    Typ:
+    <mat-form-field class="settingElement" style="margin-left: 5px">
+      <mat-select [(ngModel)]="currentLayer.type" (ngModelChange)="onChangeColorOrThickness($event)">
+        <mat-option *ngFor="let layerType of layerTypes | enumToArrayPipe" [value]="layerType.index">
+          {{layerType.name}}
+        </mat-option>
+      </mat-select>
     </mat-form-field>
   </div>
 

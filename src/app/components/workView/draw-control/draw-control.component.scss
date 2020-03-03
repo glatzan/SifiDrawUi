@@ -13,10 +13,10 @@
   padding: 5px 20px;
   display: grid;
   grid-template-columns: repeat(4, 4fr);
-  grid-template-rows: repeat(5, 70px) auto;
+  grid-template-rows: repeat(6, 70px) auto;
   grid-column-gap: 5px;
   align-content: center;
-  grid-template-areas: "mode mode hide hide" "labelSelectText labelSelect . ." "labelSettingsText labelSettings . ." "sublinesText sublines sublines sublinesHelp" "eraserText eraser eraserHelp eraserHelp";
+  grid-template-areas: "mode mode hide hide" "labelSelectText labelSelect . ." ". layerid name name" "labelSettingsText labelSettings layerType layerType" "sublinesText sublines sublines sublinesHelp" "eraserText eraser eraserHelp eraserHelp";
 
   .modus {
     grid-area: mode;
@@ -46,6 +46,35 @@
     }
   }
 
+  .layerType {
+    grid-area: layerType;
+    align-self: center;
+  }
+
+  .name {
+    grid-area: name;
+    align-self: center;
+    .nameInput {
+      margin-left: 10px;
+    }
+  }
+
+  .layerID {
+    grid-area: layerid;
+    align-self: center;
+    margin-left: 10px;
+
+    .idInput {
+      margin-left: 10px;
+      width: 50px;
+    }
+  }
+
+  .layerType {
+    grid-area: layerType;
+    align-self: center;
+  }
+
   .labelSettingsText {
     grid-area: labelSettingsText;
     align-self: center;
@@ -71,7 +100,7 @@
     width: 80%;
   }
 
-  .sublinesHelp{
+  .sublinesHelp {
     grid-area: sublinesHelp;
     align-self: center;
     justify-self: right;
@@ -88,7 +117,7 @@
     width: 50px;
   }
 
-  .eraserHelp{
+  .eraserHelp {
     grid-area: eraserHelp;
     align-self: center;
     justify-self: right;

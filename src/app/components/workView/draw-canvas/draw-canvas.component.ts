@@ -12,7 +12,7 @@ import {WorkViewService} from '../work-view.service';
 import {ICImage} from '../../../model/ICImage';
 import {ImageGroupService} from '../../../service/image-group.service';
 import {CImageGroup} from '../../../model/CImageGroup';
-import {NavigationEnd, Router} from "@angular/router";
+import {Router} from "@angular/router";
 
 @Component({
   selector: 'app-draw-canvas',
@@ -453,7 +453,12 @@ export class DrawCanvasComponent implements AfterViewInit, OnInit {
         console.error(error1);
       });
     } else {
-      this.imageGroupService.updateImageGroup(this.activeImage as CImageGroup);
+      this.imageGroupService.updateImageGroup(this.activeImage as CImageGroup).subscribe(() => {
+        console.log('saved');
+      }, error1 => {
+        console.log('Fehler beim laden der Dataset Datein');
+        console.error(error1);
+      });
     }
   }
 

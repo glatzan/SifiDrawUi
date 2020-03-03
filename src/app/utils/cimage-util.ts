@@ -23,6 +23,7 @@ export default class CImageUtil {
     }
     return group;
   }
+
   static prepareImage(image: CImage): CImage {
     if (!CImageUtil.hasLayer(image)) {
       CImageUtil.addLayer(image);
@@ -113,6 +114,23 @@ export default class CImageUtil {
     return null;
   }
 
+  static removeLayer(img: ICImage, layerID: string): boolean {
+    let i = 0;
+    for (const layer of img.getLayers()) {
+      if (layer.id === layerID) {
+        break;
+      }
+      i++;
+    }
+
+    if (i === img.getLayers().length)
+      return false;
+
+    img.getLayers().splice(i, 1)
+
+    return true;
+  }
+
   static addLayer(img: ICImage, layerID?: string): Layer {
     if (!CImageUtil.hasLayer(img)) {
       img.setLayers([new Layer(layerID ? layerID : '1')]);
@@ -123,7 +141,6 @@ export default class CImageUtil {
 
     try {
       const c = parseInt(layerID, 10);
-      console.log('---' + c);
       if (c - 1 > 0 && c - 1 < CImageUtil.colors.length) {
         color = CImageUtil.colors[c - 1];
       }

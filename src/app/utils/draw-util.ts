@@ -1,9 +1,9 @@
 import {Point} from '../model/point';
 import {Layer} from '../model/layer';
 import {CImage} from '../model/CImage';
-import {Observable, fromEvent} from 'rxjs';
-import {promise} from "selenium-webdriver";
+import {Observable} from 'rxjs';
 import {flatMap} from "rxjs/operators";
+import {LayerType} from "../model/layer-type.enum";
 
 export default class DrawUtil {
 
@@ -68,23 +68,6 @@ export default class DrawUtil {
   }
 
   /**
-   * Draws a filled reelect to a canvas
-   * @param canvas
-   * @param x
-   * @param y
-   * @param width
-   * @param height
-   * @param color
-   */
-  static drawRect(canvas: HTMLCanvasElement, x: number, y: number, width: number, height: number, color: string) {
-    const cx = canvas.getContext('2d');
-    cx.beginPath();
-    cx.rect(x, y, width, height);
-    cx.fillStyle = color;
-    cx.fill();
-  }
-
-  /**
    * Draws a line between two points
    * @param canvas
    * @param p1
@@ -144,6 +127,13 @@ export default class DrawUtil {
     }
   }
 
+  /**
+   * @deprecated
+   * @param canvas
+   * @param points
+   * @param color
+   * @param size
+   */
   static drawPoint(canvas: HTMLCanvasElement, points: Point, color: string = '#fff', size: number = 2,) {
     const cx = canvas.getContext('2d');
     cx.fillStyle = color;
@@ -177,30 +167,45 @@ export default class DrawUtil {
   }
 
 
-  static drawSingleLineOnCanvas(cx: CanvasRenderingContext2D, p1: Point, p2: Point, color: string = '#fff', size: number = 1, drawPoint: boolean = true) {
+  static drawLinesOnCanvas(cx: CanvasRenderingContext2D, points: Point[][], color: string = '#fff', size: number = 1, drawPoint: boolean = false, closed = false) {
+    points.forEach(x => DrawUtil.drawLineOnCanvas(cx, x, color, size, drawPoint, closed));
+  }
+
+  static drawLineOnCanvas(cx: CanvasRenderingContext2D, points: Point[], color: string = '#fff', size: number = 1, drawPoint: boolean = false, closed = false) {
+    for (let i = 0; i < points.length - 1; i++) {
+      this.drawTwoPointLineOnCanvas(cx, points[i], points[i + 1], color, size);
+    }
+
+    if (closed) {
+      this.drawTwoPointLineOnCanvas(cx, points[points.length - 1], points[0], color, size);
+    }
+
+    if (drawPoint)
+      this.drawPointsOnCanvas(cx, points, color, size)
+  }
+
+  static drawTwoPointLineOnCanvas(cx: CanvasRenderingContext2D, p1: Point, p2: Point, color: string = '#fff', size: number = 1) {
     cx.strokeStyle = color;
     cx.lineWidth = size;
     cx.beginPath();
     cx.moveTo(p1.x, p1.y); // from
     cx.lineTo(p2.x, p2.y);
     cx.stroke();
-    if (drawPoint) {
-      cx.fillRect(p1.x, p1.y, 2, 2);
-      cx.fillRect(p2.x, p2.y, 2, 2);
-    }
   }
 
-  static drawLineOnCanvas(cx: CanvasRenderingContext2D, points: Point[], color: string = '#fff', size: number = 1, drawPoint: boolean = false) {
-    for (let i = 0; i < points.length; i++) {
-      if (i + 1 >= points.length) {
-        return;
-      }
-      this.drawSingleLineOnCanvas(cx, points[i], points[i + 1], color, size, drawPoint);
-    }
+
+  static drawPointsOnCanvas(cx: CanvasRenderingContext2D, points: Point[], color: string = '#fff', size: number = 1) {
+    cx.fillStyle = color
+    points.forEach(point => {
+      cx.fillRect(point.x, point.y, size, size);
+      cx.fillRect(point.x, point.y, size, size);
+    })
   }
 
-  static drawLinesOnCanvas(cx: CanvasRenderingContext2D, points: Point[][], color: string = '#fff', size: number = 1, drawPoint: boolean = false) {
-    points.forEach(x => DrawUtil.drawLineOnCanvas(cx, x, color, size, drawPoint));
+  static drawPointOnCanvas(cx: CanvasRenderingContext2D, point: Point, color: string = '#fff', size: number = 1) {
+    cx.fillStyle = color
+    cx.fillRect(point.x, point.y, size, size);
+    cx.fillRect(point.x, point.y, size, size);
   }
 
   static drawCircle(cx: CanvasRenderingContext2D, pos: Point, radius: number) {
@@ -213,15 +218,36 @@ export default class DrawUtil {
     cx.clearRect(point_.x, point_.y, width, height);
   }
 
+  static drawRect(cx: CanvasRenderingContext2D, x: number, y: number, width: number, height: number, color: string) {
+    cx.beginPath();
+    cx.rect(x, y, width, height);
+    cx.fillStyle = color;
+    cx.fill();
+  }
+
 
   static redrawCanvas(cx: CanvasRenderingContext2D, layers: Layer[], size: number = 1, drawPoint: boolean = true) {
     layers.forEach(x => {
-      this.drawLinesOnCanvas(cx, x.lines, x.color, x.size, drawPoint);
+      switch (x.type) {
+        case LayerType.Dot:
+          x.lines.forEach(points => {
+            this.drawPointsOnCanvas(cx, points, x.color, x.size)
+          });
+          break;
+        case LayerType.Line:
+          this.drawLinesOnCanvas(cx, x.lines, x.color, x.size, drawPoint);
+          break;
+        case LayerType.Polygon:
+          this.drawLinesOnCanvas(cx, x.lines, x.color, x.size, drawPoint, true);
+          break;
+        case LayerType.FilledPolygon:
+          break;
+      }
     });
   }
 
   static async drawCanvas(canvas: HTMLCanvasElement, image: CImage, drawImage: boolean, background: string, useLayerSettings: boolean, layers: Layer[]) {
-    const img = await DrawUtil.loadImage(image.data)
+    const img = await DrawUtil.loadImage(image.data);
 
     const width = img.width;
     const height = img.height;

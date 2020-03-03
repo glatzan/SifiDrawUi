@@ -1,10 +1,10 @@
 import {Component, OnInit} from '@angular/core';
 import {Layer} from '../../../model/layer';
 import {WorkViewService} from '../work-view.service';
-import {CImage} from '../../../model/CImage';
 import CImageUtil from '../../../utils/cimage-util';
 import {ICImage} from "../../../model/ICImage";
 import {CImageGroup} from "../../../model/CImageGroup";
+import {LayerType} from "../../../model/layer-type.enum";
 
 @Component({
   selector: 'app-draw-control',
@@ -25,6 +25,8 @@ export class DrawControlComponent implements OnInit {
 
   renderContext = false;
 
+  layerTypes = LayerType;
+
   constructor(private workViewService: WorkViewService) {
   }
 
@@ -43,7 +45,7 @@ export class DrawControlComponent implements OnInit {
 
   private init(image: ICImage) {
     this.image = image;
-    if (image instanceof  CImageGroup && image.images.length === 0) {
+    if (image instanceof CImageGroup && image.images.length === 0) {
       console.log('Empty Image');
       this.currentLayer = new Layer('-');
     } else {
@@ -69,9 +71,22 @@ export class DrawControlComponent implements OnInit {
   public onAddLayer($event) {
     this.currentLayer = CImageUtil.addLayer(this.image);
     this.workViewService.selectLayer.emit(this.currentLayer);
+    this.workViewService.saveAndRedrawImage.emit(true);
+  }
+
+  public onRemoveLayer($event) {
+    CImageUtil.removeLayer(this.image, this.currentLayer.id);
+
+    if (this.image.getLayers().length === 0)
+      CImageUtil.addLayer(this.image)
+
+    this.currentLayer = this.image.getLayers()[0];
+    this.workViewService.selectLayer.emit(this.currentLayer);
+    this.workViewService.saveAndRedrawImage.emit(true);
   }
 
   public onChangeColorOrThickness($event) {
+    console.log(this.currentLayer)
     console.log('redarw');
     this.workViewService.saveAndRedrawImage.emit(true);
   }

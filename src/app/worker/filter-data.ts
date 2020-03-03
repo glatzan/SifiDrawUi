@@ -28,7 +28,9 @@ export class FilterData {
 
   public pushICIMG(img: ICImage, selectImage: boolean = true) {
     if (img instanceof CImageGroup) {
-      this.imgStack.concat((img as CImageGroup).images)
+      (img as CImageGroup).images.forEach(img => {
+        this.imgStack.push(img);
+      })
     } else {
       this.imgStack.push(img as CImage);
     }

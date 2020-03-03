@@ -54,6 +54,7 @@ import {ViewModeDirective} from './components/editable/view-mode-directive';
 import {EditModeDirective} from './components/editable/edit-mode-directive';
 import {EditableOnEnterDirective} from './components/editable/editable-on-enter-directive';
 import {FocusOnShowDirective} from './components/editable/focus-on-show-directive.directive';
+import { EnumToArrayPipePipe } from './helpers/enum-to-array-pipe.pipe';
 
 @NgModule({
   declarations: [
@@ -77,6 +78,7 @@ import {FocusOnShowDirective} from './components/editable/focus-on-show-directiv
     EditModeDirective,
     EditableOnEnterDirective,
     FocusOnShowDirective,
+    EnumToArrayPipePipe,
   ],
   imports: [
     HttpClientModule,
