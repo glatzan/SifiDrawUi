@@ -226,24 +226,28 @@ export default class DrawUtil {
   }
 
 
-  static redrawCanvas(cx: CanvasRenderingContext2D, layers: Layer[], size: number = 1, drawPoint: boolean = true) {
+  static redrawCanvas(cx: CanvasRenderingContext2D, layers: Layer[], drawPoint: boolean = true) {
     layers.forEach(x => {
-      switch (x.type) {
-        case LayerType.Dot:
-          x.lines.forEach(points => {
-            this.drawPointsOnCanvas(cx, points, x.color, x.size)
-          });
-          break;
-        case LayerType.Line:
-          this.drawLinesOnCanvas(cx, x.lines, x.color, x.size, drawPoint);
-          break;
-        case LayerType.Polygon:
-          this.drawLinesOnCanvas(cx, x.lines, x.color, x.size, drawPoint, true);
-          break;
-        case LayerType.FilledPolygon:
-          break;
-      }
+      this.drawLayer(cx, x, drawPoint);
     });
+  }
+
+  static drawLayer(cx: CanvasRenderingContext2D, layer: Layer, drawPoint: boolean = true) {
+    switch (layer.type) {
+      case LayerType.Dot:
+        layer.lines.forEach(points => {
+          this.drawPointsOnCanvas(cx, points, layer.color, layer.size)
+        });
+        break;
+      case LayerType.Line:
+        this.drawLinesOnCanvas(cx, layer.lines, layer.color, layer.size, drawPoint);
+        break;
+      case LayerType.Polygon:
+        this.drawLinesOnCanvas(cx, layer.lines, layer.color, layer.size, drawPoint, true);
+        break;
+      case LayerType.FilledPolygon:
+        break;
+    }
   }
 
   static async drawCanvas(canvas: HTMLCanvasElement, image: CImage, drawImage: boolean, background: string, useLayerSettings: boolean, layers: Layer[]) {

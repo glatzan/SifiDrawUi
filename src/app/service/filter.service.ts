@@ -145,62 +145,62 @@ export class FilterService {
     }
   }
 
-  public runWorkers(datasets: Dataset[], filterChain: string, env: { processCallback?: ProcessCallback, displayCallback?: DisplayCallback }) {
-    try {
-
-      const f = this;
-      const display = env.displayCallback;
-      const results = [];
-
-      let count = 0;
-
-      for (let y = 0; y < datasets.length; y++) {
-        for (let i = 0; i < datasets[y].images.length; i++) {
-          const data = new FilterData();
-          // TODO cast!
-          data.pushIMG(datasets[y].images[i] as CImage);
-          data.origName = atob(datasets[y].images[i].id);
-
-          data.numberInBatch = count;
-
-          let start;
-
-          eval(filterChain);
-
-          if (start == undefined) {
-            console.log('Fehler start nicht defined');
-            return;
-          }
-
-          start.pushCallBack(env.processCallback);
-          results.push(start.doWork(undefined, data));
-          count++;
-        }
-      }
-
-      if (env.processCallback) {
-        env.processCallback.maxRunCount = results.length * 2;
-        env.processCallback.completedRunCount = 0;
-        env.processCallback.percentRun = 0;
-      }
-
-      forkJoin(results).subscribe(x => {
-        if (env.processCallback) {
-          env.processCallback.exportIsRunning = false;
-        }
-        console.log('Ende');
-      });
-
-    } catch (e) {
-      if (e instanceof SyntaxError) {
-        alert(e);
-      }
-      console.error(e);
-      if (env.processCallback) {
-        env.processCallback.exportIsRunning = false;
-      }
-    }
-  }
+  // public runWorkers(datasets: Dataset[], filterChain: string, env: { processCallback?: ProcessCallback, displayCallback?: DisplayCallback }) {
+  //   try {
+  //
+  //     const f = this;
+  //     const display = env.displayCallback;
+  //     const results = [];
+  //
+  //     let count = 0;
+  //
+  //     for (let y = 0; y < datasets.length; y++) {
+  //       for (let i = 0; i < datasets[y].images.length; i++) {
+  //         const data = new FilterData();
+  //         // TODO cast!
+  //         data.pushIMG(datasets[y].images[i] as CImage);
+  //         data.origName = atob(datasets[y].images[i].id);
+  //
+  //         data.numberInBatch = count;
+  //
+  //         let start;
+  //
+  //         eval(filterChain);
+  //
+  //         if (start == undefined) {
+  //           console.log('Fehler start nicht defined');
+  //           return;
+  //         }
+  //
+  //         start.pushCallBack(env.processCallback);
+  //         results.push(start.doWork(undefined, data));
+  //         count++;
+  //       }
+  //     }
+  //
+  //     if (env.processCallback) {
+  //       env.processCallback.maxRunCount = results.length * 2;
+  //       env.processCallback.completedRunCount = 0;
+  //       env.processCallback.percentRun = 0;
+  //     }
+  //
+  //     forkJoin(results).subscribe(x => {
+  //       if (env.processCallback) {
+  //         env.processCallback.exportIsRunning = false;
+  //       }
+  //       console.log('Ende');
+  //     });
+  //
+  //   } catch (e) {
+  //     if (e instanceof SyntaxError) {
+  //       alert(e);
+  //     }
+  //     console.error(e);
+  //     if (env.processCallback) {
+  //       env.processCallback.exportIsRunning = false;
+  //     }
+  //   }
+  // }
 
 
   public cloneImage({index = null, displayCallback = null}: { index?: number, displayCallback?: DisplayCallback } = {}) {
@@ -780,7 +780,7 @@ export class FilterService {
         if (layer != null) {
           DrawUtil.drawManyPointLinesOnCanvas(canvas, layer.lines, color, size, drawPoints);
           data.img.data = DrawUtil.canvasAsBase64(canvas);
-          console.log('layer img' + data.origName + ' ' + layer.id + ' ' + color);
+          console.log('layer img' + data.originalImage.name + ' ' + layer.id + ' ' + color);
         }
         return data;
       }))))
@@ -911,65 +911,6 @@ export class FilterService {
         return data;
       }))
     );
-  }
-
-  public save(targetProject: string, datasetMapping: [{ dataset: string, mapping: string }], addDatasetAsPrefix: boolean = false, copyLayer: boolean = false, imageSuffix?: string) {
-    return flatMap((data: FilterData) => new Observable<FilterData>((observer) => {
-
-      const oldID = data.origName.split('/');
-
-      let newName = targetProject.replace('/', '') + '/';
-
-      // searching for dataset mapping
-      let oldDataset = '';
-      let newDataset;
-
-      for (let i = 1; i < oldID.length - 1; i++) {
-        oldDataset += oldID[i] + '/';
-      }
-
-      oldDataset = oldDataset.slice(0, -1);
-
-      if (datasetMapping.length == 1) {
-        newDataset = datasetMapping[0].mapping;
-      } else {
-        for (let i = 0; i < datasetMapping.length; i++) {
-          if (oldDataset === datasetMapping[i].dataset) {
-            newDataset = datasetMapping[i].mapping;
-            break;
-          }
-        }
-      }
-
-      newName += newDataset + '/';
-
-      if (addDatasetAsPrefix) {
-        newName += oldDataset.replace('/', '-') + '-';
-      }
-
-      newName += oldID[oldID.length - 1];
-
-
-      if (imageSuffix) {
-        newName += imageSuffix;
-      }
-
-      const newImg = Object.assign(new CImage(), data.img);
-      newImg.id = btoa(newName);
-
-      data.pushIMG(newImg);
-
-      if (!copyLayer) {
-        newImg.layers = data.img.layers;
-      }
-
-      observer.next(data);
-      observer.complete();
-    }).pipe(flatMap(data => this.imageService.createImage(data.img, 'png').pipe(
-      map(newImg => {
-        return data;
-      }))
-    )));
   }
 
   public display(displayCallback: DisplayCallback, img: number = -1) {

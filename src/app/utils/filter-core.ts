@@ -50,7 +50,7 @@ export class FilterCore {
       console.log(`Load img ${atob(cimg.id)}`);
       const filterData = new FilterData();
       filterData.pushICIMG(cimg);
-      filterData.origName = atob(cimg.id);
+      filterData.originalImage = cimg;
       return filterData;
     })));
   }
@@ -177,6 +177,47 @@ export class FilterCore {
     ));
   }
 
+  toBinary({sourceImgPos = null, targetImgPos = sourceImgPos, threshold = 0}: { sourceImgPos: number, targetImgPos?: number, threshold?: number }) {
+    return flatMap((data: FilterData) => new Observable<FilterData>((observer) => {
+
+      const img = FilterCore.getImage(sourceImgPos, data);
+
+      if (img === null) {
+        observer.error(`Image not found index ${sourceImgPos}!`);
+      }
+
+      let targetImage;
+      if (targetImgPos === null) {
+        targetImage = img
+      } else {
+        targetImage = FilterCore.getImage(targetImgPos, data);
+        if (img === null) {
+          observer.error(`TargetImage not found index ${targetImgPos}!`);
+        }
+      }
+
+      const buff = new Buffer(img.data, 'base64');
+      const png = PNG.sync.read(buff);
+
+      for (let x = 0; x < png.width; x++) {
+        for (let y = 0; y < png.height; y++) {
+          const idx = (png.width * y + x) << 2;
+          if (png.data[idx] > threshold || png.data[idx + 1] > threshold || png.data[idx + 2] > threshold) {
+            png.data[idx] = 255;
+            png.data[idx + 1] = 255;
+            png.data[idx + 2] = 255;
+          }
+        }
+      }
+
+      const buffer = PNG.sync.write(png, {colorType: 0});
+      targetImage.data = buffer.toString('base64');
+
+      observer.next(data);
+      observer.complete();
+    }));
+  }
+
   countVolume({sourceImgPos = null, targetImgPos = null}: { sourceImgPos: number, targetImgPos: number }) {
     return flatMap((data: FilterData) => DrawUtil.loadBase64AsCanvas(FilterCore.getImage(targetImgPos, data).data).pipe(map(canvas => {
 
@@ -189,6 +230,8 @@ export class FilterCore {
         return componentToHex(r) + componentToHex(g) + componentToHex(b);
       }
 
+      const cx = canvas.getContext("2d");
+      const targetImage = FilterCore.getImage(targetImgPos, data)
       const img = FilterCore.getImage(sourceImgPos, data)
       const buff = new Buffer(img.data, 'base64');
       const png = PNG.sync.read(buff);
@@ -200,10 +243,14 @@ export class FilterCore {
             console.log("asd")
           }
           const color = rgbToHex(png.data[idx], png.data[idx + 1], png.data[idx + 2]);
-          if (color !== "000000")
-            console.log(color);
+          if (color !== "000000") {
+            DrawUtil.drawPointOnCanvas(cx, new Point(x, y), "#fff", 1)
+          }
         }
       }
+
+
+      targetImage.data = DrawUtil.canvasAsBase64(canvas);
       return data;
     })));
   }
@@ -240,8 +287,9 @@ export class FilterCore {
     return flatMap((data: FilterData) => DrawUtil.loadBase64AsCanvas(FilterCore.getImage(targetImgPos, data).data).pipe(map(canvas => {
 
       const img = FilterCore.getImage(sourceImgPos, data);
+      const targetImage = FilterCore.getImage(targetImgPos, data)
 
-      if (img === null) {
+      if (img === null || targetImage === null) {
         return data;
       }
 
@@ -260,15 +308,11 @@ export class FilterCore {
 
       const cx = canvas.getContext("2d");
 
-      console.log(layers)
       layers.forEach(layer => {
-        layer.lines.forEach(lines => {
-          DrawUtil.drawLinesOnCanvas(cx, lines, layer.color, layer.size);
-        })
+        DrawUtil.drawLayer(cx, layer);
       });
 
-      data.img.data = DrawUtil.canvasAsBase64(canvas);
-
+      targetImage.data = DrawUtil.canvasAsBase64(canvas);
       return data;
     })));
   }
@@ -289,6 +333,82 @@ export class FilterCore {
       observer.next(data);
       observer.complete();
     }));
+  }
+
+  save(targetProject: string, saveOptions?: SaveOptions) {
+    return flatMap((data: FilterData) => new Observable<{ data: FilterData, img: CImage }>((observer) => {
+
+      if (saveOptions === undefined)
+        saveOptions = {};
+
+      let fullImgName = atob(data.originalImage.id);
+      let imgName = data.originalImage.name;
+
+      if (data.originalImage instanceof CImageGroup) {
+        // remove last /
+        fullImgName = fullImgName.slice(0, -1);
+        fullImgName = fullImgName.slice(0, fullImgName.lastIndexOf("/") + 1);
+        fullImgName += data.originalImage.name
+      } else {
+        imgName = fullImgName.slice(fullImgName.lastIndexOf("/") + 1, -1);
+      }
+
+      const dataset = fullImgName.substr(0, fullImgName.lastIndexOf("/") + 1);
+
+      let targetDataset = targetProject + "/filtered";
+
+
+      if (saveOptions.datasetMapping !== undefined) {
+        targetDataset = targetProject + saveOptions.datasetMapping;
+      } else if (saveOptions.datasetsMapping !== undefined) {
+        for (let i = 0; i < saveOptions.datasetsMapping.length; i++) {
+          if (dataset === saveOptions.datasetsMapping[i].dataset) {
+            targetDataset = targetProject + saveOptions.datasetsMapping[i].mapping;
+            break;
+          }
+        }
+      }
+
+      if (targetDataset.charAt(targetDataset.length - 1) !== '/') {
+        targetDataset += "/"
+      }
+
+
+      let targetImgName = targetDataset;
+
+      if (saveOptions.addDatasetAsPrefix) {
+        targetImgName += dataset.replace('/', '-') + '-';
+      }
+
+      targetImgName += imgName;
+
+      if (saveOptions.imageSuffix !== undefined) {
+        targetImgName += saveOptions.imageSuffix;
+      }
+
+      if(!targetImgName.endsWith(".png"))
+        targetImgName += ".png ";
+
+      let sourceImage = data.img;
+      if (saveOptions.sourceImage !== undefined && FilterCore.getImage(saveOptions.sourceImage, data) !== null) {
+        sourceImage = FilterCore.getImage(saveOptions.sourceImage, data);
+      }
+
+      const saveImage = Object.assign(new CImage(), sourceImage);
+      saveImage.id = btoa(targetImgName);
+      saveImage.name = imgName
+
+      if (!saveOptions.saveLayers) {
+        saveImage.layers = [];
+      }
+
+      observer.next({data: data, img: saveImage});
+      observer.complete();
+    }).pipe(flatMap(data => this.imageService.createImage(data.img, 'png').pipe(
+      map(newImg => {
+        return data.data;
+      }))
+    )));
   }
 
   public colorType() {
@@ -330,11 +450,19 @@ export class FilterCore {
 
   private static findLayer(layers: Layer[], id: string): Layer {
     return layers.find(layer => {
-      console.log(layer.id + " == " + id);
       if (layer.id == id) {
         return layer;
       }
     });
   }
+}
 
+export interface SaveOptions {
+  targetProject?: string
+  datasetsMapping?: [{ dataset: string, mapping: string }]
+  datasetMapping?: string
+  addDatasetAsPrefix?: boolean
+  saveLayers?: boolean
+  imageSuffix?: string
+  sourceImage?: number
 }

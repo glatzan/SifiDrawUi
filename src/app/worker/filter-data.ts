@@ -13,7 +13,8 @@ export class FilterData {
    */
   public img: CImage;
 
-  public origName: string;
+  public originalImage: ICImage;
+
   public batchSize: number;
   public numberInBatch: number;
 

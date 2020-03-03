@@ -34,7 +34,6 @@ export class FilterControlComponent implements OnInit, DisplayCallback {
 
   private currentImage: ICImage;
 
-
   filterIsRunning = false;
 
   private doNotResetFilter = false;
@@ -49,24 +48,27 @@ export class FilterControlComponent implements OnInit, DisplayCallback {
 
   ngOnInit() {
     this.loadFilters();
-    this.filterValueChanged = false;
-    this.filterSelected = false;
     this.workViewService.changeParentImageOrGroup.subscribe(image => {
-      this.loadFilters();
       this.image = image;
-
-      if (this.filterValue !== '') {
-        this.filterSelected = true;
-      }
     });
+
+    this.workViewService.reloadFilterSets.subscribe( _ => {
+      this.loadFilters();
+    })
   }
 
   private loadFilters() {
     this.filterSetService.getFilters().subscribe(x => {
       this.filterSetList = x;
       this.filterValueChanged = false;
-      this.filterSelected = false;
+      this.updateFilterSelected();
     });
+  }
+
+  private updateFilterSelected(){
+    if (this.filterValue !== '') {
+      this.filterSelected = true;
+    }
   }
 
   onChangeFilterSet() {
@@ -103,7 +105,7 @@ export class FilterControlComponent implements OnInit, DisplayCallback {
   }
 
   public resetImage() {
-    this.workViewService.displayImage(this.image);
+    this.workViewService.changeParentImageOrGroup.emit(this.image)
   }
 
   public displayCallBack(image: CImage): void {

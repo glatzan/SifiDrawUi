@@ -11,7 +11,6 @@ import {MatSnackBar} from '@angular/material';
 import {WorkViewService} from '../work-view.service';
 import {ICImage} from '../../../model/ICImage';
 import {ImageGroupService} from '../../../service/image-group.service';
-import {CImageGroup} from '../../../model/CImageGroup';
 import {Router} from "@angular/router";
 
 @Component({
@@ -443,23 +442,12 @@ export class DrawCanvasComponent implements AfterViewInit, OnInit {
   }
 
   private save() {
-    console.log(this.activeImage.id);
-
-    if (this.activeImage instanceof CImage) {
-      this.imageService.updateImage(this.activeImage).subscribe(() => {
+      this.imageService.updateICImage(this.activeImage).subscribe(() => {
         console.log('saved');
       }, error1 => {
         console.log('Fehler beim laden der Dataset Datein');
         console.error(error1);
       });
-    } else {
-      this.imageGroupService.updateImageGroup(this.activeImage as CImageGroup).subscribe(() => {
-        console.log('saved');
-      }, error1 => {
-        console.log('Fehler beim laden der Dataset Datein');
-        console.error(error1);
-      });
-    }
   }
 
   private onFilterCompleted(image: CImage) {

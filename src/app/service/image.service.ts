@@ -5,6 +5,9 @@ import {CImage} from '../model/CImage';
 import {environment} from "../../environments/environment";
 import {catchError, map} from "rxjs/operators";
 import {CImageMapper} from "../utils/cimage-mapper";
+import {CImageGroup} from "../model/CImageGroup";
+import {ICImage} from "../model/ICImage";
+import {ImageGroupService} from "./image-group.service";
 
 @Injectable({
   providedIn: 'root'
@@ -17,7 +20,8 @@ export class ImageService {
     })
   };
 
-  constructor(private http: HttpClient) {
+  constructor(private http: HttpClient,
+              private imageGroupService: ImageGroupService) {
   }
 
   public getImage(id: string): Observable<CImage> {
@@ -47,5 +51,13 @@ export class ImageService {
         return true;
       }), catchError(_ => of(false))
     );
+  }
+
+  public updateICImage(image: ICImage): Observable<any> {
+    if (image instanceof CImage) {
+      return this.updateImage(image);
+    } else {
+      return this.imageGroupService.updateImageGroup(image as CImageGroup);
+    }
   }
 }

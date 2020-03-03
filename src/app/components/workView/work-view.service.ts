@@ -38,6 +38,8 @@ export class WorkViewService {
 
   @Output() selectDataset: EventEmitter<Dataset> = new EventEmitter();
 
+  @Output() reloadFilterSets: EventEmitter<void> = new EventEmitter();
+
   constructor(private imageService: ImageService,
               private imageGroupService: ImageGroupService) {
   }
