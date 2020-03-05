@@ -24,8 +24,8 @@ export class ImageService {
               private imageGroupService: ImageGroupService) {
   }
 
-  public getImage(id: string): Observable<CImage> {
-    return this.http.get<CImage>(`${environment.backendUrl}/image/${id}`, ImageService.httpJsonContent).pipe(
+  public getImage(id: string, format : string = "png"): Observable<CImage> {
+    return this.http.get<CImage>(`${environment.backendUrl}/image/${id}?format=${format}`, ImageService.httpJsonContent).pipe(
       map(x => {
         return CImageMapper.mapToTypescriptObject<CImage>(x);
       })

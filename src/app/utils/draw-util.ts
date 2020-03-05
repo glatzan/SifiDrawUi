@@ -3,6 +3,7 @@ import {Layer} from '../model/layer';
 import {Observable} from 'rxjs';
 import {flatMap} from "rxjs/operators";
 import {LayerType} from "../model/layer-type.enum";
+import {ICImage} from "../model/ICImage";
 
 export default class DrawUtil {
 
@@ -22,7 +23,7 @@ export default class DrawUtil {
    * Loads a rest image to an Image Element
    * @param src
    */
-  static loadImageAsObservable(src): Observable<HTMLImageElement> {
+  static loadImageAsObservable(image: ICImage): Observable<HTMLImageElement> {
     return new Observable<HTMLImageElement>((observer) => {
       let img = new Image();
       img.onload = () => {
@@ -32,7 +33,7 @@ export default class DrawUtil {
       img.onerror = () => {
         observer.error();
       };
-      img.src = 'data:image/png;base64,' + src;
+      img.src = `data:image/${image.getFileExtension()};base64,` + image.getData();
     });
   }
 
@@ -47,8 +48,8 @@ export default class DrawUtil {
     return canvas;
   }
 
-  static loadBase64AsCanvas(base: string, canvas?: HTMLCanvasElement): Observable<HTMLCanvasElement> {
-    return DrawUtil.loadImageAsObservable(base).pipe(flatMap(x => {
+  static loadBase64AsCanvas(image: ICImage, canvas?: HTMLCanvasElement): Observable<HTMLCanvasElement> {
+    return DrawUtil.loadImageAsObservable(image).pipe(flatMap(x => {
       return new Observable<HTMLCanvasElement>((observer) => {
         const c = DrawUtil.loadImageAsCanvas(x, canvas);
         observer.next(c);
@@ -262,15 +263,6 @@ export default class DrawUtil {
     }
   }
 
-  static loadImage(src): Promise<HTMLImageElement> {
-    return new Promise((resolve, reject) => {
-      let img = new Image()
-      img.onload = () => resolve(img)
-      img.onerror = reject
-      img.src = 'data:image/png;base64,' + src;
-    })
-  }
-
   static imgToBase64(src, callback) {
     const canvas = document.createElement('canvas');
     const cx = canvas.getContext('2d');
@@ -292,13 +284,13 @@ export default class DrawUtil {
     })
   }
 
-  static loadImageFromBase64(src, callback) {
+  static loadImageFromBase64(image : ICImage, callback) {
     const img = new Image();
     img.crossOrigin = 'Anonymous';
     img.onload = function () {
       callback(img)
-    }
-    img.src = 'data:image/png;base64,' + src;
+    };
+    img.src = `data:image/${image.getFileExtension()};base64,` + image.getData();
   }
 
 }

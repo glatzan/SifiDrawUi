@@ -2,7 +2,12 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "outDir": "./out-tsc/app",
-    "types": []
+    "module": "es2015",
+    "types": ["node"],
+    "paths": {
+      "stream": ["./node_modules/stream-browserify/index.js"],
+      "zlib": ["./node_modules/browserify-zlib/lib/index.js"]
+    }
   },
   "files": [
     "src/main.ts",

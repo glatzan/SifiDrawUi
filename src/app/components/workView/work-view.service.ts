@@ -51,7 +51,7 @@ export class WorkViewService {
   public displayImage(image: ICImage, reload = true) {
     if (reload) {
       if (image instanceof CImageGroup) {
-        this.imageGroupService.getImageGroup(image.id).subscribe((data: CImageGroup) => {
+        this.imageGroupService.getImageGroup(image.id,"jpeg").subscribe((data: CImageGroup) => {
           console.log(`Selecting ImageGroup ${image.id}`);
           this.changeParentImageOrGroup.emit(CImageUtil.prepareImageGroup(data));
         }, message => {
@@ -59,7 +59,7 @@ export class WorkViewService {
           console.error(message);
         });
       } else {
-        this.imageService.getImage(image.id).subscribe((data: CImage) => {
+        this.imageService.getImage(image.id,"jpeg").subscribe((data: CImage) => {
           console.log(`Selecting Image ${image.id}`);
           this.changeParentImageOrGroup.emit(CImageUtil.prepareImage(data));
         }, message => {

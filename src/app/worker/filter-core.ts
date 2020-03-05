@@ -1,10 +1,10 @@
 import {ImageService} from "../service/image.service";
-import {ProcessCallback} from "../worker/processCallback";
-import {DisplayCallback} from "../worker/display-callback";
+import {ProcessCallback} from "./processCallback";
+import {DisplayCallback} from "./display-callback";
 import {CImage} from "../model/CImage";
 import {flatMap, map} from "rxjs/operators";
 import {ICImage} from "../model/ICImage";
-import {FilterData} from "../worker/filter-data";
+import {FilterData} from "./filter-data";
 import {Observable} from "rxjs";
 import {CImageGroup} from "../model/CImageGroup";
 import {ImageGroupService} from "../service/image-group.service";
@@ -13,8 +13,8 @@ import {applyToPoints, fromTriangles} from "transformation-matrix";
 import {Point} from "../model/point";
 import {LayerType} from "../model/layer-type.enum";
 import {ColorType, PNG} from "pngjs";
-import CImageUtil from "./cimage-util";
-import DrawUtil from "./draw-util";
+import CImageUtil from "../utils/cimage-util";
+import DrawUtil from "../utils/draw-util";
 
 export class FilterCore {
 
@@ -406,6 +406,7 @@ export class FilterCore {
       const image = new CImage();
       image.id = "tmp";
       image.name = "tmp";
+      image.fileExtension = "png";
       image.width = createImageOptions.width;
       image.height = createImageOptions.height;
       CImageUtil.prepareImage(image);
@@ -419,7 +420,7 @@ export class FilterCore {
   }
 
   drawLayer({sourceImgPos = null, targetImgPos = null, layerIDs = null}: { sourceImgPos: number, targetImgPos: number, layerIDs: string[] }) {
-    return flatMap((data: FilterData) => DrawUtil.loadBase64AsCanvas(FilterCore.getImage(targetImgPos, data).data).pipe(map(canvas => {
+    return flatMap((data: FilterData) => DrawUtil.loadBase64AsCanvas(FilterCore.getImage(targetImgPos, data)).pipe(map(canvas => {
 
       const img = FilterCore.getImage(sourceImgPos, data);
       const targetImage = FilterCore.getImage(targetImgPos, data);
@@ -453,7 +454,7 @@ export class FilterCore {
   }
 
   extractSubImage(sourceImgPos: number, targetImgPos: number, polygonLayer: string) {
-    return flatMap((data: FilterData) => DrawUtil.loadBase64AsCanvas(FilterCore.getImage(sourceImgPos, data).data).pipe(map(canvas => {
+    return flatMap((data: FilterData) => DrawUtil.loadBase64AsCanvas(FilterCore.getImage(sourceImgPos, data)).pipe(map(canvas => {
 
       const img = FilterCore.getImage(sourceImgPos, data);
       const targetImage = FilterCore.getImage(targetImgPos, data);

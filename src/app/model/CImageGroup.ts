@@ -48,4 +48,11 @@ export class CImageGroup implements ICImage {
     }
   }
 
+  public getFileExtension(){
+    if (this.activeImage >= 0 && this.activeImage < this.images.length) {
+      return this.images[this.activeImage].fileExtension;
+    } else {
+      return 0;
+    }
+  }
 }

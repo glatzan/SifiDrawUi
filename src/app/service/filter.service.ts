@@ -1,9 +1,6 @@
 import {Injectable} from '@angular/core';
-import {ImageMagicFilter} from '../filter/image-magic-filter';
-import {ImageFilter} from '../filter/image-filter';
 import {ImageMagicService} from './image-magic.service';
 import {CImage} from '../model/CImage';
-import {ImageEventFilter} from '../filter/image-event-filter';
 import {ImageService} from './image.service';
 import {Dataset} from '../model/dataset';
 import {forkJoin, from, Observable, OperatorFunction} from 'rxjs';
@@ -35,7 +32,7 @@ import {GraftFinder} from '../utils/vaa/graft-finder';
 import {ICImage} from '../model/ICImage';
 import {CImageGroup} from '../model/CImageGroup';
 import {ImageGroupService} from './image-group.service';
-import {FilterCore} from "../utils/filter-core";
+import {FilterCore} from "../worker/filter-core";
 
 @Injectable({
   providedIn: 'root'
@@ -58,15 +55,6 @@ export class FilterService {
     }
   }
 
-  public getNewMagicFilter(command: string, parentFilter?: ImageFilter) {
-    const m = new ImageMagicFilter(parentFilter || undefined, command);
-    m.imageMagicService = this.imageMagicService;
-    return m;
-  }
-
-  public getNewEventFilter(callBack: (image: CImage) => any, bind: any, origImage: CImage, parentFilter: ImageFilter) {
-    return new ImageEventFilter(parentFilter || undefined, callBack.bind(bind), origImage);
-  }
 
   public runFilterOnDatasetID(datasets: string[], func: string, env: { processCallback?: ProcessCallback, displayCallback?: DisplayCallback }) {
 
@@ -461,7 +449,7 @@ export class FilterService {
   }
 
   public drawLines({color = '', size = 1, drawStartEndPoints = true, sourceName = 'sortedLines', drawPoints = false, drawSingleLines = false}: { color?: string, size?: number, drawStartEndPoints?: boolean, sourceName?: string, drawPoints?: boolean, drawSingleLines?: boolean } = {}) {
-    return flatMap((data: FilterData) => DrawUtil.loadBase64AsCanvas(data.img.data).pipe(map(canvas => {
+    return flatMap((data: FilterData) => DrawUtil.loadBase64AsCanvas(data.img).pipe(map(canvas => {
 
         const sortedLines = data.getData(sourceName);
 
@@ -493,7 +481,7 @@ export class FilterService {
   }
 
   public hostParabola(options?: { drawParabola?: true }) {
-    return flatMap((data: FilterData) => DrawUtil.loadBase64AsCanvas(data.img.data).pipe(map(canvas => {
+    return flatMap((data: FilterData) => DrawUtil.loadBase64AsCanvas(data.img).pipe(map(canvas => {
 
         const hostEpithelialValues = HostEpithelial.scanHost(data, canvas);
         const meanHostEpithelialValues = HostEpithelial.reduceMeanValues(hostEpithelialValues);
@@ -509,7 +497,7 @@ export class FilterService {
   }
 
   public findGraftGap({color = 'red', sourceIndex = 1, sourceHostColor = 'red', sourceGraftColor = 'green'}: { color?: string, sourceIndex?: number, sourceHostColor?: string, sourceGraftColor?: string } = {}) {
-    return flatMap((data: FilterData) => DrawUtil.loadBase64AsCanvas(data.img.data).pipe(map(canvas => {
+    return flatMap((data: FilterData) => DrawUtil.loadBase64AsCanvas(data.img).pipe(map(canvas => {
 
         if (sourceIndex > 0 && sourceIndex < data.imgStack.length) {
 
@@ -548,7 +536,7 @@ export class FilterService {
   }
 
   public host({color = 'red', size = 1, drawStartEndPoints = true, drawDistance = true, lineSourceName = 'lines', hostParabola = 'hostParabola'}: { color?: string, size?: number, drawStartEndPoints?: boolean, drawDistance?: boolean, lineSourceName?: string, hostParabola?: string } = {}) {
-    return flatMap((data: FilterData) => DrawUtil.loadBase64AsCanvas(data.img.data).pipe(map(canvas => {
+    return flatMap((data: FilterData) => DrawUtil.loadBase64AsCanvas(data.img).pipe(map(canvas => {
 
         const complexLine = data.getData(lineSourceName);
         const parabola = data.getData(hostParabola);
@@ -569,7 +557,7 @@ export class FilterService {
 
 
   public graft({color = 'red', size = 1, drawStartEndPoints = true, drawDistance = true, lineSourceName = 'graftLines', hostParabola = 'hostParabola'}: { color?: string, size?: number, drawStartEndPoints?: boolean, drawDistance?: boolean, lineSourceName?: string, hostParabola?: string } = {}) {
-    return flatMap((data: FilterData) => DrawUtil.loadBase64AsCanvas(data.img.data).pipe(map(canvas => {
+    return flatMap((data: FilterData) => DrawUtil.loadBase64AsCanvas(data.img).pipe(map(canvas => {
 
         const complexLine = data.getData(lineSourceName);
         const parabola = data.getData(hostParabola);
@@ -590,7 +578,7 @@ export class FilterService {
   }
 
   public drawGraft(sourceName: string = 'lines') {
-    return flatMap((data: FilterData) => DrawUtil.loadBase64AsCanvas(data.img.data).pipe(map(canvas => {
+    return flatMap((data: FilterData) => DrawUtil.loadBase64AsCanvas(data.img).pipe(map(canvas => {
 
         const lines = data.getData(sourceName);
         const hostData = data.getData('hostData');
@@ -683,7 +671,7 @@ export class FilterService {
 
 
   public color(color: string, x = 0, y = 0, height: number = -1, width: number = -1) {
-    return flatMap((data: FilterData) => DrawUtil.loadBase64AsCanvas(data.img.data).pipe(
+    return flatMap((data: FilterData) => DrawUtil.loadBase64AsCanvas(data.img).pipe(
       map(canvas => {
         console.log(`Color img ${color}`);
 
@@ -776,7 +764,7 @@ export class FilterService {
         }
         observer.next(layer);
         observer.complete();
-      }).pipe(flatMap(layer => DrawUtil.loadBase64AsCanvas(data.img.data).pipe(map(canvas => {
+      }).pipe(flatMap(layer => DrawUtil.loadBase64AsCanvas(data.img).pipe(map(canvas => {
         if (layer != null) {
           DrawUtil.drawManyPointLinesOnCanvas(canvas, layer.lines, color, size, drawPoints);
           data.img.data = DrawUtil.canvasAsBase64(canvas);
@@ -800,7 +788,7 @@ export class FilterService {
   }
 
   public cubicSpline(sourceName: string = 'sortedLines') {
-    return flatMap((data: FilterData) => DrawUtil.loadBase64AsCanvas(data.img.data).pipe(map(canvas => {
+    return flatMap((data: FilterData) => DrawUtil.loadBase64AsCanvas(data.img).pipe(map(canvas => {
 
         const sortedLines = data.getData(sourceName);
 
@@ -868,7 +856,7 @@ export class FilterService {
   }
 
   public spline({tension = 0.5, lineColor = '#00FF00', size = 1, drawPoints = false, sourceName = 'sortedLines'}) {
-    return flatMap((data: FilterData) => DrawUtil.loadBase64AsCanvas(data.img.data).pipe(map(canvas => {
+    return flatMap((data: FilterData) => DrawUtil.loadBase64AsCanvas(data.img).pipe(map(canvas => {
         const sortedLines = data.getData(sourceName);
         console.log(sortedLines + ' ' + sourceName);
 

@@ -8,6 +8,7 @@ export class CImage implements ICImage {
   layers: Layer[] = [];
   width: number;
   height: number;
+  fileExtension: string;
 
   public type = 'img';
 
@@ -29,5 +30,9 @@ export class CImage implements ICImage {
 
   public getWidth() {
     return this.width;
+  }
+
+  public getFileExtension(){
+    return this.fileExtension;
   }
 }

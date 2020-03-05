@@ -414,7 +414,7 @@ export class DrawCanvasComponent implements AfterViewInit, OnInit {
     this.selectLayer(new Layer('-'));
     if (image.getData()) {
       this.renderContext = true;
-      this.drawImage.src = 'data:image/png;base64,' + this.activeImage.getData();
+      this.drawImage.src = `data:image/${image.getFileExtension()};base64,` + this.activeImage.getData();
 
       // setting layer settings
       this.cx.lineWidth = image.getLayers()[0].size || 1;
