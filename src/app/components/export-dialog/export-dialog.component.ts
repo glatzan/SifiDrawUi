@@ -15,6 +15,9 @@ import {ProcessCallback} from "../../worker/processCallback";
   styleUrls: ['./export-dialog.component.scss']
 })
 export class ExportDialogComponent implements OnInit, ProcessCallback {
+    displayData(data: string): void {
+        throw new Error("Method not implemented.");
+    }
 
    projects: ProjectData[];
 

@@ -1,6 +1,5 @@
 import {Point} from '../model/point';
 import {Layer} from '../model/layer';
-import {CImage} from '../model/CImage';
 import {Observable} from 'rxjs';
 import {flatMap} from "rxjs/operators";
 import {LayerType} from "../model/layer-type.enum";
@@ -111,6 +110,7 @@ export default class DrawUtil {
   }
 
   /**
+   * @deprecated
    * Draws lines between points
    * @param canvas
    * @param points
@@ -155,6 +155,7 @@ export default class DrawUtil {
   }
 
   /**
+   * @deprecated
    * Draws several lines
    * @param canvas
    * @param points
@@ -167,35 +168,8 @@ export default class DrawUtil {
   }
 
 
-  static drawLinesOnCanvas(cx: CanvasRenderingContext2D, points: Point[][], color: string = '#fff', size: number = 1, drawPoint: boolean = false, closed = false) {
-    points.forEach(x => DrawUtil.drawLineOnCanvas(cx, x, color, size, drawPoint, closed));
-  }
-
-  static drawLineOnCanvas(cx: CanvasRenderingContext2D, points: Point[], color: string = '#fff', size: number = 1, drawPoint: boolean = false, closed = false) {
-    for (let i = 0; i < points.length - 1; i++) {
-      this.drawTwoPointLineOnCanvas(cx, points[i], points[i + 1], color, size);
-    }
-
-    if (closed) {
-      this.drawTwoPointLineOnCanvas(cx, points[points.length - 1], points[0], color, size);
-    }
-
-    if (drawPoint)
-      this.drawPointsOnCanvas(cx, points, color, size)
-  }
-
-  static drawTwoPointLineOnCanvas(cx: CanvasRenderingContext2D, p1: Point, p2: Point, color: string = '#fff', size: number = 1) {
-    cx.strokeStyle = color;
-    cx.lineWidth = size;
-    cx.beginPath();
-    cx.moveTo(p1.x, p1.y); // from
-    cx.lineTo(p2.x, p2.y);
-    cx.stroke();
-  }
-
-
   static drawPointsOnCanvas(cx: CanvasRenderingContext2D, points: Point[], color: string = '#fff', size: number = 1) {
-    cx.fillStyle = color
+    cx.fillStyle = color;
     points.forEach(point => {
       cx.fillRect(point.x, point.y, size, size);
       cx.fillRect(point.x, point.y, size, size);
@@ -203,8 +177,7 @@ export default class DrawUtil {
   }
 
   static drawPointOnCanvas(cx: CanvasRenderingContext2D, point: Point, color: string = '#fff', size: number = 1) {
-    cx.fillStyle = color
-    cx.fillRect(point.x, point.y, size, size);
+    cx.fillStyle = color;
     cx.fillRect(point.x, point.y, size, size);
   }
 
@@ -225,6 +198,44 @@ export default class DrawUtil {
     cx.fill();
   }
 
+  static drawPolygons(cx: CanvasRenderingContext2D, points: Point[][], width: number, color: string, closed = false, filled = false, cliped = false) {
+    points.forEach(point => {
+      if (point.length == 1) {
+        this.drawPointsOnCanvas(cx, point, color, width)
+      } else if (point.length > 1) {
+        this.drawPolygon(cx, point, width, color, closed, filled, cliped)
+      }
+    })
+  }
+
+  static drawPolygon(cx: CanvasRenderingContext2D, points: Point[], width: number, color: string, closed = false, filled = false, cliped = false) {
+    if (points.length < 2)
+      return;
+
+    cx.fillStyle = color;
+    cx.strokeStyle = color;
+    cx.lineWidth = width;
+    cx.beginPath();
+    cx.moveTo(points[0].x, points[0].y);
+    for (let i = 1; i < points.length; i++) {
+      cx.lineTo(points[i].x, points[i].y);
+    }
+
+    if (closed)
+      cx.closePath();
+
+    if (filled) {
+      if (!closed)
+        cx.closePath();
+      cx.fill();
+    } else if (cliped) {
+      cx.clip();
+    } else {
+      cx.stroke();
+    }
+
+  }
+
 
   static redrawCanvas(cx: CanvasRenderingContext2D, layers: Layer[], drawPoint: boolean = true) {
     layers.forEach(x => {
@@ -240,42 +251,15 @@ export default class DrawUtil {
         });
         break;
       case LayerType.Line:
-        this.drawLinesOnCanvas(cx, layer.lines, layer.color, layer.size, drawPoint);
+        this.drawPolygons(cx, layer.lines, layer.size, layer.color, false, false);
         break;
       case LayerType.Polygon:
-        this.drawLinesOnCanvas(cx, layer.lines, layer.color, layer.size, drawPoint, true);
+        this.drawPolygons(cx, layer.lines, layer.size, layer.color, true, false);
         break;
       case LayerType.FilledPolygon:
+        this.drawPolygons(cx, layer.lines, layer.size, layer.color, true, true);
         break;
     }
-  }
-
-  static async drawCanvas(canvas: HTMLCanvasElement, image: CImage, drawImage: boolean, background: string, useLayerSettings: boolean, layers: Layer[]) {
-    const img = await DrawUtil.loadImage(image.data);
-
-    const width = img.width;
-    const height = img.height;
-
-    canvas.width = width;
-    canvas.height = height;
-
-    const cx = canvas.getContext('2d');
-
-    if (background) {
-      cx.fillRect(0, 0, width, height);
-    }
-
-    if (drawImage) {
-      cx.drawImage(img, 0, 0);
-    }
-
-    layers.forEach(x => {
-      image.layers.forEach(y => {
-        if (x.id == y.id) {
-          this.drawLinesOnCanvas(cx, y.lines, useLayerSettings ? y.color : x.color, useLayerSettings ? y.size : x.size, false);
-        }
-      });
-    });
   }
 
   static loadImage(src): Promise<HTMLImageElement> {
@@ -316,4 +300,5 @@ export default class DrawUtil {
     }
     img.src = 'data:image/png;base64,' + src;
   }
+
 }

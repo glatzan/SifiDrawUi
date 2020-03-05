@@ -22,7 +22,7 @@
 
 .bodyDiv {
   display: grid;
-  grid-template-columns: fit-content(300px) fit-content(300px) auto;
+  grid-template-columns: fit-content(300px) 400px auto;
   grid-template-rows: auto;
   grid-column-gap: 5px;
   width: calc( 100vw - 15px );

@@ -32,4 +32,20 @@ export class CImageGroup implements ICImage {
     }
   }
 
+  public getHeight() {
+    if (this.activeImage >= 0 && this.activeImage < this.images.length) {
+      return this.images[this.activeImage].height;
+    } else {
+      return 0;
+    }
+  }
+
+  public getWidth() {
+    if (this.activeImage >= 0 && this.activeImage < this.images.length) {
+      return this.images[this.activeImage].width;
+    } else {
+      return 0;
+    }
+  }
+
 }

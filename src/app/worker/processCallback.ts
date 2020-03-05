@@ -5,4 +5,7 @@ export interface ProcessCallback {
   maxRunCount: number;
 
   callback(): void;
+
+  displayData(data : string): void;
+
 }

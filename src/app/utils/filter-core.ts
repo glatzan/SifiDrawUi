@@ -177,8 +177,25 @@ export class FilterCore {
     ));
   }
 
-  toBinary({sourceImgPos = null, targetImgPos = sourceImgPos, threshold = 0}: { sourceImgPos: number, targetImgPos?: number, threshold?: number }) {
+  toBinary(sourceImgPos: number, binaryOptions?: BinaryOptions) {
+    if (binaryOptions !== undefined) {
+      const maxifyOptions = {
+        targetProject: binaryOptions.targetImagePos,
+        threshold_r: binaryOptions.threshold,
+        threshold_g: binaryOptions.threshold,
+        threshold_b: binaryOptions.threshold
+      };
+      return this.maxifyColorChannel(sourceImgPos, maxifyOptions)
+    } else {
+      return this.maxifyColorChannel(sourceImgPos)
+    }
+  }
+
+  maxifyColorChannel(sourceImgPos: number, maxifyOptions?: MaxifyOptions) {
     return flatMap((data: FilterData) => new Observable<FilterData>((observer) => {
+
+      if (maxifyOptions === undefined)
+        maxifyOptions = {};
 
       const img = FilterCore.getImage(sourceImgPos, data);
 
@@ -186,15 +203,17 @@ export class FilterCore {
         observer.error(`Image not found index ${sourceImgPos}!`);
       }
 
-      let targetImage;
-      if (targetImgPos === null) {
-        targetImage = img
-      } else {
-        targetImage = FilterCore.getImage(targetImgPos, data);
+      let targetImage = img;
+      if (maxifyOptions.targetImagePos !== undefined) {
+        targetImage = FilterCore.getImage(maxifyOptions.targetImagePos, data);
         if (img === null) {
-          observer.error(`TargetImage not found index ${targetImgPos}!`);
+          observer.error(`TargetImage not found index ${maxifyOptions.targetImagePos}!`);
         }
       }
+
+      const r = maxifyOptions.threshold_r !== undefined ? maxifyOptions.threshold_r : 256;
+      const g = maxifyOptions.threshold_g !== undefined ? maxifyOptions.threshold_g : 256;
+      const b = maxifyOptions.threshold_b !== undefined ? maxifyOptions.threshold_b : 256;
 
       const buff = new Buffer(img.data, 'base64');
       const png = PNG.sync.read(buff);
@@ -202,15 +221,21 @@ export class FilterCore {
       for (let x = 0; x < png.width; x++) {
         for (let y = 0; y < png.height; y++) {
           const idx = (png.width * y + x) << 2;
-          if (png.data[idx] > threshold || png.data[idx + 1] > threshold || png.data[idx + 2] > threshold) {
+
+          if (png.data[idx] >= r) {
             png.data[idx] = 255;
+          }
+          if (png.data[idx + 1] >= g) {
             png.data[idx + 1] = 255;
+          }
+
+          if (png.data[idx] >= b) {
             png.data[idx + 2] = 255;
           }
         }
       }
 
-      const buffer = PNG.sync.write(png, {colorType: 0});
+      const buffer = PNG.sync.write(png, {colorType: 2});
       targetImage.data = buffer.toString('base64');
 
       observer.next(data);
@@ -218,41 +243,121 @@ export class FilterCore {
     }));
   }
 
-  countVolume({sourceImgPos = null, targetImgPos = null}: { sourceImgPos: number, targetImgPos: number }) {
-    return flatMap((data: FilterData) => DrawUtil.loadBase64AsCanvas(FilterCore.getImage(targetImgPos, data).data).pipe(map(canvas => {
+  threshold(sourceImgPos: number, countPixelsOptions?: ThresholdOptions) {
+    return flatMap((data: FilterData) => new Observable<FilterData>((observer) => {
+      if (countPixelsOptions === undefined)
+        countPixelsOptions = {};
 
-      function componentToHex(c: number) {
-        const hex = c.toString(16);
-        return hex.length == 1 ? "0" + hex : hex;
+      let r, g, b = -1
+      if (countPixelsOptions.threshold_grey) {
+        r = countPixelsOptions.threshold_grey;
+      } else {
+        r = countPixelsOptions.threshold_r !== undefined ? countPixelsOptions.threshold_r : -1;
+        g = countPixelsOptions.threshold_g !== undefined ? countPixelsOptions.threshold_g : -1;
+        b = countPixelsOptions.threshold_b !== undefined ? countPixelsOptions.threshold_b : -1;
       }
 
-      function rgbToHex(r, g, b): string {
-        return componentToHex(r) + componentToHex(g) + componentToHex(b);
+      if (!countPixelsOptions.targetData)
+        countPixelsOptions.targetData = "countData";
+
+      const source = FilterCore.getImage(sourceImgPos, data);
+      const target = (countPixelsOptions.targetImagePos) ? FilterCore.getImage(countPixelsOptions.targetImagePos, data) : null;
+
+      if (source === null) {
+        observer.error(`Image not found index ${sourceImgPos}!`);
       }
 
-      const cx = canvas.getContext("2d");
-      const targetImage = FilterCore.getImage(targetImgPos, data)
-      const img = FilterCore.getImage(sourceImgPos, data)
-      const buff = new Buffer(img.data, 'base64');
+
+      const buff = new Buffer(source.data, 'base64');
       const png = PNG.sync.read(buff);
+      const targetPNG = new PNG({width: png.width, height: png.height});
+
+      let counter = 0;
 
       for (let x = 0; x < png.width; x++) {
         for (let y = 0; y < png.height; y++) {
           const idx = (png.width * y + x) << 2;
-          if (png.data[idx] > 100) {
-            console.log("asd")
+          let c = true;
+
+          if (r != -1) {
+            if (png.data[idx] < r)
+              c = false;
           }
-          const color = rgbToHex(png.data[idx], png.data[idx + 1], png.data[idx + 2]);
-          if (color !== "000000") {
-            DrawUtil.drawPointOnCanvas(cx, new Point(x, y), "#fff", 1)
+
+          if (g != -1) {
+            if (png.data[idx + 1] < g)
+              c = false;
+          }
+
+          if (b != -1) {
+            if (png.data[idx + 2] < b)
+              c = false;
+          }
+
+          if (c) {
+            counter++;
+            if (target) {
+              targetPNG.data[idx] = png.data[idx];
+              targetPNG.data[idx + 1] = png.data[idx + 1];
+              targetPNG.data[idx + 2] = png.data[idx + 2];
+              targetPNG.data[idx + 3] = png.data[idx + 3];
+            }
           }
         }
       }
 
+      console.log("count" + counter);
 
-      targetImage.data = DrawUtil.canvasAsBase64(canvas);
-      return data;
-    })));
+      if (target) {
+        const targetBuff = PNG.sync.write(targetPNG, {colorType: 2});
+        target.data = targetBuff.toString('base64');
+      }
+
+      const entry = {tag: sourceImgPos.toString(), name: source.name, value: counter};
+      data.pushData(countPixelsOptions.targetData, entry)
+
+      observer.next(data);
+      observer.complete();
+    }));
+  }
+
+  merge(imageOnePos: number, imageTwoPos: number, targetImagePos: number = imageOnePos) {
+    return flatMap((data: FilterData) => new Observable<FilterData>((observer) => {
+      const imgOne = FilterCore.getImage(imageOnePos, data);
+      const imgTwo = FilterCore.getImage(imageTwoPos, data);
+      const targetImage = FilterCore.getImage(targetImagePos, data);
+
+      if (imgOne === null || imgTwo === null || targetImage === null) {
+        observer.error(`Image not found index img 1 ${imageOnePos} or img 2 ${imageTwoPos} or target ${targetImage}!`);
+      }
+
+      const buff1 = new Buffer(imgOne.data, 'base64');
+      const png1 = PNG.sync.read(buff1);
+
+      const buff2 = new Buffer(imgTwo.data, 'base64');
+      const png2 = PNG.sync.read(buff2);
+
+      const dst = new PNG({width: png1.width, height: png1.height, colorType: 2});
+
+      if (png1.width > png2.width || png1.height > png2.height) {
+        observer.error(`Image two must be equal or bigger in size ${png1.width} - ${png2.width} / ${png1.height} - ${png2.height}`);
+      }
+
+      for (let y = 0; y < png1.height; y++) {
+        for (let x = 0; x < png1.width; x++) {
+          const idx = (png1.width * y + x) << 2;
+          dst.data[idx] = png1.data[idx] | png2.data[idx];
+          dst.data[idx + 1] = png1.data[idx + 1] | png2.data[idx + 1];
+          dst.data[idx + 2] = png1.data[idx + 2] | png2.data[idx + 2];
+          dst.data[idx + 3] = 255
+        }
+      }
+      const targetBuff = PNG.sync.write(dst, {colorType: 2});
+      const tmo = targetBuff.toString('base64')
+      targetImage.data = targetBuff.toString('base64');
+      observer.next(data);
+      observer.complete();
+    }));
   }
 
   /**
@@ -261,18 +366,48 @@ export class FilterCore {
    * @param color
    * @param imageType 0 (grayscale -> grey), colortype 2 (RGB -> rgb), colortype 4 (grayscale alpha -> greya) and colortype 6 (RGBA -> rgba)
    */
-  createImage({width = 1000, height = 1000, color = "#00000", imageType = "0"}: { width: number, height: number, color: string, imageType: string }) {
+  createImage(createImageOptions?: CreateImageOptions) {
     return flatMap((data: FilterData) => new Observable<FilterData>((observer) => {
 
+      if (!createImageOptions) {
+        createImageOptions = {};
+      }
+
+      if (!createImageOptions.backgroundColor) {
+        createImageOptions.backgroundColor = "#000"
+      }
+
+      if (!createImageOptions.colorType) {
+        createImageOptions.colorType = 0
+      }
+
+      if (createImageOptions.referenceImagePos) {
+        const refIMG = FilterCore.getImage(createImageOptions.referenceImagePos, data);
+        if (refIMG) {
+          createImageOptions.width = refIMG.width || 1000;
+          createImageOptions.height = refIMG.height || 1000;
+        }
+      }
+
+      if (createImageOptions.width === -1 || !createImageOptions.width) {
+        createImageOptions.width = data.img.width || 1000;
+      }
+
+      if (createImageOptions.height == -1 || !createImageOptions.height) {
+        createImageOptions.height = data.img.height || 1000;
+      }
+
       const canvas = document.createElement("canvas");
-      canvas.width = width;
-      canvas.height = height;
+      canvas.width = createImageOptions.width;
+      canvas.height = createImageOptions.height;
       const cx = canvas.getContext("2d");
-      DrawUtil.drawRect(cx, 0, 0, width, height, color);
+      DrawUtil.drawRect(cx, 0, 0, createImageOptions.width, createImageOptions.height, createImageOptions.backgroundColor);
 
       const image = new CImage();
       image.id = "tmp";
       image.name = "tmp";
+      image.width = createImageOptions.width;
+      image.height = createImageOptions.height;
       CImageUtil.prepareImage(image);
       image.data = DrawUtil.canvasAsBase64(canvas);
 
@@ -287,7 +422,7 @@ export class FilterCore {
     return flatMap((data: FilterData) => DrawUtil.loadBase64AsCanvas(FilterCore.getImage(targetImgPos, data).data).pipe(map(canvas => {
 
       const img = FilterCore.getImage(sourceImgPos, data);
-      const targetImage = FilterCore.getImage(targetImgPos, data)
+      const targetImage = FilterCore.getImage(targetImgPos, data);
 
       if (img === null || targetImage === null) {
         return data;
@@ -317,6 +452,57 @@ export class FilterCore {
     })));
   }
 
+  extractSubImage(sourceImgPos: number, targetImgPos: number, polygonLayer: string) {
+    return flatMap((data: FilterData) => DrawUtil.loadBase64AsCanvas(FilterCore.getImage(sourceImgPos, data).data).pipe(map(canvas => {
+
+      const img = FilterCore.getImage(sourceImgPos, data);
+      const targetImage = FilterCore.getImage(targetImgPos, data);
+
+      if (img == null || targetImage == null) {
+        return data;
+      }
+
+      const layer = FilterCore.findLayer(img.layers, polygonLayer);
+
+      if (layer == null) {
+        return data;
+      }
+
+      const canvas2 = document.createElement("canvas");
+      canvas2.width = canvas.width;
+      canvas2.height = canvas.height;
+      const cx2 = canvas2.getContext("2d");
+      DrawUtil.drawRect(cx2, 0, 0, canvas2.width, canvas2.height, "#000");
+
+      const cx = canvas.getContext("2d");
+      DrawUtil.drawPolygons(cx2, layer.lines, 1, "#fff", true, false, true);
+      cx2.drawImage(canvas, 0, 0, canvas2.width, canvas2.height, 0, 0, canvas2.width, canvas2.height);
+      targetImage.data = DrawUtil.canvasAsBase64(canvas2);
+      return data;
+    })));
+  }
+
+  public toColorType(sourceImgPos: number, colorType: string, colorTypeOptions?: ColorTypeOptions) {
+    return flatMap((data: FilterData) => new Observable<FilterData>((observer) => {
+
+        const source = FilterCore.getImage(sourceImgPos, data);
+        const target = (colorTypeOptions && colorTypeOptions.targetImagePos) ? FilterCore.getImage(colorTypeOptions.targetImagePos, data) : source
+
+        if (source == null || target == null) {
+          observer.error(`Image not found index source ${source} or target ${target}!`);
+        }
+
+        const buff = new Buffer(data.img.data, 'base64');
+        const png = PNG.sync.read(buff);
+        const buffer = PNG.sync.write(png, {colorType: FilterCore.getColorType(colorType)});
+        target.data = buffer.toString('base64');
+
+        observer.next(data);
+        observer.complete();
+      }
+    ));
+  }
+
   display({imgPos = -1}: { imgPos: number }) {
     return flatMap((data: FilterData) => new Observable<FilterData>((observer) => {
       console.log(`Display img ${imgPos} of ${data.imgStack.length}`);
@@ -329,6 +515,37 @@ export class FilterCore {
       }
 
       this.displayCallback.displayCallBack(data.imgStack[imgPos]);
+
+      observer.next(data);
+      observer.complete();
+    }));
+  }
+
+  processCountedPixels(processCountedPixelsOptions?: ProcessCountedPixelsOptions) {
+    return flatMap((data: FilterData) => new Observable<FilterData>((observer) => {
+
+      if (!processCountedPixelsOptions) {
+        processCountedPixelsOptions = {};
+      }
+
+      if (!processCountedPixelsOptions.sourceData) {
+        processCountedPixelsOptions.sourceData = "countData";
+      }
+
+      if (!processCountedPixelsOptions.pixelInMM) {
+        processCountedPixelsOptions.pixelInMM = 1;
+      }
+
+      const counts = data.getData(processCountedPixelsOptions.sourceData );
+
+      let result = "Ergebniss <br>";
+
+      console.log(processCountedPixelsOptions.pixelInMM)
+      for (let count of counts) {
+        result += `ID: ${count.tag} &emsp;  Value: ${count.value} &emsp; Volume: ${count.value * processCountedPixelsOptions.pixelInMM} mm2<br>`
+      }
+
+      this.processCallback.displayData(result);
 
       observer.next(data);
       observer.complete();
@@ -386,8 +603,8 @@ export class FilterCore {
         targetImgName += saveOptions.imageSuffix;
       }
 
-      if(!targetImgName.endsWith(".png"))
-        targetImgName += ".png ";
+      if (!targetImgName.endsWith(".png"))
+        targetImgName += ".png";
 
       let sourceImage = data.img;
       if (saveOptions.sourceImage !== undefined && FilterCore.getImage(saveOptions.sourceImage, data) !== null) {
@@ -411,30 +628,13 @@ export class FilterCore {
     )));
   }
 
-  public colorType() {
-    const getColorType = function (type: string): ColorType {
-      switch (type) {
-        case "rgb":
-          return 0;
-        case "greya":
-          return 4;
-        case "rgba":
-          return 6;
-        default:
-          return 0;
-      }
-    };
-  }
-
   private pushAndAddImageToStack(img: CImage, data: FilterData) {
     data.pushIMG(img);
     this.displayCallback.addImage(img);
   }
 
-  private loadICImage(img: ICImage):
-    Observable<ICImage> {
-    if (img instanceof CImageGroup
-    ) {
+  private loadICImage(img: ICImage): Observable<ICImage> {
+    if (img instanceof CImage) {
       return this.imageService.getImage(img.id);
     } else {
       return this.imageGroupService.getImageGroup(img.id);
@@ -455,6 +655,29 @@ export class FilterCore {
       }
     });
   }
+
+  private static getColorType(type: string): ColorType {
+    switch (type) {
+      case "rgb":
+        return 0;
+      case "greya":
+        return 4;
+      case "rgba":
+        return 6;
+      case "grey":
+      default:
+        return 0;
+    }
+  }
+
+  // function componentToHex(c: number) {
+  //   const hex = c.toString(16);
+  //   return hex.length == 1 ? "0" + hex : hex;
+  // }
+  //
+  // function rgbToHex(r, g, b): string {
+  //   return componentToHex(r) + componentToHex(g) + componentToHex(b);
+  // }
 }
 
 export interface SaveOptions {
@@ -465,4 +688,43 @@ export interface SaveOptions {
   saveLayers?: boolean
   imageSuffix?: string
   sourceImage?: number
+}
+
+export interface MaxifyOptions {
+  targetImagePos?: number
+  threshold_r?: number
+  threshold_g?: number
+  threshold_b?: number
+}
+
+export interface BinaryOptions {
+  targetImagePos?: number
+  threshold?: number
+}
+
+export interface ThresholdOptions {
+  targetData?: string
+  targetTag?: string
+  threshold_r?: number
+  threshold_g?: number
+  threshold_b?: number
+  threshold_grey?: number
+  targetImagePos?: number
+}
+
+export interface ProcessCountedPixelsOptions {
+  sourceData?: string
+  pixelInMM?: number
+}
+
+export interface ColorTypeOptions {
+  targetImagePos?: number
+}
+
+export interface CreateImageOptions {
+  width?: number
+  height?: number
+  referenceImagePos?: number
+  colorType?: ColorType
+  backgroundColor?: string
 }

@@ -5,10 +5,15 @@
   grid-template-areas: "filterlist filterlist filterlist filterlist filterlist filterlist" "button save spinner . filterSelect reset";
   height: 99%;
 
-  .filter {
-    width: 100%;
+  .tabs{
     grid-area: filterlist;
+
+    .filter {
+      margin-top: 10px;
+      width: 100%;
+    }
   }
+
 
   .start {
     grid-area: button;

@@ -49,6 +49,14 @@ export class FilterData {
     return this.dataStack.get(key);
   }
 
+  public pushData(key: string, data: any) {
+    const tmp = this.getData(key);
+    if (this.getData(key)) {
+      tmp.push(data);
+    } else {
+      this.setData(key, [data]);
+    }
+  }
 
   public popIMG() {
     this.imgStack.splice(-1, 1);

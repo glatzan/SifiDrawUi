@@ -9,6 +9,8 @@ import {ICImage} from "../../model/ICImage";
 import {CImageGroup} from "../../model/CImageGroup";
 import {ImageGroupService} from "../../service/image-group.service";
 import {Dataset} from "../../model/dataset";
+import {FilterSet} from "../../model/FilterSet";
+import {MousePosition} from "../../helpers/mouse-position";
 
 @Injectable({
   providedIn: 'root'
@@ -21,7 +23,7 @@ export class WorkViewService {
   @Output() addImageToFilterList: EventEmitter<ICImage> = new EventEmitter();
 
   @Output() resetImageZoom: EventEmitter<boolean> = new EventEmitter();
-  @Output() mouseCoordinateOnImage: EventEmitter<Vector> = new EventEmitter();
+  @Output() mouseCoordinateOnImage: EventEmitter<MousePosition> = new EventEmitter();
 
   @Output() eraserSizeChange: EventEmitter<number> = new EventEmitter();
   @Output() drawModeChanged: EventEmitter<boolean> = new EventEmitter();
@@ -39,6 +41,8 @@ export class WorkViewService {
   @Output() selectDataset: EventEmitter<Dataset> = new EventEmitter();
 
   @Output() reloadFilterSets: EventEmitter<void> = new EventEmitter();
+
+  @Output() openFilterDialog: EventEmitter<FilterSet> = new EventEmitter();
 
   constructor(private imageService: ImageService,
               private imageGroupService: ImageGroupService) {
@@ -74,10 +78,6 @@ export class WorkViewService {
 
   public filterImageListAdd(img: CImage) {
     this.addImageToFilterList.emit(img);
-  }
-
-  public mousePositionOnImage(v: Vector) {
-    this.mouseCoordinateOnImage.emit(v);
   }
 
   public resetCanvasZoom() {

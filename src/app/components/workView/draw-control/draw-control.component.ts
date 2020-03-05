@@ -27,6 +27,8 @@ export class DrawControlComponent implements OnInit {
 
   layerTypes = LayerType;
 
+  private lastLayerID: string;
+
   constructor(private workViewService: WorkViewService) {
   }
 
@@ -49,8 +51,13 @@ export class DrawControlComponent implements OnInit {
       console.log('Empty Image');
       this.currentLayer = new Layer('-');
     } else {
-      this.currentLayer = image.getLayers()[0];
+      if (this.lastLayerID) {
+        this.currentLayer = CImageUtil.findLayer(image, this.lastLayerID) || image.getLayers()[0]
+      } else {
+        this.currentLayer = image.getLayers()[0];
+      }
       this.renderContext = true;
+      this.onLayerChange(null);
     }
   }
 
@@ -64,6 +71,7 @@ export class DrawControlComponent implements OnInit {
   }
 
   public onLayerChange($event) {
+    this.lastLayerID = this.currentLayer.id;
     this.workViewService.selectLayer.emit(this.currentLayer);
     console.log('chage to' + this.currentLayer.id);
   }

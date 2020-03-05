@@ -6,6 +6,9 @@ export class CImage implements ICImage {
   public name: string;
   data: string;
   layers: Layer[] = [];
+  width: number;
+  height: number;
+
   public type = 'img';
 
   public getData(): string {
@@ -18,5 +21,13 @@ export class CImage implements ICImage {
 
   public setLayers(layers: Layer[]) {
     this.layers = layers;
+  }
+
+  public getHeight() {
+    return this.height;
+  }
+
+  public getWidth() {
+    return this.width;
   }
 }

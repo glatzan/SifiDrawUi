@@ -12,6 +12,7 @@ import {WorkViewService} from '../work-view.service';
 import {ICImage} from '../../../model/ICImage';
 import {ImageGroupService} from '../../../service/image-group.service';
 import {Router} from "@angular/router";
+import {MousePosition} from "../../../helpers/mouse-position";
 
 @Component({
   selector: 'app-draw-canvas',
@@ -86,7 +87,7 @@ export class DrawCanvasComponent implements AfterViewInit, OnInit {
   private hideLines = false;
 
   // last point of the mouse
-  private lastMousePoint = new Point(0, 0);
+  private lastMousePoint = new MousePosition();
 
   /**
    * Drawmode
@@ -116,7 +117,8 @@ export class DrawCanvasComponent implements AfterViewInit, OnInit {
     setLastPoint: (evt) => {
       this.lastMousePoint.x = evt.offsetX || (evt.pageX - this.canvas.nativeElement.offsetLeft);
       this.lastMousePoint.y = evt.offsetY || (evt.pageY - this.canvas.nativeElement.offsetTop);
-      this.workViewService.mousePositionOnImage(this.lastMousePoint);
+      this.lastMousePoint.color = this.cx.getImageData(this.lastMousePoint.x, this.lastMousePoint.y, 1, 1).data;
+      this.workViewService.mouseCoordinateOnImage.emit(this.lastMousePoint);
     },
     zoomFunction: (clicks) => {
       const pt = this.cx.transformedPoint(this.lastMousePoint.x, this.lastMousePoint.y);
@@ -236,16 +238,10 @@ export class DrawCanvasComponent implements AfterViewInit, OnInit {
               private router: Router) {
     // draw on load
     this.drawImage.onload = () => {
-      this.canvasRedraw();
+      this.drawImageOnCanvas();
+      // checking after image is drawn, before layers are drawn
+      this.drawLayersOnCanvas();
     };
-
-    // router.events.subscribe(e => {
-    //   if (e instanceof NavigationEnd) {
-    //     console.log(e);
-    //     console.log("--------");
-    //     this.initializeCanvas();
-    //   }
-    // });
   }
 
   /**
@@ -282,7 +278,7 @@ export class DrawCanvasComponent implements AfterViewInit, OnInit {
     });
 
     this.workViewService.selectLayer.subscribe(x => {
-      this.currentLayer = x;
+      this.selectLayer(x)
     });
 
     this.workViewService.saveAndRedrawImage.subscribe(x => {
@@ -294,7 +290,7 @@ export class DrawCanvasComponent implements AfterViewInit, OnInit {
       if (x === null) {
         this.canvasRedraw();
       } else {
-        DrawUtil.drawLineOnCanvas(this.cx, x, 'yellow', 4);
+        DrawUtil.drawPolygon(this.cx, x, 4, 'yellow');
       }
     });
 
@@ -336,7 +332,7 @@ export class DrawCanvasComponent implements AfterViewInit, OnInit {
           this.workViewService.prevSelectImageInDataset.emit();
         } else if (!isNaN(Number($event.key))) {
           const layer = CImageUtil.findOrAddLayer(this.activeImage, $event.key);
-          this.currentLayer = layer;
+          this.selectLayer(layer);
           this.snackBar.open(`Layer ${layer.id} ausgewählt`);
         } else if ($event.key === 'h') {
           this.hideLines = !this.hideLines;
@@ -374,9 +370,16 @@ export class DrawCanvasComponent implements AfterViewInit, OnInit {
    * Redraws the canvas
    */
   private canvasRedraw() {
+    this.drawImageOnCanvas();
+    this.drawLayersOnCanvas();
+  }
+
+  private drawImageOnCanvas() {
     this.clearCanvas();
     this.cx.drawImage(this.drawImage, 0, 0);
+  }
 
+  private drawLayersOnCanvas() {
     if (!this.hideLines) {
       DrawUtil.redrawCanvas(this.cx, this.activeImage.getLayers());
     }
@@ -408,12 +411,8 @@ export class DrawCanvasComponent implements AfterViewInit, OnInit {
     }
 
     this.activeImage = image;
-
-    if (image.getData() === '') {
-      console.log('Empty Image');
-      this.currentLayer = new Layer('-');
-    } else {
-      this.currentLayer = image.getLayers()[0];
+    this.selectLayer(new Layer('-'));
+    if (image.getData()) {
       this.renderContext = true;
       this.drawImage.src = 'data:image/png;base64,' + this.activeImage.getData();
 
@@ -423,6 +422,10 @@ export class DrawCanvasComponent implements AfterViewInit, OnInit {
       this.cx.strokeStyle = image.getLayers()[0].color || '#fff';
       this.cx.fillStyle = image.getLayers()[0].color || '#fff';
     }
+  }
+
+  private selectLayer(layer: Layer) {
+    this.currentLayer = layer;
   }
 
   public onEvent(event: MouseEvent): boolean {
@@ -442,12 +445,12 @@ export class DrawCanvasComponent implements AfterViewInit, OnInit {
   }
 
   private save() {
-      this.imageService.updateICImage(this.activeImage).subscribe(() => {
-        console.log('saved');
-      }, error1 => {
-        console.log('Fehler beim laden der Dataset Datein');
-        console.error(error1);
-      });
+    this.imageService.updateICImage(this.activeImage).subscribe(() => {
+      console.log('saved');
+    }, error1 => {
+      console.log('Fehler beim laden der Dataset Datein');
+      console.error(error1);
+    });
   }
 
   private onFilterCompleted(image: CImage) {

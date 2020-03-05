@@ -1,11 +1,8 @@
-import {Component, Input, OnInit} from '@angular/core';
-import {DrawCanvasComponent} from '../workView/draw-canvas/draw-canvas.component';
+import {AfterViewInit, Component, OnInit} from '@angular/core';
 import {FilterService} from '../../service/filter.service';
 import {ImageService} from '../../service/image.service';
 import {ImageMagicService} from '../../service/image-magic.service';
 import {DatasetService} from '../../service/dataset.service';
-import {FlaskService} from '../../service/flask.service';
-import {ImageJService} from '../../service/image-j.service';
 import {ImportDialogComponent} from '../import-dialog/import-dialog.component';
 import {ExportDialogComponent} from '../export-dialog/export-dialog.component';
 import {MatDialog} from '@angular/material/dialog';
@@ -16,6 +13,7 @@ import {FilterSetDialogComponent} from '../filter-set-dialog/filter-set-dialog.c
 import {CreateProjectDialogComponent} from '../create-project-dialog/create-project-dialog.component';
 import {WorkViewService} from '../workView/work-view.service';
 import {FileUploadDialogComponent} from '../file-upload-dialog/file-upload-dialog.component';
+import {FilterSet} from "../../model/FilterSet";
 
 @Component({
   selector: 'app-home',
@@ -39,9 +37,10 @@ export class HomeComponent implements OnInit {
 
   private selectedImageId: string;
 
-  @Input() drawCanvasComponent: DrawCanvasComponent;
-
   ngOnInit(): void {
+    this.workViewService.openFilterDialog.subscribe(x => {
+      this.openFilterSetDialog(x)
+    });
   }
 
   onImageSelect(id: string) {
@@ -73,10 +72,13 @@ export class HomeComponent implements OnInit {
     });
   }
 
-  openFilterSetDialog(): void {
+  openFilterSetDialog(filter?: FilterSet): void {
     const dialogRef = this.dialog.open(FilterSetDialogComponent, {
       height: '768px',
-      width: '1024px'
+      width: '1024px',
+      data: {
+        filter: filter
+      }
     });
 
     dialogRef.afterClosed().subscribe(result => {

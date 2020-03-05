@@ -37,6 +37,12 @@ export class ImageService {
     return this.http.put<CImage>(`${environment.backendUrl}/image/update`, image, ImageService.httpJsonContent);
   }
 
+  public updateExistingImage(image: CImage): Observable<any> {
+    console.log(`${environment.backendUrl}/image/update/checked`);
+    return this.http.put<CImage>(`${environment.backendUrl}/image/update/checked`, image, ImageService.httpJsonContent);
+  }
+
+
   public createImage(image: CImage, type: string): Observable<any> {
     console.log(`${environment.backendUrl}}/image/${type}`);
     return this.http.post<CImage>(`${environment.backendUrl}/image/${type}`, image);

@@ -9,7 +9,7 @@ import {ScImportService} from "../../service/sc-import.service";
 })
 export class ImportDialogComponent implements OnInit {
 
-  mapping = '{"maxX" : 1300, "maxY" :650, "maps" : [{"name" : "21328", "path" : "imgs/21328/"}]}';
+  mapping = '{"maxX" : 1300, "maxY" :650, "checkImage" : true, "maps" : [{"name" : ".*", "path" : "image/michi2/", "prefix": "128-", "suffix": ".png"}]}';
 
   data: string;
 

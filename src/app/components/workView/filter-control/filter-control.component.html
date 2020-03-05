@@ -1,15 +1,24 @@
 <div class="content">
-  <mat-form-field floatLabel="always" class="filter">
+  <mat-tab-group class="tabs" dynamicHeight [(selectedIndex)]="tabIndex">
+    <mat-tab label="Filter">
+      <mat-form-field floatLabel="always" class="filter">
     <textarea matInput placeholder="Filter" style="white-space: nowrap;" [(ngModel)]="filterValue" rows="20"
-              (change)="onFilterChange()"></textarea>
-  </mat-form-field>
+              (keyup)="onFilterValueChange()"></textarea>
+      </mat-form-field>
+    </mat-tab>
+    <mat-tab label="Ausgabe">
+      <p [innerHtml]="filterResultData"></p>
+    </mat-tab>
+  </mat-tab-group>
 
-  <button mat-stroked-button (click)="runFilter()" class="start" [disabled]="!filterSelected">Filtern</button>
-  <button mat-stroked-button (click)="runFilter()" class="save" [disabled]="!filterValueChanged">Speichern</button>
+  <button mat-stroked-button (click)="runFilter()" class="start" [disabled]="!isFilterSelected()">Filtern</button>
+  <button mat-stroked-button (click)="onSaveFilter()" class="save"
+          [disabled]="!filterValueChanged">{{isNewFilter() ? "Erstellen" : "Speichern"}}</button>
   <mat-spinner class="spinner" *ngIf="filterIsRunning" [diameter]="30"></mat-spinner>
   <div class="filterSelect">
     <mat-form-field>
       <mat-select [(ngModel)]="selectedFilter" placeholder="Skripte" (selectionChange)="onChangeFilterSet()">
+        <mat-option value="null">Neuen Filter erstellen</mat-option>
         <mat-option *ngFor="let filterSet of filterSetList" [value]="filterSet">
           {{filterSet.name}}
         </mat-option>

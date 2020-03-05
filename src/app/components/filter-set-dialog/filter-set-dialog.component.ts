@@ -1,5 +1,5 @@
-import {Component, OnInit} from '@angular/core';
-import {MatDialogRef} from '@angular/material/dialog';
+import {AfterViewInit, Component, Inject, OnInit} from '@angular/core';
+import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 import {FilterSet} from '../../model/FilterSet';
 import {FilterSetService} from '../../service/filter-set.service';
 
@@ -10,7 +10,8 @@ import {FilterSetService} from '../../service/filter-set.service';
 })
 export class FilterSetDialogComponent implements OnInit {
 
-   filterSets: FilterSet[];
+
+  filterSets: FilterSet[];
 
   selectedFilterSet: FilterSet = new FilterSet();
 
@@ -19,6 +20,7 @@ export class FilterSetDialogComponent implements OnInit {
   disabled = true;
 
   constructor(public dialogRef: MatDialogRef<FilterSetDialogComponent>,
+              @Inject(MAT_DIALOG_DATA) public data: any,
               private filterSetService: FilterSetService) {
   }
 
@@ -29,16 +31,22 @@ export class FilterSetDialogComponent implements OnInit {
         this.disabled = false;
         this.selectedFilterSet = x[0];
       }
+
+      if (this.data.filter != null) {
+        this.onNewScript(this.data.filter);
+      }
     });
   }
 
   public onChangeFilterSet() {
   }
 
-  public onNewScript() {
-    let newFilter = new FilterSet();
-    newFilter.id = Date.now();
-    newFilter.name = 'Neuer Filter';
+  public onNewScript(newFilter?: FilterSet) {
+    if (newFilter == null) {
+      newFilter = new FilterSet();
+      newFilter.id = Date.now();
+      newFilter.name = 'Neuer Filter';
+    }
 
     this.disabled = false;
     this.filterSetService.createFilterSet(newFilter).subscribe();

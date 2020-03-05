@@ -1,7 +1,7 @@
 .imageList {
   height: 100%;
-  min-width: 200px;
   position: relative;
+  width: 100%;
   display: grid;
   grid-template-columns: fit-content(160px) auto;
   grid-template-rows: 35px auto;

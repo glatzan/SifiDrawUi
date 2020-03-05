@@ -22,7 +22,16 @@
         </div>
 
         <span class="mouse" *ngIf="activeImage !== undefined">
-          X {{mousePositionInCanvas.x}} Y {{mousePositionInCanvas.y}}
+          Maus: X {{mousePositionInCanvas.x}} Y {{mousePositionInCanvas.y}}
+        </span>
+
+        <span class="colorFiled" *ngIf="activeImage !== undefined &&  renderColor">
+          Farbe: RGB {{mousePositionInCanvas.color[0]}} {{mousePositionInCanvas.color[1]}} {{mousePositionInCanvas.color[2]}}
+        </span>
+
+
+        <span class="imageSize" *ngIf="activeImage !== undefined">
+          Bildgröße: {{activeImage.getWidth()}}x{{activeImage.getHeight()}} px (WxH)
         </span>
 
         <span class="zoom" *ngIf="activeImage !== undefined">

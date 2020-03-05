@@ -46,8 +46,8 @@
 
         grid-area: cc;
         display: grid;
-        grid-template-columns: 150px 400px 150px auto 100px 50px;
-        grid-template-areas: "drawMode contrast mouse .   zoom resetBtn";
+        grid-template-columns: 150px 400px 200px 250px 250px auto 100px 50px;
+        grid-template-areas: "drawMode contrast mouse colorFiled imageSize .   zoom resetBtn";
 
         .drawMode {
           grid-area: drawMode;
@@ -63,6 +63,17 @@
         }
 
         .mouse {
+          grid-area: mouse;
+          align-self: center;
+        }
+
+        .colorFiled{
+          grid-area: colorFiled;
+          align-self: center;
+        }
+
+        .imageSize{
+          grid-area: imageSize;
           align-self: center;
         }
 

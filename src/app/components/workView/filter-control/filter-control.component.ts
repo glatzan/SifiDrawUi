@@ -1,4 +1,4 @@
-import {Component, ElementRef, OnInit} from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 import {CImage} from '../../../model/CImage';
 import {ImageService} from '../../../service/image.service';
 import {ImageMagicService} from '../../../service/image-magic.service';
@@ -12,6 +12,7 @@ import {FilterSetService} from '../../../service/filter-set.service';
 import {FilterSet} from '../../../model/FilterSet';
 import {ICImage} from '../../../model/ICImage';
 import {ProcessCallback} from '../../../worker/processCallback';
+import {DomSanitizer} from "@angular/platform-browser";
 
 @Component({
   selector: 'app-filter-control',
@@ -28,22 +29,23 @@ export class FilterControlComponent implements OnInit, DisplayCallback {
 
   filterValueChanged = false;
 
-  filterSelected = false;
-
-  private image: ICImage;
-
-  private currentImage: ICImage;
-
   filterIsRunning = false;
 
-  private doNotResetFilter = false;
+  filterResultData: any;
+
+  filteredDataUpdate = false;
+
+  tabIndex = 0;
+
+  private image: ICImage;
 
   constructor(public imageMagicService: ImageMagicService,
               private imageService: ImageService,
               private filterService: FilterService,
               private http: HttpClient,
               private filterSetService: FilterSetService,
-              private workViewService: WorkViewService) {
+              private workViewService: WorkViewService,
+              private sanitized: DomSanitizer) {
   }
 
   ngOnInit() {
@@ -52,7 +54,7 @@ export class FilterControlComponent implements OnInit, DisplayCallback {
       this.image = image;
     });
 
-    this.workViewService.reloadFilterSets.subscribe( _ => {
+    this.workViewService.reloadFilterSets.subscribe(_ => {
       this.loadFilters();
     })
   }
@@ -60,32 +62,52 @@ export class FilterControlComponent implements OnInit, DisplayCallback {
   private loadFilters() {
     this.filterSetService.getFilters().subscribe(x => {
       this.filterSetList = x;
-      this.filterValueChanged = false;
-      this.updateFilterSelected();
+      this.onFilterValueChange();
     });
   }
 
-  private updateFilterSelected(){
-    if (this.filterValue !== '') {
-      this.filterSelected = true;
-    }
+  isNewFilter(): boolean {
+    return this.selectedFilter == null;
   }
+
+  isFilterSelected() {
+    return this.filterValue;
+  }
+
 
   onChangeFilterSet() {
     this.filterValue = this.selectedFilter.filters;
-    this.filterSelected = true;
+    this.tabIndex = 0;
+    this.onFilterValueChange();
   }
 
-  onFilterChange() {
-    this.filterValueChanged = true;
-    if (this.filterValue !== null && this.filterValue !== '') {
-      this.filterSelected = true;
+
+  onFilterValueChange() {
+    if (this.filterValue) {
+      this.filterValueChanged = (this.selectedFilter == null || this.selectedFilter.filters != this.filterValue)
+    } else {
+      this.filterValueChanged = false;
+    }
+  }
+
+  onSaveFilter() {
+    if (this.selectedFilter != null) {
+      this.selectedFilter.filters = this.filterValue;
+      this.filterSetService.saveFilterSet(this.selectedFilter).subscribe(x => {
+        this.onFilterValueChange();
+      });
+    } else {
+      let newFilter = new FilterSet();
+      newFilter.id = Date.now();
+      newFilter.name = 'Neuer Filter';
+      newFilter.filters = this.filterValue;
+      this.workViewService.openFilterDialog.emit(newFilter);
     }
   }
 
   public runFilter() {
 
-    if (this.filterValue === undefined || this.filterValue.length == 0) {
+    if (!this.filterValue || this.filterValue.length == 0) {
       console.log(this.filterValue + '---');
       return;
     }
@@ -93,12 +115,18 @@ export class FilterControlComponent implements OnInit, DisplayCallback {
     const me = this;
 
     const dataset = new Dataset();
-    dataset.images = [new CImage()];
-    dataset.images[0].id = this.image.id;
+    dataset.images = [this.image];
+    //dataset.images[0].id = this.image.id;
 
     this.filterService.runFilterOnDataset(dataset, this.filterValue, {
-      displayCallback: this, processCallback : {
+      displayCallback: this, processCallback: {
         callback(): void {
+        },
+        displayData(data: string): void {
+          console.log(data)
+          me.filterResultData = me.sanitized.bypassSecurityTrustHtml(data);
+          me.filteredDataUpdate = true;
+          me.tabIndex = 1;
         }
       } as ProcessCallback
     });

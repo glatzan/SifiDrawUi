@@ -107,7 +107,7 @@ export default class CImageUtil {
 
   static findLayer(image: ICImage, layerID: string) {
     for (const layer of image.getLayers()) {
-      if (layer.id === layerID) {
+      if (layer.id == layerID) {
         return layer;
       }
     }

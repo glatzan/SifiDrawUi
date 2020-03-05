@@ -10,4 +10,8 @@ export interface ICImage {
   getLayers(): Layer[];
 
   setLayers(layers: Layer[]);
+
+  getHeight();
+
+  getWidth();
 }
