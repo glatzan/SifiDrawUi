@@ -123,10 +123,9 @@ export class FilterControlComponent implements OnInit, DisplayCallback {
         callback(): void {
         },
         displayData(data: string): void {
-          console.log(data)
           me.filterResultData = me.sanitized.bypassSecurityTrustHtml(data);
           me.filteredDataUpdate = true;
-          me.tabIndex = 1;
+          me.tabIndex = 2;
         }
       } as ProcessCallback
     });
