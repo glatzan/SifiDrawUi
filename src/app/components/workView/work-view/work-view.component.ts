@@ -2,6 +2,9 @@ import {Component, OnInit} from '@angular/core';
 import {WorkViewService} from '../work-view.service';
 import {ICImage} from '../../../model/ICImage';
 import {MousePosition} from "../../../helpers/mouse-position";
+import {CanvasDisplaySettings} from "../../../helpers/canvas-display-settings";
+import {CImageGroup} from "../../../model/CImageGroup";
+import {MatSnackBar} from "@angular/material/snack-bar";
 
 @Component({
   selector: 'app-work-view',
@@ -10,42 +13,57 @@ import {MousePosition} from "../../../helpers/mouse-position";
 })
 export class WorkViewComponent implements OnInit {
 
-  constructor(private workViewService: WorkViewService) {
+  constructor(private workViewService: WorkViewService,
+              private snackBar: MatSnackBar) {
   }
 
-  image: ICImage;
-  activeImage: ICImage;
+  displaySettings: CanvasDisplaySettings;
 
-  drawMode = true;
-  mousePositionInCanvas = new MousePosition();
-  currentZoomLevel = 100;
+  renderComponent = false;
+
   renderColor = false;
 
+  mousePositionInCanvas = new MousePosition();
+
+  currentZoomLevel = 100;
+
+  parentImage: ICImage;
+
+  activeImage: ICImage;
+
   ngOnInit() {
-    this.workViewService.changeDisplayImage.subscribe(image => {
+    this.displaySettings = this.workViewService.getDisplaySettings();
+
+    this.workViewService.onChangedParentImage.subscribe(image => {
+      this.parentImage = image;
       this.activeImage = image;
+      this.renderComponent = true;
       this.renderColor = false;
       this.mousePositionInCanvas.clear();
     });
 
-    this.workViewService.changeParentImageOrGroup.subscribe(image => {
-      this.image = image;
+    this.workViewService.onChangedActiveImage.subscribe(image => {
       this.activeImage = image;
-      this.renderColor = false;
-      this.mousePositionInCanvas.clear();
     });
 
-    this.workViewService.mouseCoordinateOnImage.subscribe(v => {
+    this.workViewService.onMouseCoordinatesCanvasChanged.subscribe(v => {
       this.mousePositionInCanvas = v;
       this.renderColor = true;
     });
   }
 
   public resetCanvasZoom() {
-    this.workViewService.resetCanvasZoom();
+    this.workViewService.onResetCanvasZoom.emit();
+  }
+
+  public flicker() {
+    if (this.parentImage instanceof CImageGroup)
+      this.workViewService.toggleFlicker();
+    else
+      this.snackBar.open("Flicker nur mit einer Bildergruppe möglich")
   }
 
   public changeDrawMode() {
-    this.workViewService.drawMode(this.drawMode);
+    this.workViewService.onDisplaySettingsChanged.emit();
   }
 }

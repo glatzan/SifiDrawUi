@@ -3,8 +3,8 @@ import {Layer} from '../../../model/layer';
 import {WorkViewService} from '../work-view.service';
 import CImageUtil from '../../../utils/cimage-util';
 import {ICImage} from "../../../model/ICImage";
-import {CImageGroup} from "../../../model/CImageGroup";
 import {LayerType} from "../../../model/layer-type.enum";
+import {CanvasDisplaySettings} from "../../../helpers/canvas-display-settings";
 
 @Component({
   selector: 'app-draw-control',
@@ -15,115 +15,77 @@ export class DrawControlComponent implements OnInit {
 
   image: ICImage;
 
-  pointMode = 'false';
-
-  hideLines = false;
-
   currentLayer: Layer;
 
-  rightClickCircle = 40;
+  renderComponent = false;
 
-  renderContext = false;
+  displaySettings: CanvasDisplaySettings;
 
   layerTypes = LayerType;
-
-  private lastLayerID: string;
 
   constructor(private workViewService: WorkViewService) {
   }
 
-  /**
-   * Event for loading a new Image
-   */
   ngOnInit() {
-    this.workViewService.changeDisplayImage.subscribe(image => {
-      this.init(image);
+    this.displaySettings = this.workViewService.getDisplaySettings();
+
+    this.workViewService.onChangedParentImage.subscribe(image => {
+      this.image = image;
     });
 
-    this.workViewService.changeParentImageOrGroup.subscribe(image => {
-      this.init(image);
+    this.workViewService.onChangedActiveImage.subscribe( image => {
+      this.image = image;
     });
-  }
 
-  private init(image: ICImage) {
-    this.image = image;
-    if (image instanceof CImageGroup && image.images.length === 0) {
-      console.log('Empty Image');
-      this.currentLayer = new Layer('-');
-    } else {
-      if (this.lastLayerID) {
-        this.currentLayer = CImageUtil.findLayer(image, this.lastLayerID) || image.getLayers()[0]
-      } else {
-        this.currentLayer = image.getLayers()[0];
-      }
-      this.renderContext = true;
-      this.onLayerChange(null);
-    }
-  }
-
-  public onChangeMode($event) {
-    this.workViewService.pointModeChanged.emit(this.pointMode === 'true');
-  }
-
-  public onHideLines($event) {
-    console.log(this.hideLines);
-    this.workViewService.hideLines.emit(this.hideLines);
+    this.workViewService.onLayerChange.subscribe(x => {
+      this.currentLayer = x;
+      this.renderComponent = true;
+    });
   }
 
   public onLayerChange($event) {
-    this.lastLayerID = this.currentLayer.id;
-    this.workViewService.selectLayer.emit(this.currentLayer);
-    console.log('chage to' + this.currentLayer.id);
+    this.workViewService.selectLayer(this.currentLayer);
+  }
+
+  public onChange($event) {
+    this.workViewService.onDisplayImageRedraw.emit();
+    this.workViewService.saveContent();
   }
 
   public onAddLayer($event) {
     this.currentLayer = CImageUtil.addLayer(this.image);
-    this.workViewService.selectLayer.emit(this.currentLayer);
-    this.workViewService.saveAndRedrawImage.emit(true);
+    this.onChange($event);
+    this.onLayerChange($event);
   }
 
   public onRemoveLayer($event) {
     CImageUtil.removeLayer(this.image, this.currentLayer.id);
 
     if (this.image.getLayers().length === 0)
-      CImageUtil.addLayer(this.image)
+      CImageUtil.addLayer(this.image);
 
     this.currentLayer = this.image.getLayers()[0];
-    this.workViewService.selectLayer.emit(this.currentLayer);
-    this.workViewService.saveAndRedrawImage.emit(true);
+    this.onChange($event);
+    this.onLayerChange($event);
   }
 
-  public onChangeColorOrThickness($event) {
-    console.log(this.currentLayer)
-    console.log('redarw');
-    this.workViewService.saveAndRedrawImage.emit(true);
+  public onDisplaySettingsChanged($event) {
+    this.workViewService.onDisplaySettingsChanged.emit(this.displaySettings);
   }
 
   public onHighlightLine(id: number, highlight: boolean) {
-    if (highlight) {
-      this.workViewService.highlightLine.emit(this.currentLayer.lines[id]);
-    } else {
-      this.workViewService.highlightLine.emit(null);
-    }
+    this.workViewService.highlightLineOfLayer.emit(highlight ? this.currentLayer.lines[id] : null);
   }
 
   public onSelectSubLine($event, id: number) {
     if ($event.ctrlKey) {
       CImageUtil.removeLine(this.currentLayer, this.currentLayer.lines[id]);
-      this.workViewService.saveAndRedrawImage.emit(true);
+      this.onChange($event)
     } else {
       this.currentLayer.line = this.currentLayer.lines[id];
     }
-
     // preventing default ctrl click
     return $event.preventDefault() && false;
   }
-
-  public onEraserSizeChange($event) {
-    console.log(this.rightClickCircle)
-    this.workViewService.eraserSizeChange.emit(this.rightClickCircle);
-  }
-
-
 }
 

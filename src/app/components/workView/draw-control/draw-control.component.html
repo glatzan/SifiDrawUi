@@ -1,19 +1,19 @@
-<div class="paintControl" *ngIf="renderContext">
+<div class="paintControl" *ngIf="renderComponent">
 
   <div class="modus">
     Modus:
-    <mat-button-toggle-group #group="matButtonToggleGroup" class="modusBtn" [(ngModel)]="pointMode"
-                             (change)="onChangeMode($event)">
-      <mat-button-toggle value="false">
+    <mat-button-toggle-group #group="matButtonToggleGroup" class="modusBtn" [(ngModel)]="displaySettings.drawMode"
+                             (change)="onDisplaySettingsChanged($event)">
+      <mat-button-toggle value="1">
         Linie
       </mat-button-toggle>
-      <mat-button-toggle value="true">
+      <mat-button-toggle value="0">
         Punkt
       </mat-button-toggle>
     </mat-button-toggle-group>
   </div>
 
-  <mat-checkbox [(ngModel)]="hideLines" (change)="onHideLines($event)" class="hideLine">Linien verstecken</mat-checkbox>
+  <mat-checkbox [(ngModel)]="displaySettings.displayLayer" (change)="onDisplaySettingsChanged($event)" class="hideLine">Layer anzeigen</mat-checkbox>
 
   <div class="labelSelectText">
     Label:
@@ -39,7 +39,7 @@
   <div class="layerID">
     ID:
     <mat-form-field class="idInput">
-      <input matInput [(ngModel)]="currentLayer.id" (ngModelChange)="onChangeColorOrThickness($event)">
+      <input matInput [(ngModel)]="currentLayer.id" (ngModelChange)="onChange($event)">
     </mat-form-field>
   </div>
 
@@ -47,7 +47,7 @@
   <div class="name">
     Name:
     <mat-form-field class="nameInput">
-      <input matInput [(ngModel)]="currentLayer.name" (ngModelChange)="onChangeColorOrThickness($event)">
+      <input matInput [(ngModel)]="currentLayer.name" (ngModelChange)="onChange($event)">
     </mat-form-field>
   </div>
 
@@ -56,12 +56,12 @@
   </div>
   <div class="labelSettings">
     <mat-form-field class="settingElement">
-      <input matInput [(ngModel)]="currentLayer.color" placeholder="Farbe" (change)="onChangeColorOrThickness($event)"
+      <input matInput [(ngModel)]="currentLayer.color" placeholder="Farbe" (change)="onChange($event)"
              type="color"/>
     </mat-form-field>
 
     <mat-form-field class="settingElement">
-      <input matInput [(ngModel)]="currentLayer.size" placeholder="Dicke" (change)="onChangeColorOrThickness($event)"
+      <input matInput [(ngModel)]="currentLayer.size" placeholder="Dicke" (change)="onChange($event)"
              type="number" min="1"
              id="myNumber"/>
     </mat-form-field>
@@ -70,7 +70,7 @@
   <div class="layerType">
     Typ:
     <mat-form-field class="settingElement" style="margin-left: 5px">
-      <mat-select [(ngModel)]="currentLayer.type" (ngModelChange)="onChangeColorOrThickness($event)">
+      <mat-select [(ngModel)]="currentLayer.type" (ngModelChange)="onChange($event)">
         <mat-option *ngFor="let layerType of layerTypes | enumToArrayPipe" [value]="layerType.index">
           {{layerType.name}}
         </mat-option>
@@ -99,7 +99,7 @@
     Radierer
   </div>
   <mat-form-field class="eraser">
-    <input matInput [(ngModel)]="rightClickCircle" placeholder="Größe" (change)="onEraserSizeChange($event)"
+    <input matInput [(ngModel)]="displaySettings.eraserSize" placeholder="Größe" (change)="onDisplaySettingsChanged($event)"
            type="number" min="1"
     />
   </mat-form-field>
@@ -110,6 +110,6 @@
 
 </div>
 
-<div class="selectImage" *ngIf="!renderContext">
+<div class="selectImage" *ngIf="!renderComponent">
   Bild auswählen..
 </div>

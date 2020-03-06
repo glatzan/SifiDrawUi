@@ -103,72 +103,117 @@ export class FilterCore {
     }));
   }
 
+  applyTransformation(sourceImgPos, targetImgPos = sourceImgPos, applyTransformationOptions?: ApplyTransformationOptions) {
+    return flatMap((data: FilterData) => new Observable<FilterData>((observer) => {
+
+      const source = FilterCore.getImage(sourceImgPos, data);
+      const target = FilterCore.getImage(targetImgPos, data);
+
+      if (!applyTransformationOptions)
+        applyTransformationOptions = {}
+
+      if (!applyTransformationOptions.sourceData)
+        applyTransformationOptions.sourceData = "affineMatrix";
+
+      const transformation = data.getData(applyTransformationOptions.sourceData);
+
+      if (!source || !target || !transformation) {
+        observer.error("Target or source not found")
+      }
+
+      const buff = new Buffer(source.data, 'base64');
+      const png = PNG.sync.read(buff);
+
+      const canvas = document.createElement("canvas");
+      canvas.width = png.width;
+      canvas.height = png.height;
+      const cx = canvas.getContext("2d");
+
+      const canvasResult = document.createElement("canvas");
+      canvasResult.width = png.width;
+      canvasResult.height = png.height;
+      const cx2 = canvasResult.getContext("2d");
+
+      const array = new Uint8ClampedArray(png.data);
+      const imageData = new ImageData(array, cx.canvas.width, cx.canvas.height);
+
+      cx.putImageData(imageData, 0, 0);
+
+      cx2.transform(transformation.a, transformation.b, transformation.c, transformation.d, transformation.e, transformation.f);
+      cx2.drawImage(canvas, 0, 0);
+
+      target.data = DrawUtil.canvasAsBase64(canvasResult);
+      observer.next(data);
+      observer.complete();
+    }));
+  }
+
   copyLayerToImage({sourceImgPos = null, targetImgPos = null, layerIDs = null, affineTransformation = false, affineMatrixSource = "affineMatrix"}: { sourceImgPos: number, targetImgPos: number, layerIDs: [{ oldID: string, newID: string, name: string, type?: string, color?: string }], affineTransformation?: boolean, affineMatrixSource?: string }) {
     return flatMap((data: FilterData) => new Observable<FilterData>((observer) => {
-        if (sourceImgPos < 0 || sourceImgPos >= data.imgStack.length || targetImgPos < 0 || targetImgPos >= data.imgStack.length) {
-          observer.error(`Clone Image out of bounds source IMG ${sourceImgPos} or target img ${targetImgPos}`);
+      if (sourceImgPos < 0 || sourceImgPos >= data.imgStack.length || targetImgPos < 0 || targetImgPos >= data.imgStack.length) {
+        observer.error(`Clone Image out of bounds source IMG ${sourceImgPos} or target img ${targetImgPos}`);
+      }
+
+      if (affineTransformation && data.getData(affineMatrixSource) === undefined) {
+        observer.error(`No affine matrix at position ${affineMatrixSource}`);
+      }
+
+      if (layerIDs === null) {
+        observer.error(`Layer ids to convert hav to be provided!`);
+      }
+
+      const getLayerType = function (type: string): LayerType {
+        switch (type) {
+          case "Dot":
+            return LayerType.Dot;
+          case "FilledPolygon":
+            return LayerType.FilledPolygon;
+          case "Polygon":
+            return LayerType.Polygon;
+          default:
+            return LayerType.Line;
         }
+      };
 
-        if (affineTransformation && data.getData(affineMatrixSource) === undefined) {
-          observer.error(`No affine matrix at position ${affineMatrixSource}`);
+      const affineMatrix = data.getData(affineMatrixSource);
+      const sourceImage = data.imgStack[sourceImgPos];
+      const targetImage = data.imgStack[targetImgPos];
+
+      const layerToProcess = layerIDs.map(layerData => {
+        return {
+          layerData: layerData,
+          origLayer: FilterCore.findLayer(sourceImage.layers, layerData.oldID)
         }
+      });
 
-        if (layerIDs === null) {
-          observer.error(`Layer ids to convert hav to be provided!`);
+      layerToProcess.forEach(x => {
+        if (x.origLayer === null) {
+          observer.error(`Layer ID not found ${x.layerData.oldID}!`);
         }
+      });
 
-        const getLayerType = function (type: string): LayerType {
-          switch (type) {
-            case "Dot":
-              return LayerType.Dot;
-            case "FilledPolygon":
-              return LayerType.FilledPolygon;
-            case "Polygon":
-              return LayerType.Polygon;
-            default:
-              return LayerType.Line;
+      layerToProcess.forEach(layerData => {
+        const nLayer = Object.assign(new Layer(""), layerData.origLayer);
+        nLayer.lines = [];
+        nLayer.id = layerData.layerData.newID;
+        nLayer.name = layerData.layerData.name;
+        nLayer.type = getLayerType(layerData.layerData.type);
+        nLayer.color = layerData.layerData.color || "#fff";
+
+        for (const {item, index} of layerData.origLayer.lines.map((item, index) => ({item, index}))) {
+          if (affineTransformation) {
+            const tmp = applyToPoints(affineMatrix, item);
+            nLayer.lines.push(tmp.map(x => {
+              // @ts-ignore
+              return new Point(Math.round(x.x), Math.round(x.y));
+            }));
+          } else {
+            const objs = Object.assign([], item)
+            nLayer.lines.push(objs);
           }
-        };
-
-        const affineMatrix = data.getData(affineMatrixSource);
-        const sourceImage = data.imgStack[sourceImgPos];
-        const targetImage = data.imgStack[targetImgPos];
-
-        const layerToProcess = layerIDs.map(layerData => {
-          return {
-            layerData: layerData,
-            origLayer: FilterCore.findLayer(sourceImage.layers, layerData.oldID)
-          }
-        });
-
-        layerToProcess.forEach(x => {
-          if (x.origLayer === null) {
-            observer.error(`Layer ID not found ${x.layerData.oldID}!`);
-          }
-        });
-
-        layerToProcess.forEach(layerData => {
-          const nLayer = Object.assign(new Layer(""), layerData.origLayer);
-          nLayer.lines = [];
-          nLayer.id = layerData.layerData.newID;
-          nLayer.name = layerData.layerData.name;
-          nLayer.type = getLayerType(layerData.layerData.type);
-          nLayer.color = layerData.layerData.color || "#fff";
-
-          for (const {item, index} of layerData.origLayer.lines.map((item, index) => ({item, index}))) {
-            if (affineTransformation) {
-              const tmp = applyToPoints(affineMatrix, item);
-              nLayer.lines.push(tmp.map(x => {
-                // @ts-ignore
-                return new Point(Math.round(x.x), Math.round(x.y));
-              }));
-            } else {
-              const objs = Object.assign([], item)
-              nLayer.lines.push(objs);
-            }
-          }
-          targetImage.layers.push(nLayer)
-        });
+        }
+        targetImage.layers.push(nLayer)
+      });
 
         observer.next(data);
         observer.complete();
@@ -723,9 +768,13 @@ export interface ColorTypeOptions {
 }
 
 export interface CreateImageOptions {
-  width?: number
-  height?: number
-  referenceImagePos?: number
-  colorType?: ColorType
-  backgroundColor?: string
+  width?: number;
+  height?: number;
+  referenceImagePos?: number;
+  colorType?: ColorType;
+  backgroundColor?: string;
+}
+
+export interface ApplyTransformationOptions {
+  sourceData?: string;
 }

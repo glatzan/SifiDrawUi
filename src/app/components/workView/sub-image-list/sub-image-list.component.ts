@@ -16,11 +16,7 @@ export class SubImageListComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.workViewService.changeFilterList.subscribe(imgs => {
-      this.imageArray = imgs;
-    });
-
-    this.workViewService.changeParentImageOrGroup.subscribe(img => {
+    this.workViewService.onChangedParentImage.subscribe(img => {
       let arr: Array<CImage> = [];
 
       if (img instanceof CImageGroup) {
@@ -31,13 +27,13 @@ export class SubImageListComponent implements OnInit {
       this.imageArray = arr;
     });
 
-    this.workViewService.addImageToFilterList.subscribe(img => {
+    this.workViewService.onAddNewFilteredImage.subscribe(img => {
       this.imageArray = [...this.imageArray, img];
     });
   }
 
   public selectImage(image: CImage) {
-    this.workViewService.displayImage(image, false);
+    this.workViewService.selectActiveImage(image);
   }
 
 }

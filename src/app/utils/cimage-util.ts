@@ -17,6 +17,15 @@ export default class CImageUtil {
     '#FF3380', '#CCCC00', '#66E64D', '#4D80CC', '#9900B3',
     '#E64D66', '#4DB380', '#FF4D4D', '#99E6E6', '#6666FF'];
 
+  static prepare(img: ICImage): ICImage {
+    if (img instanceof CImageGroup)
+      return this.prepareImageGroup(img);
+    else if (img instanceof CImage)
+      return this.prepareImage(img);
+    else
+      return img
+  }
+
   static prepareImageGroup(group: CImageGroup): CImageGroup {
     for (const img of group.images) {
       CImageUtil.prepareImage(img);

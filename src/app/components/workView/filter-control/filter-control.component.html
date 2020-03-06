@@ -1,7 +1,7 @@
 <div class="content">
   <mat-tab-group class="tabs" dynamicHeight [(selectedIndex)]="tabIndex">
     <mat-tab label="Info">
-      {{selectedFilter.comment}}
+      {{selectedFilter ? selectedFilter.comment : ""}}
     </mat-tab>
     <mat-tab label="Filter">
       <mat-form-field floatLabel="always" class="filter">

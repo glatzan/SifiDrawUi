@@ -13,6 +13,8 @@ import {ICImage} from '../../../model/ICImage';
 import {ImageGroupService} from '../../../service/image-group.service';
 import {Router} from "@angular/router";
 import {MousePosition} from "../../../helpers/mouse-position";
+import {LayerType} from "../../../model/layer-type.enum";
+import {CanvasDisplaySettings, CanvasDrawMode} from "../../../helpers/canvas-display-settings";
 
 @Component({
   selector: 'app-draw-canvas',
@@ -26,14 +28,9 @@ export class DrawCanvasComponent implements AfterViewInit, OnInit {
   @ViewChild('canvas', {static: false}) public canvas: ElementRef;
 
   /**
-   * Original Image
-   */
-  private image: ICImage;
-
-  /**
    * Image Data from Backend, display image
    */
-  private activeImage: ICImage;
+  private image: ICImage;
 
   /**
    * Current layer
@@ -45,22 +42,17 @@ export class DrawCanvasComponent implements AfterViewInit, OnInit {
    */
   private drawImage = new Image();
 
-
   readonly MOUSE_LEFT_BTN = 0;
 
   readonly MOUSE_RIGHT_BTN = 2;
 
-  private cx; // CanvasRenderingContext2D
+  private cx;
 
   private pointTracker: PointTracker;
 
-
   private event: MouseEvent;
 
-  private renderContext = false;
-
-  private currentSaveTimeout: any = undefined;
-
+  private displaySettings: CanvasDisplaySettings;
   /**
    * Scalefactor for zooming, constant
    */
@@ -71,28 +63,10 @@ export class DrawCanvasComponent implements AfterViewInit, OnInit {
    */
   private currentZoomRounded = 100;
 
-  /**
-   * True if only points should be drawn
-   */
-  private pointMode = false;
 
-  /**
-   * Size of the circle which is displayed with a right click, in px
-   */
-  private rightClickCircleSize = 40;
-
-  /**
-   * If true no lindes will be displayed
-   */
-  private hideLines = false;
 
   // last point of the mouse
   private lastMousePoint = new MousePosition();
-
-  /**
-   * Drawmode
-   */
-  private drawMode = true;
 
   /**
    * Settings for image
@@ -118,7 +92,7 @@ export class DrawCanvasComponent implements AfterViewInit, OnInit {
       this.lastMousePoint.x = evt.offsetX || (evt.pageX - this.canvas.nativeElement.offsetLeft);
       this.lastMousePoint.y = evt.offsetY || (evt.pageY - this.canvas.nativeElement.offsetTop);
       this.lastMousePoint.color = this.cx.getImageData(this.lastMousePoint.x, this.lastMousePoint.y, 1, 1).data;
-      this.workViewService.mouseCoordinateOnImage.emit(this.lastMousePoint);
+      this.workViewService.onMouseCoordinatesCanvasChanged.emit(this.lastMousePoint);
     },
     zoomFunction: (clicks) => {
       const pt = this.cx.transformedPoint(this.lastMousePoint.x, this.lastMousePoint.y);
@@ -135,13 +109,13 @@ export class DrawCanvasComponent implements AfterViewInit, OnInit {
       const delta = $event.wheelDelta ? $event.wheelDelta / 40 : $event.detail ? -$event.detail : 0;
       if (this.imageSettings.mouseClicked && this.imageSettings.mouseBtn === this.MOUSE_RIGHT_BTN) {
         if (delta > 0) {
-          this.rightClickCircleSize = this.rightClickCircleSize + 2;
+          this.displaySettings.eraserSize = this.displaySettings.eraserSize + 2;
         } else {
-          this.rightClickCircleSize = this.rightClickCircleSize - 2;
+          this.displaySettings.eraserSize = this.displaySettings.eraserSize - 2;
         }
         const pt = this.cx.transformedPoint(this.lastMousePoint.x, this.lastMousePoint.y);
         this.canvasRedraw();
-        DrawUtil.drawCircle(this.cx, new Point(pt.x, pt.y), this.rightClickCircleSize);
+        DrawUtil.drawCircle(this.cx, new Point(pt.x, pt.y), this.displaySettings.eraserSize);
       } else {
         if (delta) {
           this.imageSettings.zoomFunction(delta);
@@ -172,7 +146,7 @@ export class DrawCanvasComponent implements AfterViewInit, OnInit {
         if (this.imageSettings.mouseBtn === this.MOUSE_LEFT_BTN) {
           const pt = this.cx.transformedPoint(this.lastMousePoint.x, this.lastMousePoint.y);
           CImageUtil.addPointToCurrentLine(this.currentLayer, pt.x, pt.y);
-          this.saveContent();
+          this.workViewService.saveContent();
           this.canvasRedraw();
         }
       }
@@ -196,25 +170,25 @@ export class DrawCanvasComponent implements AfterViewInit, OnInit {
           // draw
           switch (this.imageSettings.mouseBtn) {
             case this.MOUSE_LEFT_BTN:
-              if (!this.pointMode) {
+              if (this.displaySettings.drawMode == CanvasDrawMode.LineMode && this.currentLayer.type != LayerType.Dot) {
                 CImageUtil.addPointToCurrentLine(this.currentLayer, pt.x, pt.y);
-                this.saveContent();
+                this.workViewService.saveContent();
                 this.canvasRedraw();
               }
               break;
             case this.MOUSE_RIGHT_BTN:
               // check ctrl key again, for better editing
               if (evt.ctrlKey) {
-                if (VectorUtils.removeCollidingPointListsOfCircle(this.currentLayer.lines, new Point(pt.x, pt.y), this.rightClickCircleSize)) {
-                  this.saveContent();
+                if (VectorUtils.removeCollidingPointListsOfCircle(this.currentLayer.lines, new Point(pt.x, pt.y), this.displaySettings.eraserSize)) {
+                  this.workViewService.saveContent();
                 }
               } else {
-                if (VectorUtils.movePointListsToCircleBoundaries(this.currentLayer.lines, new Point(pt.x, pt.y), this.rightClickCircleSize)) {
-                  this.saveContent();
+                if (VectorUtils.movePointListsToCircleBoundaries(this.currentLayer.lines, new Point(pt.x, pt.y), this.displaySettings.eraserSize, this.currentLayer.type !== LayerType.Dot)) {
+                  this.workViewService.saveContent();
                 }
               }
               this.canvasRedraw();
-              DrawUtil.drawCircle(this.cx, new Point(pt.x, pt.y), this.rightClickCircleSize);
+              DrawUtil.drawCircle(this.cx, new Point(pt.x, pt.y), this.displaySettings.eraserSize);
               break;
           }
         }
@@ -248,45 +222,30 @@ export class DrawCanvasComponent implements AfterViewInit, OnInit {
    * Event for loading a new Image
    */
   ngOnInit() {
-    this.workViewService.changeDisplayImage.subscribe(image => {
+
+    this.displaySettings = this.workViewService.getDisplaySettings();
+
+    this.workViewService.onChangedParentImage.subscribe(image => {
       this.prepareImage(image);
     });
 
-    this.workViewService.changeParentImageOrGroup.subscribe(image => {
-      this.image = image;
+    this.workViewService.onChangedActiveImage.subscribe(image => {
       this.prepareImage(image);
     });
 
-    this.workViewService.resetImageZoom.subscribe(x => {
-      if (x) {
-        this.canvasResetZoom();
-      }
-    });
-
-    this.workViewService.drawModeChanged.subscribe(x => {
-      this.drawMode = x;
-      this.setMouseListeners(this.drawMode);
-    });
-
-    this.workViewService.pointModeChanged.subscribe(x => {
-      this.pointMode = x;
-    });
-
-    this.workViewService.hideLines.subscribe(x => {
-      this.hideLines = x;
+    this.workViewService.onDisplayImageRedraw.subscribe(x => {
       this.canvasRedraw();
     });
 
-    this.workViewService.selectLayer.subscribe(x => {
-      this.selectLayer(x)
+    this.workViewService.onLayerChange.subscribe(x => {
+      this.currentLayer = x;
     });
 
-    this.workViewService.saveAndRedrawImage.subscribe(x => {
-      this.canvasRedraw();
-      this.saveContent();
+    this.workViewService.onResetCanvasZoom.subscribe(x => {
+      this.canvasResetZoom();
     });
 
-    this.workViewService.highlightLine.subscribe(x => {
+    this.workViewService.highlightLineOfLayer.subscribe(x => {
       if (x === null) {
         this.canvasRedraw();
       } else {
@@ -294,8 +253,8 @@ export class DrawCanvasComponent implements AfterViewInit, OnInit {
       }
     });
 
-    this.workViewService.eraserSizeChange.subscribe(x => {
-      this.rightClickCircleSize = x;
+    this.workViewService.onDisplaySettingsChanged.subscribe(x => {
+      this.setMouseListeners(this.displaySettings.enableDrawing);
       this.canvasRedraw();
     });
   }
@@ -322,7 +281,7 @@ export class DrawCanvasComponent implements AfterViewInit, OnInit {
     });
 
     window.addEventListener('keydown', ($event) => {
-      if (me.renderContext && me.imageSettings.acceptKeyInput) {
+      if (me.image && me.imageSettings.acceptKeyInput) {
         if ($event.key === ' ' || $event.key === 'ArrowDown') {
           // next image
           this.workViewService.nextSelectImageInDataset.emit();
@@ -331,12 +290,12 @@ export class DrawCanvasComponent implements AfterViewInit, OnInit {
           // previouse image
           this.workViewService.prevSelectImageInDataset.emit();
         } else if (!isNaN(Number($event.key))) {
-          const layer = CImageUtil.findOrAddLayer(this.activeImage, $event.key);
-          this.selectLayer(layer);
+          const layer = CImageUtil.findOrAddLayer(this.image, $event.key);
+          this.currentLayer= layer;
           this.snackBar.open(`Layer ${layer.id} ausgewählt`);
         } else if ($event.key === 'h') {
-          this.hideLines = !this.hideLines;
-          this.snackBar.open(`Linien ${this.hideLines ? 'ausgeblendet' : 'eingeblendet'}`);
+          this.displaySettings.displayLayer = !this.displaySettings.displayLayer
+          this.snackBar.open(`Linien ${this.displaySettings.displayLayer ? 'angezeigt' : 'ausgeblendet'}`);
           this.canvasRedraw();
         } else if ($event.key === 'r') {
           this.canvasResetZoom();
@@ -349,13 +308,11 @@ export class DrawCanvasComponent implements AfterViewInit, OnInit {
       }
     }, false);
 
-    this.setMouseListeners(this.drawMode);
+    this.setMouseListeners(this.displaySettings.enableDrawing);
   }
 
   private setMouseListeners(setListeners: boolean) {
-    const me = this;
-
-    if (this.drawMode) {
+    if (setListeners) {
       this.canvas.nativeElement.addEventListener('mousedown', this.imageSettings.mouseDownListener, false);
       this.canvas.nativeElement.addEventListener('mousemove', this.imageSettings.mouseMoveListener, false);
       this.canvas.nativeElement.addEventListener('mouseup', this.imageSettings.mouseUpListener, false);
@@ -380,8 +337,24 @@ export class DrawCanvasComponent implements AfterViewInit, OnInit {
   }
 
   private drawLayersOnCanvas() {
-    if (!this.hideLines) {
-      DrawUtil.redrawCanvas(this.cx, this.activeImage.getLayers());
+    if (this.displaySettings.displayLayer) {
+      DrawUtil.redrawCanvas(this.cx, this.image.getLayers());
+    }
+  }
+
+  private prepareImage(image: ICImage) {
+    // save manually if image should be changed
+    this.image = image;
+    this.currentLayer = new Layer('-');
+
+    if (image.getData()) {
+      this.drawImage.src = `data:image/${image.getFileExtension()};base64,` + this.image.getData();
+
+      // setting layer settings
+      this.cx.lineWidth = image.getLayers()[0].size || 1;
+      this.cx.lineCap = 'round';
+      this.cx.strokeStyle = image.getLayers()[0].color || '#fff';
+      this.cx.fillStyle = image.getLayers()[0].color || '#fff';
     }
   }
 
@@ -403,58 +376,8 @@ export class DrawCanvasComponent implements AfterViewInit, OnInit {
     this.cx.restore();
   }
 
-  private prepareImage(image: ICImage) {
-    // save manually if image should be changed
-    if (this.currentSaveTimeout !== undefined) {
-      this.cancelSaveTimeout();
-      this.save();
-    }
-
-    this.activeImage = image;
-    this.selectLayer(new Layer('-'));
-    if (image.getData()) {
-      this.renderContext = true;
-      this.drawImage.src = `data:image/${image.getFileExtension()};base64,` + this.activeImage.getData();
-
-      // setting layer settings
-      this.cx.lineWidth = image.getLayers()[0].size || 1;
-      this.cx.lineCap = 'round';
-      this.cx.strokeStyle = image.getLayers()[0].color || '#fff';
-      this.cx.fillStyle = image.getLayers()[0].color || '#fff';
-    }
-  }
-
-  private selectLayer(layer: Layer) {
-    this.currentLayer = layer;
-  }
-
   public onEvent(event: MouseEvent): boolean {
     return false;
-  }
-
-  private saveContent() {
-    this.cancelSaveTimeout();
-    this.currentSaveTimeout = setTimeout(() => {
-      this.save();
-    }, 1000);
-  }
-
-  private cancelSaveTimeout(): void {
-    clearTimeout(this.currentSaveTimeout);
-    this.currentSaveTimeout = undefined;
-  }
-
-  private save() {
-    this.imageService.updateICImage(this.activeImage).subscribe(() => {
-      console.log('saved');
-    }, error1 => {
-      console.log('Fehler beim laden der Dataset Datein');
-      console.error(error1);
-    });
-  }
-
-  private onFilterCompleted(image: CImage) {
-    this.prepareImage(image);
   }
 }
 

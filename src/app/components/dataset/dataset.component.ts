@@ -75,7 +75,7 @@ export class DatasetComponent implements OnInit {
 
   onSelectImage($event, image: ICImage) {
     this.selectedImageId = image.id;
-    this.workViewService.displayImage(image, true);
+    this.workViewService.selectImage(image);
   }
 
 

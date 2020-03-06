@@ -82,7 +82,7 @@ export class HomeComponent implements OnInit {
     });
 
     dialogRef.afterClosed().subscribe(result => {
-      this.workViewService.reloadFilterSets.emit()
+      this.workViewService.onFilterSetChanged.emit()
     });
   }
 

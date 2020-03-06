@@ -1,6 +1,6 @@
 <div class="content">
   <div class="headline">
-    Bild {{image !== undefined ? image.name : ""}} {{activeImage !== undefined && activeImage !== image ? " - Aktives Bild " + activeImage.name : ""}}</div>
+    Bild {{parentImage !== undefined ? parentImage.name : ""}} {{activeImage !== undefined && activeImage !== parentImage ? " - Aktives Bild " + activeImage.name : ""}}</div>
   <div class="drawContent">
 
     <div class="workView">
@@ -11,35 +11,38 @@
 
       <div class="canvasControl">
 
-        <div class="contrast" *ngIf="activeImage !== undefined">
+        <div class="contrast" *ngIf="renderComponent">
           Zeichnen:
-          <mat-slide-toggle [(ngModel)]="drawMode" (change)="changeDrawMode()" class="drawMode"></mat-slide-toggle>
+          <mat-slide-toggle [(ngModel)]="displaySettings.enableDrawing" (change)="changeDrawMode()" class="drawMode"></mat-slide-toggle>
         </div>
 
-        <div class="contrast" *ngIf="activeImage !== undefined">
+        <div class="contrast" *ngIf="renderComponent">
           Kontrast:
           <mat-slider min="1" max="200" step="1" value="100"></mat-slider>
         </div>
 
-        <span class="mouse" *ngIf="activeImage !== undefined">
+        <span class="mouse" *ngIf="renderComponent">
           Maus: X {{mousePositionInCanvas.x}} Y {{mousePositionInCanvas.y}}
         </span>
 
-        <span class="colorFiled" *ngIf="activeImage !== undefined &&  renderColor">
+        <span class="colorFiled" *ngIf="renderComponent &&  renderColor">
           Farbe: RGB {{mousePositionInCanvas.color[0]}} {{mousePositionInCanvas.color[1]}} {{mousePositionInCanvas.color[2]}}
         </span>
 
+        <i class="material-icons flicker-btn" (click)="flicker()" title="Flicker" *ngIf="renderComponent">
+          broken_image
+        </i>
 
-        <span class="imageSize" *ngIf="activeImage !== undefined">
+        <span class="imageSize" *ngIf="renderComponent">
           Bildgröße: {{activeImage.getWidth()}}x{{activeImage.getHeight()}} px (WxH)
         </span>
 
-        <span class="zoom" *ngIf="activeImage !== undefined">
+        <span class="zoom" *ngIf="renderComponent">
           Zoom {{currentZoomLevel}} %
         </span>
 
         <i class="material-icons resetBtn" (click)="resetCanvasZoom()" title="Bild zurücksetzten"
-           *ngIf="activeImage !== undefined">
+           *ngIf="renderComponent">
           control_camera
         </i>
       </div>
