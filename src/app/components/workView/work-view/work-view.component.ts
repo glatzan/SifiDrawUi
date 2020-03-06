@@ -5,6 +5,7 @@ import {MousePosition} from "../../../helpers/mouse-position";
 import {CanvasDisplaySettings} from "../../../helpers/canvas-display-settings";
 import {CImageGroup} from "../../../model/CImageGroup";
 import {MatSnackBar} from "@angular/material/snack-bar";
+import {MatSliderChange} from "@angular/material/slider";
 
 @Component({
   selector: 'app-work-view',

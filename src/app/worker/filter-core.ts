@@ -9,7 +9,7 @@ import {Observable} from "rxjs";
 import {CImageGroup} from "../model/CImageGroup";
 import {ImageGroupService} from "../service/image-group.service";
 import {Layer} from "../model/layer";
-import {applyToPoints, fromTriangles} from "transformation-matrix";
+import {applyToPoints, fromTriangles, fromObject, transform} from "transformation-matrix";
 import {Point} from "../model/point";
 import {LayerType} from "../model/layer-type.enum";
 import {ColorType, PNG} from "pngjs";
@@ -77,26 +77,54 @@ export class FilterCore {
       const layer1 = findLayer(img1.layers, layerImg1ID);
       const layer2 = findLayer(img2.layers, layerImg2ID);
 
-      if (layer1 === null || layer2 === null || layer1.lines.length <= 0) {
+      if (layer1 === null || layer2 === null || layer1.lines.length == 0) {
         observer.error(`Layer not found on IMG 1 ${layerImg1ID} or IMG 2 ${layerImg2ID};`);
       }
 
-      if (layer1.lines[0].length < 3 || layer2.lines.length <= 0 || layer2.lines[0].length < 3) {
+      if (layer1.lines[0].length < 3 || layer2.lines.length == 0 || layer2.lines[0].length !== layer1.lines[0].length) {
         observer.error(`Three dots in layer (line 1) needed Layer 1 ${layerImg1ID} or Layer 2 ${layerImg2ID};`);
       }
 
-      const t1 = layer1.lines[0].slice(0, 3).map(x => {
+      const t1 = layer1.lines[0].map(x => {
         return {x: x.x, y: x.y}
       });
-      const t2 = layer2.lines[0].slice(0, 3).map(x => {
+      const t2 = layer2.lines[0].map(x => {
         return {x: x.x, y: x.y}
       });
 
-      const resultMatrix = fromTriangles(t1, t2);
+      const resultArrs = [];
 
-      console.log(resultMatrix);
+      for (let i = 0; i < t1.length - 2; i++) {
+        resultArrs.push(fromTriangles(t1.slice(i, i + 3), t2.slice(i, i + 3)));
+        console.log(resultArrs[i])
+      }
 
-      data.setData(targetName, resultMatrix);
+      let t = { a : 0,b :0,c:0,d:0,e:0,f:0};
+      resultArrs.forEach( x =>{
+        t.a += x.a;
+        t.b += x.b;
+        t.c += x.c;
+        t.d += x.d;
+        t.e += x.e;
+        t.f += x.f;
+      })
+
+      t.a = t.a /resultArrs.length;
+      t.b = t.b /resultArrs.length;
+      t.c = t.c /resultArrs.length;
+      t.d = t.d/resultArrs.length;
+      t.e = t.e/resultArrs.length;
+      t.f = t.f/resultArrs.length;
+
+      const test = fromObject(t);
+
+
+      const result = transform(resultArrs);
+
+      console.log(result)
+      console.log(test)
+
+      data.setData(targetName, test);
 
       observer.next(data);
       observer.complete();

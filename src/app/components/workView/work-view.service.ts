@@ -98,6 +98,12 @@ export class WorkViewService implements OnInit {
     this.forceSave();
     this.onChangedActiveImage.emit(img);
     this.submitLastLayer(img);
+
+    if (this.flicker) {
+      if (this.currentFlickerTimeout)
+        this.cancelFlickerTimeout();
+      this.flickerTimeout();
+    }
   }
 
   public selectLayer(layer: Layer) {
@@ -127,8 +133,7 @@ export class WorkViewService implements OnInit {
   }
 
   toggleFlicker() {
-    this.flicker = !this.flicker;
-    if (this.flicker)
+    if (!this.flicker)
       this.startFlicker();
     else
       this.stopFlicker();
@@ -139,30 +144,35 @@ export class WorkViewService implements OnInit {
     this.flickerBaseImage = this.currentImage;
     this.flickerImage = this.currentImage;
     this.snackBar.open("Bitte Bild auswählen");
-
-    this.flickerTimeout();
   }
 
   private flickerTimeout() {
     this.currentFlickerTimeout = setTimeout(() => {
-      if (!this.flicker) {
-        if (this.currentFlickerTimeout)
-          this.cancelFlickerTimeout();
-        return;
-      } else {
-        if (this.currentImage !== this.flickerBaseImage) {
-          this.flickerImage = this.currentImage;
-          this.selectActiveImage(this.flickerBaseImage);
-        } else {
-          this.selectActiveImage(this.flickerImage);
-        }
-      }
-      console.log("flicker")
+      console.log("flicker");
+      if (this.displaySettings.flickerTimer != 0)
+        this.executeFlicker();
+
       this.flickerTimeout();
-    }, 500);
+    }, this.displaySettings.flickerTimer !== 0 ? this.displaySettings.flickerTimer : 50);
+  }
+
+  private executeFlicker() {
+    if (!this.flicker) {
+      if (this.currentFlickerTimeout)
+        this.cancelFlickerTimeout();
+      return;
+    } else {
+      if (this.currentImage !== this.flickerBaseImage) {
+        this.flickerImage = this.currentImage;
+        this.selectActiveImage(this.flickerBaseImage);
+      } else {
+        this.selectActiveImage(this.flickerImage);
+      }
+    }
   }
 
   stopFlicker() {
+    this.flicker = false;
     this.cancelFlickerTimeout();
     this.flickerImage = undefined;
     this.selectActiveImage(this.flickerBaseImage);

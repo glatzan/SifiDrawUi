@@ -46,8 +46,8 @@
 
         grid-area: cc;
         display: grid;
-        grid-template-columns: 150px 400px 200px 250px 250px auto 50px 100px 50px;
-        grid-template-areas: "drawMode contrast mouse colorFiled imageSize . flicker zoom resetBtn";
+        grid-template-columns: 150px 400px 200px 250px 250px auto 40px 150px 100px 40px;
+        grid-template-areas: "drawMode contrast mouse colorFiled imageSize . flicker flickerTime zoom resetBtn";
 
         .drawMode {
           grid-area: drawMode;
@@ -56,6 +56,7 @@
 
         .contrast {
           align-self: center;
+
           .mat-slider-horizontal {
             padding: 0;
             width: 300px;
@@ -67,18 +68,22 @@
           align-self: center;
         }
 
-        .colorFiled{
+        .colorFiled {
           grid-area: colorFiled;
           align-self: center;
         }
 
-        .imageSize{
+        .imageSize {
           grid-area: imageSize;
           align-self: center;
         }
 
+        .flickerTime {
+          grid-area: flickerTime;
+          align-self: center;
+        }
 
-        .flicker-btn{
+        .flicker-btn {
           grid-area: flicker;
           justify-self: center;
           align-self: center;
@@ -117,7 +122,6 @@
       .filterControl {
         grid-area: fc;
         border: 1px solid LightGray;
-        border-radius: 3px;
         border-radius: 3px;
         border-spacing: 0px;
         padding: 3px;

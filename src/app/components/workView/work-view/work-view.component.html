@@ -29,13 +29,18 @@
           Farbe: RGB {{mousePositionInCanvas.color[0]}} {{mousePositionInCanvas.color[1]}} {{mousePositionInCanvas.color[2]}}
         </span>
 
-        <i class="material-icons flicker-btn" (click)="flicker()" title="Flicker" *ngIf="renderComponent">
-          broken_image
-        </i>
 
         <span class="imageSize" *ngIf="renderComponent">
           Bildgröße: {{activeImage.getWidth()}}x{{activeImage.getHeight()}} px (WxH)
         </span>
+
+        <span class="flickerTime" *ngIf="renderComponent">
+          <mat-slider min="0" max="1000" step="50" value="500" style="width: 60px" [(ngModel)]="displaySettings.flickerTimer" (ngModelChange)="onFlickerChange($event)"></mat-slider>
+        </span>
+
+        <i class="material-icons flicker-btn" (click)="flicker()" title="Flicker" *ngIf="renderComponent">
+          broken_image
+        </i>
 
         <span class="zoom" *ngIf="renderComponent">
           Zoom {{currentZoomLevel}} %
