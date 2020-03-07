@@ -9,7 +9,7 @@ import {Observable} from "rxjs";
 import {CImageGroup} from "../model/CImageGroup";
 import {ImageGroupService} from "../service/image-group.service";
 import {Layer} from "../model/layer";
-import {applyToPoints, fromTriangles, fromObject, transform} from "transformation-matrix";
+import {applyToPoints, fromObject, fromTriangles, transform} from "transformation-matrix";
 import {Point} from "../model/point";
 import {LayerType} from "../model/layer-type.enum";
 import {ColorType, PNG} from "pngjs";
@@ -433,6 +433,67 @@ export class FilterCore {
     }));
   }
 
+  histogram(imageOnePos: number, channel: number, histogramOptions?: HistogramOptions) {
+    return flatMap((data: FilterData) => new Observable<FilterData>((observer) => {
+      const source = FilterCore.getImage(imageOnePos, data);
+
+      if (!histogramOptions)
+        histogramOptions = {};
+
+      if (!histogramOptions.targetData)
+        histogramOptions.targetData = "histogram";
+
+      let target = null;
+
+      if (histogramOptions.targetImagePos)
+        target = FilterCore.getImage(histogramOptions.targetImagePos, data);
+
+      if (source === null) {
+        observer.error(`Image not found index img 1 ${imageOnePos} or target ${target}!`);
+      }
+
+      if (channel < 0 || channel > 2) {
+        observer.error(`Channgel r = 0, g = 1, b = 2`);
+      }
+
+      const buff1 = new Buffer(source.data, 'base64');
+      const png1 = PNG.sync.read(buff1);
+
+      const result = new Array<number>(256).fill(0);
+
+      let i = 0;
+      for (let y = 0; y < png1.height; y++) {
+        for (let x = 0; x < png1.width; x++) {
+          const t = png1.data[i + channel];
+          result[t] += 1;
+          i += 4;
+        }
+      }
+
+      if (target) {
+        const canvas = document.createElement("canvas");
+        canvas.width = 510;
+        canvas.height = 510;
+        const cx = canvas.getContext("2d");
+
+        const max = result.reduce((a,b)=>a>b?a:b);
+
+        for (let i = 0; i < result.length; i++) {
+          const height = (result[i] * 510) / max;
+          DrawUtil.drawRect(cx, i * 2, 510 - height, 2, height, "#000");
+        }
+
+        target.data = DrawUtil.canvasAsBase64(canvas);
+      }
+
+
+      data.pushData(histogramOptions.targetData, result);
+      console.log(result)
+      observer.next(data);
+      observer.complete();
+    }));
+  }
+
   /**
    * @param width
    * @param height
@@ -805,4 +866,12 @@ export interface CreateImageOptions {
 
 export interface ApplyTransformationOptions {
   sourceData?: string;
+}
+
+export interface HistogramOptions {
+  targetImagePos?: number
+  targetData?: string
+  clipMin?: number
+  clipMax?: number
+  max?: number
 }
