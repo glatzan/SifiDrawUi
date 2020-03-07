@@ -34,6 +34,8 @@ export class WorkViewService implements OnInit {
 
   @Output() onChangedActiveImage: EventEmitter<ICImage> = new EventEmitter();
 
+  @Output() onAddFlickerImage: EventEmitter<ICImage> = new EventEmitter();
+
   @Output() onDisplayImageRedraw: EventEmitter<void> = new EventEmitter();
 
   @Output() onLayerChange: EventEmitter<Layer> = new EventEmitter();
@@ -41,8 +43,6 @@ export class WorkViewService implements OnInit {
   @Output() highlightLineOfLayer: EventEmitter<Point[]> = new EventEmitter();
 
   @Output() onDisplaySettingsChanged: EventEmitter<CanvasDisplaySettings> = new EventEmitter();
-
-  @Output() activateFlicker: EventEmitter<void> = new EventEmitter();
 
   @Output() onResetCanvasZoom: EventEmitter<void> = new EventEmitter();
 
@@ -52,20 +52,11 @@ export class WorkViewService implements OnInit {
 
   private currentImage: ICImage;
 
-  private flickerImage: ICImage;
-
-  private flickerBaseImage: ICImage;
-
-  private flicker = false;
-
   private lastLayerID: string;
 
   private displaySettings = new CanvasDisplaySettings();
 
   private currentSaveTimeout: any = undefined;
-
-  private currentFlickerTimeout: any = undefined;
-
 
   constructor(private imageService: ImageService,
               private imageGroupService: ImageGroupService,
@@ -73,10 +64,10 @@ export class WorkViewService implements OnInit {
   }
 
   ngOnInit(): void {
+    console.log("Initialize");
   }
 
   public selectImage(image: ICImage) {
-    this.flicker = false;
     if (image instanceof CImageGroup) {
       this.imageGroupService.getImageGroup(image.id, "jpeg").subscribe((group: CImageGroup) => {
         this.submitLoadedImage(group);
@@ -95,15 +86,8 @@ export class WorkViewService implements OnInit {
   public selectActiveImage(image: ICImage) {
     const img = CImageUtil.prepare(image);
     this.currentImage = img;
-    this.forceSave();
     this.onChangedActiveImage.emit(img);
     this.submitLastLayer(img);
-
-    if (this.flicker) {
-      if (this.currentFlickerTimeout)
-        this.cancelFlickerTimeout();
-      this.flickerTimeout();
-    }
   }
 
   public selectLayer(layer: Layer) {
@@ -132,66 +116,10 @@ export class WorkViewService implements OnInit {
     }
   }
 
-  toggleFlicker() {
-    if (!this.flicker)
-      this.startFlicker();
-    else
-      this.stopFlicker();
-  }
-
-  startFlicker() {
-    this.flicker = true;
-    this.flickerBaseImage = this.currentImage;
-    this.flickerImage = this.currentImage;
-    this.snackBar.open("Bitte Bild auswählen");
-  }
-
-  private flickerTimeout() {
-    this.currentFlickerTimeout = setTimeout(() => {
-      console.log("flicker");
-      if (this.displaySettings.flickerTimer != 0)
-        this.executeFlicker();
-
-      this.flickerTimeout();
-    }, this.displaySettings.flickerTimer !== 0 ? this.displaySettings.flickerTimer : 50);
-  }
-
-  private executeFlicker() {
-    if (!this.flicker) {
-      if (this.currentFlickerTimeout)
-        this.cancelFlickerTimeout();
-      return;
-    } else {
-      if (this.currentImage !== this.flickerBaseImage) {
-        this.flickerImage = this.currentImage;
-        this.selectActiveImage(this.flickerBaseImage);
-      } else {
-        this.selectActiveImage(this.flickerImage);
-      }
-    }
-  }
-
-  stopFlicker() {
-    this.flicker = false;
-    this.cancelFlickerTimeout();
-    this.flickerImage = undefined;
-    this.selectActiveImage(this.flickerBaseImage);
-    this.flickerBaseImage = undefined;
-  }
-
-  setFlickerBaseImage(image: ICImage) {
-    this.flickerBaseImage = image;
-  }
-
-
   forceSave() {
     if (this.currentSaveTimeout !== undefined) {
       this.cancelSaveTimeout();
       this.save();
-
-      this.currentSaveTimeout = setTimeout(() => {
-        this.save();
-      }, 1000);
     }
   }
 
@@ -207,11 +135,6 @@ export class WorkViewService implements OnInit {
     this.currentSaveTimeout = undefined;
   }
 
-  private cancelFlickerTimeout(): void {
-    clearTimeout(this.currentFlickerTimeout);
-    this.currentFlickerTimeout = undefined;
-  }
-
   private save() {
     this.imageService.updateICImage(this.image).subscribe(() => {
       console.log('saved');
@@ -224,5 +147,4 @@ export class WorkViewService implements OnInit {
   public getDisplaySettings(): CanvasDisplaySettings {
     return this.displaySettings;
   }
-
 }

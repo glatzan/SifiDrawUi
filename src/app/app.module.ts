@@ -55,6 +55,7 @@ import {EditModeDirective} from './components/editable/edit-mode-directive';
 import {EditableOnEnterDirective} from './components/editable/editable-on-enter-directive';
 import {FocusOnShowDirective} from './components/editable/focus-on-show-directive.directive';
 import { EnumToArrayPipePipe } from './helpers/enum-to-array-pipe.pipe';
+import {WorkViewService} from "./components/workView/work-view.service";
 
 @NgModule({
   declarations: [
@@ -115,7 +116,8 @@ import { EnumToArrayPipePipe } from './helpers/enum-to-array-pipe.pipe';
     {provide: MAT_SNACK_BAR_DEFAULT_OPTIONS, useValue: {duration: 500}},
     {provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true},
     {provide: HTTP_INTERCEPTORS, useClass: ErrorInterceptor, multi: true},
-    {provide: HAMMER_GESTURE_CONFIG, useClass: GestureConfig}],
+    {provide: HAMMER_GESTURE_CONFIG, useClass: GestureConfig},
+    WorkViewService],
   bootstrap: [AppComponent]
 })
 export class AppModule {

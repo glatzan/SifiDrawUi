@@ -1,14 +1,17 @@
-import {Component, OnInit, ViewChild} from '@angular/core';
+import {Component, OnInit, TemplateRef, ViewChild, ViewContainerRef} from '@angular/core';
 import {Dataset} from '../../model/dataset';
 import {DatasetService} from '../../service/dataset.service';
 import {WorkViewService} from '../workView/work-view.service';
 import {ImageGroupService} from '../../service/image-group.service';
-import {MatMenuTrigger} from '@angular/material/menu';
 import {FormArray, FormBuilder, FormControl, FormGroup, Validators} from '@angular/forms';
 import {ICImage} from '../../model/ICImage';
 import {ImageService} from '../../service/image.service';
 import {CImageGroup} from '../../model/CImageGroup';
 import {MatSnackBar} from '@angular/material/snack-bar';
+import {Overlay, OverlayRef} from "@angular/cdk/overlay";
+import {TemplatePortal} from "@angular/cdk/portal";
+import {fromEvent, Subscription} from "rxjs";
+import {filter, take} from "rxjs/operators";
 
 @Component({
   selector: 'app-dataset',
@@ -17,10 +20,11 @@ import {MatSnackBar} from '@angular/material/snack-bar';
 })
 export class DatasetComponent implements OnInit {
 
-  @ViewChild(MatMenuTrigger, {static: false})
-  contextMenu: MatMenuTrigger;
+  @ViewChild('imageMenu', {static: false}) imageMenu: TemplateRef<any>;
 
-   contextMenuPosition = {x: '0px', y: '0px'};
+  overlayRef: OverlayRef | null;
+
+  sub: Subscription;
 
   dataset: Dataset = new Dataset();
 
@@ -31,8 +35,10 @@ export class DatasetComponent implements OnInit {
   selectedImageId: string;
 
   constructor(private datasetService: DatasetService,
+              private overlay: Overlay,
               private workViewService: WorkViewService,
               private imageGroupService: ImageGroupService,
+              public viewContainerRef: ViewContainerRef,
               private formBuilder: FormBuilder,
               private imageService: ImageService,
               private snackBar: MatSnackBar) {
@@ -206,13 +212,57 @@ export class DatasetComponent implements OnInit {
     });
   }
 
-  public onContextMenu($event: MouseEvent) {
-    console.log('asd');
-    $event.preventDefault();
-    this.contextMenuPosition.x = $event.clientX + 'px';
-    this.contextMenuPosition.y = $event.clientY + 'px';
-    this.contextMenu.menuData = {item: 'asd'};
-    this.contextMenu.menu.focusFirstItem('mouse');
-    this.contextMenu.openMenu();
+
+  openContextMenu(event: MouseEvent, image: ICImage) {
+    this.closeOverlayMenu();
+    event.preventDefault();
+    const x = event.pageX;
+    const y = event.pageY;
+
+    const positionStrategy = this.overlay.position()
+      .flexibleConnectedTo({x, y})
+      .withPositions([
+        {
+          originX: 'end',
+          originY: 'bottom',
+          overlayX: 'start',
+          overlayY: 'top',
+        }
+      ]);
+
+    this.overlayRef = this.overlay.create({
+      positionStrategy,
+      scrollStrategy: this.overlay.scrollStrategies.close()
+    });
+
+    this.overlayRef.attach(new TemplatePortal(this.imageMenu, this.viewContainerRef, {
+      $implicit: image
+    }));
+
+    this.sub = fromEvent<MouseEvent>(document, 'click')
+      .pipe(
+        filter(event => {
+          const clickTarget = event.target as HTMLElement;
+          return !!this.overlayRef && !this.overlayRef.overlayElement.contains(clickTarget);
+        }),
+        take(1)
+      ).subscribe((x) => {
+        this.closeOverlayMenu()
+      })
+  }
+
+  closeOverlayMenu() {
+    this.sub && this.sub.unsubscribe();
+    if (this.overlayRef) {
+      this.overlayRef.dispose();
+      this.overlayRef = null;
+    }
+  }
+
+  public delete(item: ICImage) {
+    this.imageService.deleteICImage(item).subscribe(x => {
+      this.reload();
+    });
+    this.closeOverlayMenu();
   }
 }

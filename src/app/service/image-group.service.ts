@@ -46,4 +46,8 @@ export class ImageGroupService {
       })
     );
   }
+
+  public deleteImageGroup(id: string): Observable<any> {
+    return this.http.delete<any>(`${environment.backendUrl}/imagegroup/delete/${id}`);
+  }
 }

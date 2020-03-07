@@ -16,7 +16,7 @@
         <!-- folder -->
         <app-editable #imageGroup
                       (update)="updateField(getIndex(img), 'name')"
-                      (contextmenu)="onContextMenu($event)"
+                      (contextmenu)="openContextMenu($event,img)"
                       [ngClass]="selectedImageId === img.id ? 'selectedElement' : ''"
                       (click)="onSelectImage($event, img)"
                       appEditableOnEnter>
@@ -45,7 +45,7 @@
                         [cdkDragData]="subimage"
                         [cdkDragDisabled]="'edit'===imageEdit.mode"
                         [ngClass]="selectedImageId === subimage.id ? 'selectedElement' : ''"
-                        (contextmenu)="onContextMenu($event)"
+                        (contextmenu)="openContextMenu($event,img)"
                         class="subImage">
             <ng-template appViewMode>
               <div class="holderGrid clickAble">
@@ -71,7 +71,7 @@
         <app-editable *ngIf="img.type === 'img'"
                       #imageEdit
                       (update)="updateField(getIndex(img), 'name')"
-                      (contextmenu)="onContextMenu($event)"
+                      (contextmenu)="openContextMenu($event,img)"
                       (click)="onSelectImage($event, img)"
                       appEditableOnEnter
                       cdkDrag
@@ -97,13 +97,9 @@
   </cdk-virtual-scroll-viewport>
 </div>
 
-<div style="visibility: hidden; position: fixed"
-     [style.left]="contextMenuPosition.x"
-     [style.top]="contextMenuPosition.y"
-     [matMenuTriggerFor]="contextMenu">
-</div>
-<mat-menu #contextMenu="matMenu">
-  <ng-template matMenuContent let-item="item">
-    <button mat-menu-item>Löschen</button>
-  </ng-template>
-</mat-menu>
+<ng-template #imageMenu let-image>
+  <section class="image-menu">
+    <div (click)="delete(image)">{{image.type == "img" ? "Bild löschen" : "Bildergruppe löschen"}}</div>
+    <div>{{image.type == "img" ? "Bild klonen" : "Bildergruppe klonen"}}</div>
+  </section>
+</ng-template>

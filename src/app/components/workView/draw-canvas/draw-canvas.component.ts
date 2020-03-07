@@ -15,6 +15,7 @@ import {Router} from "@angular/router";
 import {MousePosition} from "../../../helpers/mouse-position";
 import {LayerType} from "../../../model/layer-type.enum";
 import {CanvasDisplaySettings, CanvasDrawMode} from "../../../helpers/canvas-display-settings";
+import {FlickerService} from "../flicker.service";
 
 @Component({
   selector: 'app-draw-canvas',
@@ -208,8 +209,7 @@ export class DrawCanvasComponent implements AfterViewInit, OnInit {
   constructor(public imageService: ImageService,
               private snackBar: MatSnackBar,
               private workViewService: WorkViewService,
-              private imageGroupService: ImageGroupService,
-              private router: Router) {
+              private flickerService: FlickerService) {
     // draw on load
     this.drawImage.onload = () => {
       this.drawImageOnCanvas();
@@ -299,6 +299,8 @@ export class DrawCanvasComponent implements AfterViewInit, OnInit {
           this.canvasRedraw();
         } else if ($event.key === 'r') {
           this.canvasResetZoom();
+        } else if ($event.key === 't') {
+          this.flickerService.toggleImage();
         } else {
           console.log($event.key);
         }

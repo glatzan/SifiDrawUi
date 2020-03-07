@@ -59,6 +59,18 @@ export class ImageService {
     );
   }
 
+  public deleteImage(id: string): Observable<any> {
+    return this.http.delete<any>(`${environment.backendUrl}/image/delete/${id}`, ImageService.httpJsonContent);
+  }
+
+  public deleteICImage(image: ICImage): Observable<any> {
+    if (image instanceof CImage) {
+      return this.deleteImage(image.id);
+    } else {
+      return this.imageGroupService.deleteImageGroup(image.id);
+    }
+  }
+
   public updateICImage(image: ICImage): Observable<any> {
     if (image instanceof CImage) {
       return this.updateImage(image);

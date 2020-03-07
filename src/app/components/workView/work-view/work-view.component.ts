@@ -5,7 +5,7 @@ import {MousePosition} from "../../../helpers/mouse-position";
 import {CanvasDisplaySettings} from "../../../helpers/canvas-display-settings";
 import {CImageGroup} from "../../../model/CImageGroup";
 import {MatSnackBar} from "@angular/material/snack-bar";
-import {MatSliderChange} from "@angular/material/slider";
+import {FlickerService} from "../flicker.service";
 
 @Component({
   selector: 'app-work-view',
@@ -15,6 +15,7 @@ import {MatSliderChange} from "@angular/material/slider";
 export class WorkViewComponent implements OnInit {
 
   constructor(private workViewService: WorkViewService,
+              private flickerService: FlickerService,
               private snackBar: MatSnackBar) {
   }
 
@@ -58,13 +59,38 @@ export class WorkViewComponent implements OnInit {
   }
 
   public flicker() {
-    if (this.parentImage instanceof CImageGroup)
-      this.workViewService.toggleFlicker();
-    else
-      this.snackBar.open("Flicker nur mit einer Bildergruppe möglich")
+    if (this.parentImage instanceof CImageGroup) {
+      if (!this.flickerService.isActive()) {
+        this.flickerService.addImage(this.activeImage);
+        this.flickerService.armFlicker(this.displaySettings.flickerTimer);
+        this.snackBar.open("Bitte Bild auswählen", '', {
+          duration: 1000
+        });
+      } else {
+        this.flickerService.stopFlicker();
+      }
+    } else
+      this.snackBar.open("Flicker nur mit einer Bildergruppe möglich", '', {
+        duration: 1000
+      });
+  }
+
+  public onFlickerChange($event) {
+    if (this.flickerService.isActive()) {
+      if ($event === 0) {
+        this.snackBar.open("Toggel per Tase T", '', {
+          duration: 3000
+        });
+      }
+      this.flickerService.updateFlickerTimer($event);
+    }
   }
 
   public changeDrawMode() {
     this.workViewService.onDisplaySettingsChanged.emit();
+  }
+
+  flickerActive(){
+    return this.flickerService.isActive();
   }
 }

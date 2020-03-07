@@ -2,6 +2,8 @@ import {Component, OnInit} from '@angular/core';
 import {CImage} from '../../../model/CImage';
 import {WorkViewService} from '../work-view.service';
 import {CImageGroup} from '../../../model/CImageGroup';
+import {FlickerService} from "../flicker.service";
+import CImageUtil from "../../../utils/cimage-util";
 
 @Component({
   selector: 'app-sub-image-list',
@@ -12,7 +14,8 @@ export class SubImageListComponent implements OnInit {
 
   imageArray: Array<CImage> = [];
 
-  constructor(private workViewService: WorkViewService) {
+  constructor(private workViewService: WorkViewService,
+              private flickerService: FlickerService) {
   }
 
   ngOnInit() {
@@ -33,7 +36,11 @@ export class SubImageListComponent implements OnInit {
   }
 
   public selectImage(image: CImage) {
-    this.workViewService.selectActiveImage(image);
+    if (this.flickerService.isActive()) {
+      this.workViewService.onAddFlickerImage.emit(CImageUtil.prepare(image))
+    } else {
+      this.workViewService.selectActiveImage(image);
+    }
   }
 
 }
