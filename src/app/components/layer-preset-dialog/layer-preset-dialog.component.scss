@@ -1,0 +1,98 @@
+.dialog {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+
+  .dialogContent {
+    padding: 5px 20px;
+    display: grid;
+    grid-template-columns: repeat(4, 4fr);
+    grid-template-rows: repeat(6, 70px) auto;
+    grid-column-gap: 5px;
+    align-content: center;
+    grid-template-areas: "selectLayer selectLayer selectLayer selectLayer" "layeridText layerid nameText name" "labelSettingsText labelSettings layerTypeText layerType";
+
+    .selectLayer {
+      grid-area: selectLayer;
+      align-self: center;
+    }
+
+    .layeridText{
+      grid-area: layeridText;
+      align-self: center;
+    }
+
+    .layerID {
+      grid-area: layerid;
+      align-self: center;
+      margin-left: 10px;
+
+      .idInput {
+        margin-left: 10px;
+        width: 50px;
+      }
+    }
+
+    .nameText{
+      grid-area: nameText;
+      align-self: center;
+    }
+
+    .name {
+      grid-area: name;
+      align-self: center;
+
+      .nameInput {
+        margin-left: 10px;
+      }
+    }
+
+    .labelSettingsText {
+      grid-area: labelSettingsText;
+      align-self: center;
+    }
+
+    .labelSettings {
+      grid-area: labelSettings;
+
+      .settingElement {
+        margin-left: 15px;
+        width: 50px;
+      }
+    }
+
+    .layerTypeText{
+      grid-area: layerTypeText;
+      align-self: center;
+    }
+
+    .layerType {
+      grid-area: layerType;
+      align-self: center;
+    }
+
+  }
+
+  .btnContainer {
+    width: 100%;
+    display: grid;
+    grid-column-gap: 15px;
+    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-rows: auto;
+    grid-template-areas: "newBtn . createAbortBtn";
+
+    .newBtn {
+      grid-area: newBtn;
+      justify-self: left;
+    }
+
+    .createAbortBtn {
+      grid-area: createAbortBtn;
+      justify-self: right;
+    }
+  }
+
+  .spacer {
+    flex-grow: 1;
+  }
+}

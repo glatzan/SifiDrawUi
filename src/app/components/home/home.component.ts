@@ -1,4 +1,4 @@
-import {AfterViewInit, Component, OnInit} from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 import {FilterService} from '../../service/filter.service';
 import {ImageService} from '../../service/image.service';
 import {ImageMagicService} from '../../service/image-magic.service';
@@ -14,6 +14,7 @@ import {CreateProjectDialogComponent} from '../create-project-dialog/create-proj
 import {WorkViewService} from '../workView/work-view.service';
 import {FileUploadDialogComponent} from '../file-upload-dialog/file-upload-dialog.component';
 import {FilterSet} from "../../model/FilterSet";
+import {LayerPresetDialogComponent} from "../layer-preset-dialog/layer-preset-dialog.component";
 
 @Component({
   selector: 'app-home',
@@ -108,6 +109,16 @@ export class HomeComponent implements OnInit {
     });
   }
 
+  openUserSettingsDialog(): void {
+    const dialogRef = this.dialog.open(LayerPresetDialogComponent, {
+      height: '768px',
+      width: '1024px'
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      this.authenticationService.loadUserSettings();
+    });
+  }
 
   logout() {
     this.authenticationService.logout();

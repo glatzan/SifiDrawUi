@@ -3,6 +3,7 @@ import {Layer} from '../model/layer';
 import {Point} from '../model/point';
 import {ICImage} from '../model/ICImage';
 import {CImageGroup} from '../model/CImageGroup';
+import {LayerType} from "../model/layer-type.enum";
 
 export default class CImageUtil {
 
@@ -102,15 +103,15 @@ export default class CImageUtil {
     line.push(new Point(x, y));
   }
 
-  static findOrAddLayer(image: ICImage, layerID: string) {
+  static findOrAddLayer(image: ICImage, layerID: string, layerPresets?: Layer[]) {
     if (!CImageUtil.hasLayer(image)) {
-      return CImageUtil.addLayer(image, layerID);
+      return CImageUtil.addLayer(image, layerPresets, layerID);
     } else {
       const tmp = CImageUtil.findLayer(image, layerID);
       if (tmp != null) {
         return tmp;
       }
-      return CImageUtil.addLayer(image, layerID);
+      return CImageUtil.addLayer(image, layerPresets, layerID);
     }
   }
 
@@ -135,33 +136,71 @@ export default class CImageUtil {
     if (i === img.getLayers().length)
       return false;
 
-    img.getLayers().splice(i, 1)
+    img.getLayers().splice(i, 1);
 
     return true;
   }
 
-  static addLayer(img: ICImage, layerID?: string): Layer {
+  static addLayer(img: ICImage, layerPresets?: Layer[], layerID?: string): Layer {
     if (!CImageUtil.hasLayer(img)) {
       img.setLayers([new Layer(layerID ? layerID : '1')]);
       return img.getLayers()[0];
     }
 
-    let color = '#ffffff';
+    layerID = layerID ? layerID : this.getNewLayerName(img);
 
-    try {
-      const c = parseInt(layerID, 10);
-      if (c - 1 > 0 && c - 1 < CImageUtil.colors.length) {
-        color = CImageUtil.colors[c - 1];
+    let color = this.getColor(layerID);
+    let size = 1;
+    let type = LayerType.Line;
+
+    if (layerPresets) {
+      const searchLayer = this.findPreset(layerPresets, layerID);
+      if (searchLayer) {
+        color = searchLayer.color;
+        size = searchLayer.size;
+        type = searchLayer.type;
       }
-    } catch (e) {
     }
 
-    img.setLayers([...img.getLayers(), (new Layer(layerID ? layerID : '' + (img.getLayers().length + 1)))]);
-    img.getLayers()[img.getLayers().length - 1].color = color;
+    const newLayer = new Layer(layerID);
+    newLayer.color = color;
+    newLayer.size = size;
+    newLayer.type = type;
+    img.setLayers([...img.getLayers(), newLayer]);
     return img.getLayers()[img.getLayers().length - 1];
   }
 
   static hasLayer(img: ICImage) {
     return img.getLayers() !== undefined && img.getLayers().length !== 0;
+  }
+
+  static findPreset(layers: Layer[], newLayerID: string): Layer {
+    for(const layer of layers){
+      if(layer.id === newLayerID){
+        return layer;
+      }
+    }
+    return null
+  }
+
+  static getNewLayerName(image: ICImage) {
+    let layerName = image.getLayers().length + 1;
+
+    while (this.findLayer(image, String(layerName))) {
+      layerName++;
+    }
+
+    return String(layerName);
+  }
+
+  private static getColor(id: string) {
+    try {
+      const c = parseInt(id, 10);
+      if (c - 1 > 0 && c - 1 < CImageUtil.colors.length) {
+        return CImageUtil.colors[c - 1];
+      }
+    } catch (e) {
+      return "#fff"
+    }
   }
 }

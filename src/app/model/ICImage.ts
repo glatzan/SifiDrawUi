@@ -16,4 +16,6 @@ export interface ICImage {
   getWidth();
 
   getFileExtension();
+
+  hasData();
 }

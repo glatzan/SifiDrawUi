@@ -15,6 +15,15 @@
 
   <mat-checkbox [(ngModel)]="displaySettings.displayLayer" (change)="onDisplaySettingsChanged($event)" class="hideLine">Layer anzeigen</mat-checkbox>
 
+  <div class="copyLayer">
+    <button mat-icon-button class="addButton" (click)="copyLayersFromClipboardToImage($event)" title="Layer aus Zwischenablage der in Bild kopieren" [disabled]="!isLayerClipboardEmpty()">
+      <mat-icon>layers_icon</mat-icon>
+    </button>
+    <button mat-icon-button class="removeButton" (click)="copyLayersToClipboard($event)" title="Layer in die Zwischenablage kopieren">
+      <mat-icon>file_copy_icon</mat-icon>
+    </button>
+  </div>
+
   <div class="labelSelectText">
     Label:
   </div>
@@ -27,13 +36,12 @@
       </mat-select>
     </mat-form-field>
 
-    <button mat-icon-button class="addButton" (click)="onAddLayer($event)">
+    <button mat-icon-button class="addButton" (click)="onAddLayer($event)" title="Layer hinzufügen">
       <mat-icon>playlist_add</mat-icon>
     </button>
-    <button mat-icon-button class="removeButton" (click)="onRemoveLayer($event)">
+    <button mat-icon-button class="removeButton" (click)="onRemoveLayer($event)" title="Layer löschen">
       <mat-icon>delete sweep icon</mat-icon>
     </button>
-
   </div>
 
   <div class="layerID">

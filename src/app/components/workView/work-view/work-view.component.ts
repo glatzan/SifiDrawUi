@@ -39,13 +39,14 @@ export class WorkViewComponent implements OnInit {
     this.workViewService.onChangedParentImage.subscribe(image => {
       this.parentImage = image;
       this.activeImage = image;
-      this.renderComponent = true;
+      this.renderComponent = image.hasData();
       this.renderColor = false;
       this.mousePositionInCanvas.clear();
     });
 
     this.workViewService.onChangedActiveImage.subscribe(image => {
       this.activeImage = image;
+      this.renderComponent = image.hasData();
     });
 
     this.workViewService.onMouseCoordinatesCanvasChanged.subscribe(v => {

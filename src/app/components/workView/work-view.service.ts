@@ -68,18 +68,24 @@ export class WorkViewService implements OnInit {
   }
 
   public selectImage(image: ICImage) {
-    if (image instanceof CImageGroup) {
-      this.imageGroupService.getImageGroup(image.id, "jpeg").subscribe((group: CImageGroup) => {
-        this.submitLoadedImage(group);
-      }, message => {
-        console.error(message);
-      });
+
+    if (image.id == null) {
+      this.submitLoadedImage(image);
     } else {
-      this.imageService.getImage(image.id, "jpeg").subscribe((image: CImage) => {
-        this.submitLoadedImage(image);
-      }, message => {
-        console.error(message);
-      });
+
+      if (image instanceof CImageGroup) {
+        this.imageGroupService.getImageGroup(image.id, "jpeg").subscribe((group: CImageGroup) => {
+          this.submitLoadedImage(group);
+        }, message => {
+          console.error(message);
+        });
+      } else {
+        this.imageService.getImage(image.id, "jpeg").subscribe((image: CImage) => {
+          this.submitLoadedImage(image);
+        }, message => {
+          console.error(message);
+        });
+      }
     }
   }
 
@@ -93,6 +99,10 @@ export class WorkViewService implements OnInit {
   public selectLayer(layer: Layer) {
     this.lastLayerID = layer.id;
     this.onLayerChange.emit(layer);
+  }
+
+  public restoreLastSelectedLayer() {
+    this.submitLastLayer(this.currentImage);
   }
 
   private submitLoadedImage(image: ICImage) {
@@ -136,12 +146,14 @@ export class WorkViewService implements OnInit {
   }
 
   private save() {
-    this.imageService.updateICImage(this.image).subscribe(() => {
-      console.log('saved');
-    }, error1 => {
-      console.log('Fehler beim laden der Dataset Datein');
-      console.error(error1);
-    });
+    if (this.image.id != null) {
+      this.imageService.updateICImage(this.image).subscribe(() => {
+        console.log('saved');
+      }, error1 => {
+        console.log('Fehler beim laden der Dataset Datein');
+        console.error(error1);
+      });
+    }
   }
 
   public getDisplaySettings(): CanvasDisplaySettings {

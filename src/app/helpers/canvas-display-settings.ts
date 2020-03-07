@@ -3,6 +3,8 @@ export class CanvasDisplaySettings {
   displayLayer = true;
   eraserSize = 40;
   enableDrawing = true;
+  oldStatusEnableDrawing = true;
+  enableDrawingSliderDisabled = false;
   flickerTimer = 500;
 }
 

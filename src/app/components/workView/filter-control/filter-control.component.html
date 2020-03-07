@@ -1,8 +1,5 @@
 <div class="content">
   <mat-tab-group class="tabs" dynamicHeight [(selectedIndex)]="tabIndex">
-    <mat-tab label="Info">
-      {{selectedFilter ? selectedFilter.comment : ""}}
-    </mat-tab>
     <mat-tab label="Filter">
       <mat-form-field floatLabel="always" class="filter">
     <textarea matInput placeholder="Filter" style="white-space: nowrap;" [(ngModel)]="filterValue" rows="20"
@@ -11,6 +8,9 @@
     </mat-tab>
     <mat-tab label="Ausgabe">
       <p [innerHtml]="filterResultData"></p>
+    </mat-tab>
+    <mat-tab label="Info">
+      {{selectedFilter ? selectedFilter.comment : ""}}
     </mat-tab>
   </mat-tab-group>
 

@@ -1,0 +1,75 @@
+<div class="dialog">
+  <div mat-dialog-title>Vorlagen</div>
+
+  <div mat-dialog-content class="dialogContent">
+
+    <mat-form-field class="selectLayer">
+      <mat-select [(ngModel)]="selectedLayerSetting" placeholder="Layer Vorlage">
+        <mat-option *ngFor="let layer of userSettings.defaultLayerSettings" [value]="layer">
+          {{layer.name}}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <div class="layeridText">
+      ID:
+    </div>
+    <div class="layerID">
+      <mat-form-field class="idInput">
+        <input matInput [(ngModel)]="selectedLayerSetting.id" (ngModelChange)="onChange($event)">
+      </mat-form-field>
+    </div>
+
+    <div class="nameText">
+      Name:
+    </div>
+    <div class="name">
+      <mat-form-field class="nameInput">
+        <input matInput [(ngModel)]="selectedLayerSetting.name" (ngModelChange)="onChange($event)">
+      </mat-form-field>
+    </div>
+
+    <div class="labelSettingsText">
+      Einstellung:
+    </div>
+    <div class="labelSettings">
+      <mat-form-field class="settingElement">
+        <input matInput [(ngModel)]="selectedLayerSetting.color" placeholder="Farbe" (change)="onChange($event)"
+               type="color"/>
+      </mat-form-field>
+
+      <mat-form-field class="settingElement">
+        <input matInput [(ngModel)]="selectedLayerSetting.size" placeholder="Dicke" (change)="onChange($event)"
+               type="number" min="1"
+               id="myNumber"/>
+      </mat-form-field>
+    </div>
+
+    <div class="layerTypeText">
+      Typ:
+    </div>
+    <div class="layerType">
+      <mat-form-field class="settingElement" style="margin-left: 5px">
+        <mat-select [(ngModel)]="selectedLayerSetting.type" (ngModelChange)="onChange($event)">
+          <mat-option *ngFor="let layerType of layerTypes | enumToArrayPipe" [value]="layerType.index">
+            {{layerType.name}}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+  </div>
+
+  <div class="spacer"></div>
+
+  <div mat-dialog-actions class="btnContainer">
+    <div class="addBtn">
+      <button mat-stroked-button class="addBtn" (click)="newLayer()">Neuer Layer</button>
+      <button mat-stroked-button class="addBtn" (click)="delete()" [disabled]="selectedLayerSetting == null">Löschen
+      </button>
+    </div>
+    <div class="createAbortBtn">
+      <button mat-stroked-button class="addBtn" (click)="saveSettings()" [disabled]="!contentChanged">Save</button>
+      <button mat-stroked-button class="addBtn" (click)="close()">Close</button>
+    </div>
+  </div>
+</div>

@@ -4,18 +4,17 @@ import VectorUtils from '../../../utils/vector-utils';
 import {Point} from '../../../model/point';
 import DrawUtil from '../../../utils/draw-util';
 import {ImageService} from '../../../service/image.service';
-import {CImage} from '../../../model/CImage';
 import CImageUtil from '../../../utils/cimage-util';
 import {PointTracker} from '../../../utils/point-tracker';
 import {MatSnackBar} from '@angular/material';
 import {WorkViewService} from '../work-view.service';
 import {ICImage} from '../../../model/ICImage';
-import {ImageGroupService} from '../../../service/image-group.service';
-import {Router} from "@angular/router";
 import {MousePosition} from "../../../helpers/mouse-position";
 import {LayerType} from "../../../model/layer-type.enum";
 import {CanvasDisplaySettings, CanvasDrawMode} from "../../../helpers/canvas-display-settings";
 import {FlickerService} from "../flicker.service";
+import {CImageGroup} from "../../../model/CImageGroup";
+import {AuthenticationService} from "../../../service/authentication.service";
 
 @Component({
   selector: 'app-draw-canvas',
@@ -209,7 +208,8 @@ export class DrawCanvasComponent implements AfterViewInit, OnInit {
   constructor(public imageService: ImageService,
               private snackBar: MatSnackBar,
               private workViewService: WorkViewService,
-              private flickerService: FlickerService) {
+              private flickerService: FlickerService,
+              private authenticationService: AuthenticationService) {
     // draw on load
     this.drawImage.onload = () => {
       this.drawImageOnCanvas();
@@ -290,7 +290,7 @@ export class DrawCanvasComponent implements AfterViewInit, OnInit {
           // previouse image
           this.workViewService.prevSelectImageInDataset.emit();
         } else if (!isNaN(Number($event.key))) {
-          const layer = CImageUtil.findOrAddLayer(this.image, $event.key);
+          const layer = CImageUtil.findOrAddLayer(this.image, $event.key, this.authenticationService.currentUserSettingsValue.defaultLayerSettings);
           this.currentLayer= layer;
           this.snackBar.open(`Layer ${layer.id} ausgewählt`);
         } else if ($event.key === 'h') {
@@ -349,7 +349,7 @@ export class DrawCanvasComponent implements AfterViewInit, OnInit {
     this.image = image;
     this.currentLayer = new Layer('-');
 
-    if (image.getData()) {
+    if (image.hasData()) {
       this.drawImage.src = `data:image/${image.getFileExtension()};base64,` + this.image.getData();
 
       // setting layer settings
@@ -357,6 +357,20 @@ export class DrawCanvasComponent implements AfterViewInit, OnInit {
       this.cx.lineCap = 'round';
       this.cx.strokeStyle = image.getLayers()[0].color || '#fff';
       this.cx.fillStyle = image.getLayers()[0].color || '#fff';
+
+      if (this.displaySettings.enableDrawingSliderDisabled) {
+        this.displaySettings.enableDrawing = this.displaySettings.oldStatusEnableDrawing;
+        this.displaySettings.enableDrawingSliderDisabled = false;
+      }
+
+    } else {
+      if (image instanceof CImageGroup)
+        this.drawImage.src = "assets/emptyImageGroup.jpg";
+      else
+        this.drawImage.src = "assets/selectImage.jpg";
+      this.displaySettings.oldStatusEnableDrawing = this.displaySettings.enableDrawing;
+      this.displaySettings.enableDrawing = false;
+      this.displaySettings.enableDrawingSliderDisabled = true;
     }
   }
 

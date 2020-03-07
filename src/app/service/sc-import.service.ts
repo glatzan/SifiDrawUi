@@ -4,23 +4,25 @@ import CImageUtil from "../utils/cimage-util";
 import {ImageService} from "./image.service";
 import {forkJoin, Observable} from 'rxjs';
 import {flatMap} from "rxjs/operators";
+import {AuthenticationService} from "./authentication.service";
 
 @Injectable({
   providedIn: 'root'
 })
 export class ScImportService {
 
-  constructor(public imageService: ImageService) {
+  constructor(public imageService: ImageService,
+              private authenticationService: AuthenticationService) {
   }
 
 
   public processData(mapping: { maxX: number, maxY: number, checkImage: boolean, maps: [{ name: string, path: string, prefix?: string, suffix?: string }] }, idata: [{ id: number, x: number, y: number, tag: string, name: string, idimage: string, idanalysis: string }]): Observable<any> {
 
     const simpleObservable = new Observable((observer) => {
-        let arr: { [key: string]: CImage } = {};
-        let missingMappings = new Set();
+      let arr: { [key: string]: CImage } = {};
+      let missingMappings = new Set();
 
-        const colors = ['#FFFFFF', '#2919ff', '#FF33FF', '#FFFF99', '#00B3E6',
+      const colors = ['#FFFFFF', '#2919ff', '#FF33FF', '#FFFF99', '#00B3E6',
           '#E6B333', '#3366E6', '#999966', '#99FF99', '#B34D4D',
           '#80B300', '#809900', '#E6B3B3', '#6680B3', '#66991A',
           '#FF99E6', '#CCFF1A', '#FF1A66', '#E6331A', '#33FFCC',
@@ -51,7 +53,7 @@ export class ScImportService {
             arr[col.name] = img;
           }
 
-          const layer = CImageUtil.findOrAddLayer(img, col.tag + 1);
+          const layer = CImageUtil.findOrAddLayer(img, col.tag + 1, this.authenticationService.currentUserSettingsValue.defaultLayerSettings);
           layer.color = colors[col.tag];
           const lastLIne = CImageUtil.initLastLineOfLayer(layer);
 

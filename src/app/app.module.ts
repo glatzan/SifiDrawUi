@@ -56,6 +56,7 @@ import {EditableOnEnterDirective} from './components/editable/editable-on-enter-
 import {FocusOnShowDirective} from './components/editable/focus-on-show-directive.directive';
 import { EnumToArrayPipePipe } from './helpers/enum-to-array-pipe.pipe';
 import {WorkViewService} from "./components/workView/work-view.service";
+import { LayerPresetDialogComponent } from './components/layer-preset-dialog/layer-preset-dialog.component';
 
 @NgModule({
   declarations: [
@@ -80,6 +81,7 @@ import {WorkViewService} from "./components/workView/work-view.service";
     EditableOnEnterDirective,
     FocusOnShowDirective,
     EnumToArrayPipePipe,
+    LayerPresetDialogComponent,
   ],
   imports: [
     HttpClientModule,
@@ -111,7 +113,7 @@ import {WorkViewService} from "./components/workView/work-view.service";
     MaterialFileInputModule,
     DragDropModule
   ],
-  entryComponents: [ExportDialogComponent, ImportDialogComponent, FilterSetDialogComponent, CreateProjectDialogComponent, FileUploadDialogComponent],
+  entryComponents: [ExportDialogComponent, ImportDialogComponent, FilterSetDialogComponent, CreateProjectDialogComponent, FileUploadDialogComponent,LayerPresetDialogComponent],
   providers: [
     {provide: MAT_SNACK_BAR_DEFAULT_OPTIONS, useValue: {duration: 500}},
     {provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true},

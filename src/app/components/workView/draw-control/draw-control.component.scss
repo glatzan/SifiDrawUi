@@ -16,7 +16,7 @@
   grid-template-rows: repeat(6, 70px) auto;
   grid-column-gap: 5px;
   align-content: center;
-  grid-template-areas: "mode mode hide hide" "labelSelectText labelSelect . ." ". layerid name name" "labelSettingsText labelSettings layerType layerType" "sublinesText sublines sublines sublinesHelp" "eraserText eraser eraserHelp eraserHelp";
+  grid-template-areas: "mode mode hide copyLayer" "labelSelectText labelSelect . ." ". layerid name name" "labelSettingsText labelSettings layerType layerType" "sublinesText sublines sublines sublinesHelp" "eraserText eraser eraserHelp eraserHelp";
 
   .modus {
     grid-area: mode;
@@ -25,6 +25,12 @@
     .modusBtn {
       margin-left: 15px;
     }
+  }
+
+  .copyLayer{
+    grid-area: copyLayer;
+    align-self: center;
+    justify-self: right;
   }
 
   .hideLine {
@@ -42,7 +48,7 @@
 
     .settingElement {
       margin-left: 15px;
-      width: 50px;
+      width: 70px;
     }
   }
 

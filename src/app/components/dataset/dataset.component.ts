@@ -12,6 +12,7 @@ import {Overlay, OverlayRef} from "@angular/cdk/overlay";
 import {TemplatePortal} from "@angular/cdk/portal";
 import {fromEvent, Subscription} from "rxjs";
 import {filter, take} from "rxjs/operators";
+import {CImage} from "../../model/CImage";
 
 @Component({
   selector: 'app-dataset',
@@ -62,8 +63,12 @@ export class DatasetComponent implements OnInit {
 
   public loadDataset(datasetID: string) {
     this.datasetService.getDataset(datasetID).subscribe((data: Dataset) => {
-      if (this.dataset.id !== data.id && data.images.length > 0) {
-        this.onSelectImage('', data.images[0]);
+      if (this.dataset.id !== data.id) {
+        if(data.images.length > 0) {
+          this.onSelectImage('', data.images[0]);
+        }else{
+          this.onSelectImage('', new CImage());
+        }
       }
       this.dataset = data;
       this.datasetSelected = true;

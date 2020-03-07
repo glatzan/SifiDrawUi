@@ -5,6 +5,7 @@ import CImageUtil from '../../../utils/cimage-util';
 import {ICImage} from "../../../model/ICImage";
 import {LayerType} from "../../../model/layer-type.enum";
 import {CanvasDisplaySettings} from "../../../helpers/canvas-display-settings";
+import {AuthenticationService} from "../../../service/authentication.service";
 
 @Component({
   selector: 'app-draw-control',
@@ -23,7 +24,10 @@ export class DrawControlComponent implements OnInit {
 
   layerTypes = LayerType;
 
-  constructor(private workViewService: WorkViewService) {
+  layerClipboard: Layer[];
+
+  constructor(private workViewService: WorkViewService,
+              private authenticationService: AuthenticationService) {
   }
 
   ngOnInit() {
@@ -31,15 +35,17 @@ export class DrawControlComponent implements OnInit {
 
     this.workViewService.onChangedParentImage.subscribe(image => {
       this.image = image;
+      this.renderComponent = this.image.hasData();
     });
 
     this.workViewService.onChangedActiveImage.subscribe( image => {
       this.image = image;
+      this.renderComponent = this.image.hasData();
     });
 
     this.workViewService.onLayerChange.subscribe(x => {
       this.currentLayer = x;
-      this.renderComponent = true;
+      this.renderComponent = this.image.hasData();
     });
   }
 
@@ -53,7 +59,8 @@ export class DrawControlComponent implements OnInit {
   }
 
   public onAddLayer($event) {
-    this.currentLayer = CImageUtil.addLayer(this.image);
+    console.log(this.authenticationService.currentUserSettingsValue);
+    this.currentLayer = CImageUtil.addLayer(this.image, this.authenticationService.currentUserSettingsValue.defaultLayerSettings);
     this.onChange($event);
     this.onLayerChange($event);
   }
@@ -62,7 +69,7 @@ export class DrawControlComponent implements OnInit {
     CImageUtil.removeLayer(this.image, this.currentLayer.id);
 
     if (this.image.getLayers().length === 0)
-      CImageUtil.addLayer(this.image);
+      CImageUtil.addLayer(this.image, this.authenticationService.currentUserSettingsValue.defaultLayerSettings);
 
     this.currentLayer = this.image.getLayers()[0];
     this.onChange($event);
@@ -86,6 +93,20 @@ export class DrawControlComponent implements OnInit {
     }
     // preventing default ctrl click
     return $event.preventDefault() && false;
+  }
+
+  isLayerClipboardEmpty() {
+    return this.layerClipboard != null
+  }
+
+  copyLayersToClipboard($event) {
+    this.layerClipboard = this.image.getLayers()
+  }
+
+  copyLayersFromClipboardToImage($event) {
+    this.image.setLayers(this.layerClipboard);
+    this.onChange(null);
+    this.workViewService.restoreLastSelectedLayer()
   }
 }
 

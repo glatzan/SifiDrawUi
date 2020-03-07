@@ -32,7 +32,11 @@ export class CImage implements ICImage {
     return this.width;
   }
 
-  public getFileExtension(){
+  public getFileExtension() {
     return this.fileExtension;
+  }
+
+  public hasData() {
+    return this.data != null && this.data.length > 0
   }
 }
