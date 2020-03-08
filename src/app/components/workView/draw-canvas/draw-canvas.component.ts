@@ -282,6 +282,7 @@ export class DrawCanvasComponent implements AfterViewInit, OnInit {
 
     window.addEventListener('keydown', ($event) => {
       if (me.image && me.imageSettings.acceptKeyInput) {
+        this.workViewService.onKeyPressedOverCanvas.emit({key: $event.key, mousePosition: this.lastMousePoint})
         if ($event.key === ' ' || $event.key === 'ArrowDown') {
           // next image
           this.workViewService.nextSelectImageInDataset.emit();

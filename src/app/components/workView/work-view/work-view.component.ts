@@ -6,6 +6,10 @@ import {CanvasDisplaySettings} from "../../../helpers/canvas-display-settings";
 import {CImageGroup} from "../../../model/CImageGroup";
 import {MatSnackBar} from "@angular/material/snack-bar";
 import {FlickerService} from "../flicker.service";
+import {FilterHelper} from "../../../worker/filter/filter-helper";
+import {ContrastFilter} from "../../../worker/filter/contrast-filter";
+import {CImage} from "../../../model/CImage";
+import {MatSliderChange} from "@angular/material/slider";
 
 @Component({
   selector: 'app-work-view',
@@ -33,12 +37,17 @@ export class WorkViewComponent implements OnInit {
 
   activeImage: ICImage;
 
+  contrastCopy: ICImage;
+
+  contrast: number = 1;
+
   ngOnInit() {
     this.displaySettings = this.workViewService.getDisplaySettings();
 
     this.workViewService.onChangedParentImage.subscribe(image => {
       this.parentImage = image;
       this.activeImage = image;
+      this.contrastCopy = image;
       this.renderComponent = image.hasData();
       this.renderColor = false;
       this.mousePositionInCanvas.clear();
@@ -47,6 +56,11 @@ export class WorkViewComponent implements OnInit {
     this.workViewService.onChangedActiveImage.subscribe(image => {
       this.activeImage = image;
       this.renderComponent = image.hasData();
+
+      if (this.activeImage.id !== "contrast") {
+        this.contrastCopy = image;
+      }
+
     });
 
     this.workViewService.onMouseCoordinatesCanvasChanged.subscribe(v => {
@@ -91,7 +105,19 @@ export class WorkViewComponent implements OnInit {
     this.workViewService.onDisplaySettingsChanged.emit();
   }
 
-  flickerActive(){
+  onContrastChange($event: MatSliderChange) {
+    console.log($event.value);
+    if ($event.value === 1) {
+      this.workViewService.onChangedActiveImage.emit(this.contrastCopy);
+    } else {
+      const target = FilterHelper.createNewImage(this.activeImage.getWidth(), this.activeImage.getHeight(), "#000","contrast");
+      const contrastFilter = new ContrastFilter(null);
+      const img = contrastFilter.doFilter(this.contrastCopy as CImage, target, $event.value);
+      this.workViewService.onChangedActiveImage.emit(target);
+    }
+  }
+
+  flickerActive() {
     return this.flickerService.isActive();
   }
 }

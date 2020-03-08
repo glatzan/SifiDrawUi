@@ -1,48 +1,25 @@
-import {ImageService} from "../service/image.service";
-import {ProcessCallback} from "./processCallback";
-import {DisplayCallback} from "./display-callback";
 import {CImage} from "../model/CImage";
 import {flatMap, map} from "rxjs/operators";
 import {ICImage} from "../model/ICImage";
 import {FilterData} from "./filter-data";
 import {Observable} from "rxjs";
 import {CImageGroup} from "../model/CImageGroup";
-import {ImageGroupService} from "../service/image-group.service";
 import {Layer} from "../model/layer";
 import {applyToPoints, fromObject, fromTriangles, transform} from "transformation-matrix";
 import {Point} from "../model/point";
 import {LayerType} from "../model/layer-type.enum";
 import {ColorType, PNG} from "pngjs";
-import CImageUtil from "../utils/cimage-util";
 import DrawUtil from "../utils/draw-util";
+import {ContrastFilter} from "./filter/contrast-filter";
+import {Services} from "./filter/abstract-filter";
+import {FilterHelper} from "./filter/filter-helper";
 
 export class FilterCore {
 
+  services: Services;
 
-  imageService: ImageService;
-
-  imageGroupService: ImageGroupService;
-
-  processCallback: ProcessCallback;
-
-  displayCallback: DisplayCallback;
-
-
-  constructor(processCallback?: ProcessCallback, displayCallback?: DisplayCallback) {
-
-    this.processCallback = processCallback || {
-      callback(): void {
-      }
-    } as ProcessCallback
-
-    this.displayCallback = displayCallback || {
-      displayCallBack(image: CImage): void {
-
-      },
-      addImage(image: CImage): void {
-
-      }
-    } as DisplayCallback
+  constructor(services: Services) {
+    this.services = services;
   }
 
   load() {
@@ -134,8 +111,8 @@ export class FilterCore {
   applyTransformation(sourceImgPos, targetImgPos = sourceImgPos, applyTransformationOptions?: ApplyTransformationOptions) {
     return flatMap((data: FilterData) => new Observable<FilterData>((observer) => {
 
-      const source = FilterCore.getImage(sourceImgPos, data);
-      const target = FilterCore.getImage(targetImgPos, data);
+      const source = this.getImage(sourceImgPos, data);
+      const target = this.getImage(targetImgPos, data);
 
       if (!applyTransformationOptions)
         applyTransformationOptions = {}
@@ -270,7 +247,7 @@ export class FilterCore {
       if (maxifyOptions === undefined)
         maxifyOptions = {};
 
-      const img = FilterCore.getImage(sourceImgPos, data);
+      const img = this.getImage(sourceImgPos, data);
 
       if (img === null) {
         observer.error(`Image not found index ${sourceImgPos}!`);
@@ -278,7 +255,7 @@ export class FilterCore {
 
       let targetImage = img;
       if (maxifyOptions.targetImagePos !== undefined) {
-        targetImage = FilterCore.getImage(maxifyOptions.targetImagePos, data);
+        targetImage = this.getImage(maxifyOptions.targetImagePos, data);
         if (img === null) {
           observer.error(`TargetImage not found index ${maxifyOptions.targetImagePos}!`);
         }
@@ -333,8 +310,8 @@ export class FilterCore {
       if (!countPixelsOptions.targetData)
         countPixelsOptions.targetData = "countData";
 
-      const source = FilterCore.getImage(sourceImgPos, data);
-      const target = (countPixelsOptions.targetImagePos) ? FilterCore.getImage(countPixelsOptions.targetImagePos, data) : null;
+      const source = this.getImage(sourceImgPos, data);
+      const target = (countPixelsOptions.targetImagePos) ? this.getImage(countPixelsOptions.targetImagePos, data) : null;
 
       if (source === null) {
         observer.error(`Image not found index ${sourceImgPos}!`);
@@ -396,9 +373,9 @@ export class FilterCore {
 
   merge(imageOnePos: number, imageTwoPos: number, targetImagePos: number = imageOnePos) {
     return flatMap((data: FilterData) => new Observable<FilterData>((observer) => {
-      const imgOne = FilterCore.getImage(imageOnePos, data);
-      const imgTwo = FilterCore.getImage(imageTwoPos, data);
-      const targetImage = FilterCore.getImage(targetImagePos, data);
+      const imgOne = this.getImage(imageOnePos, data);
+      const imgTwo = this.getImage(imageTwoPos, data);
+      const targetImage = this.getImage(targetImagePos, data);
 
       if (imgOne === null || imgTwo === null || targetImage === null) {
         observer.error(`Image not found index img 1 ${imageOnePos} or img 2 ${imageTwoPos} or target ${targetImage}!`);
@@ -433,9 +410,33 @@ export class FilterCore {
     }));
   }
 
+  contrast(sourcePos: number, contrastOptions?: ContrastOptions) {
+    return flatMap((data: FilterData) => new Observable<FilterData>((observer) => {
+      const source = this.getImage(sourcePos, data);
+
+      if (!contrastOptions)
+        contrastOptions = {};
+
+      if (!contrastOptions.targetPos)
+        contrastOptions.targetPos = sourcePos;
+
+      if (!contrastOptions.contrast)
+        contrastOptions.contrast = 1;
+
+      const target = this.getImage(contrastOptions.targetPos, data);
+
+      const contrastFilter = new ContrastFilter(this.services);
+      contrastFilter.doFilter(source, target, contrastOptions.contrast)
+
+      observer.next(data);
+      observer.complete();
+    }));
+  }
+
+
   histogram(imageOnePos: number, channel: number, histogramOptions?: HistogramOptions) {
     return flatMap((data: FilterData) => new Observable<FilterData>((observer) => {
-      const source = FilterCore.getImage(imageOnePos, data);
+      const source = this.getImage(imageOnePos, data);
 
       if (!histogramOptions)
         histogramOptions = {};
@@ -446,7 +447,7 @@ export class FilterCore {
       let target = null;
 
       if (histogramOptions.targetImagePos)
-        target = FilterCore.getImage(histogramOptions.targetImagePos, data);
+        target = this.getImage(histogramOptions.targetImagePos, data);
 
       if (source === null) {
         observer.error(`Image not found index img 1 ${imageOnePos} or target ${target}!`);
@@ -503,50 +504,33 @@ export class FilterCore {
   createImage(createImageOptions?: CreateImageOptions) {
     return flatMap((data: FilterData) => new Observable<FilterData>((observer) => {
 
-      if (!createImageOptions) {
+      if (!createImageOptions)
         createImageOptions = {};
-      }
 
-      if (!createImageOptions.backgroundColor) {
-        createImageOptions.backgroundColor = "#000"
-      }
+      if (!createImageOptions.backgroundColor)
+        createImageOptions.backgroundColor = "#000";
 
-      if (!createImageOptions.colorType) {
+
+      if (!createImageOptions.colorType)
         createImageOptions.colorType = 0
-      }
+
 
       if (createImageOptions.referenceImagePos) {
-        const refIMG = FilterCore.getImage(createImageOptions.referenceImagePos, data);
+        const refIMG = this.getImage(createImageOptions.referenceImagePos, data);
         if (refIMG) {
           createImageOptions.width = refIMG.width || 1000;
           createImageOptions.height = refIMG.height || 1000;
         }
       }
 
-      if (createImageOptions.width === -1 || !createImageOptions.width) {
+      if (createImageOptions.width === -1 || !createImageOptions.width)
         createImageOptions.width = data.img.width || 1000;
-      }
 
-      if (createImageOptions.height == -1 || !createImageOptions.height) {
+      if (createImageOptions.height == -1 || !createImageOptions.height)
         createImageOptions.height = data.img.height || 1000;
-      }
 
-      const canvas = document.createElement("canvas");
-      canvas.width = createImageOptions.width;
-      canvas.height = createImageOptions.height;
-      const cx = canvas.getContext("2d");
-      DrawUtil.drawRect(cx, 0, 0, createImageOptions.width, createImageOptions.height, createImageOptions.backgroundColor);
-
-      const image = new CImage();
-      image.id = "tmp";
-      image.name = "tmp";
-      image.fileExtension = "png";
-      image.width = createImageOptions.width;
-      image.height = createImageOptions.height;
-      CImageUtil.prepareImage(image);
-      image.data = DrawUtil.canvasAsBase64(canvas);
-
-      this.pushAndAddImageToStack(image, data);
+      const newImage = FilterHelper.createNewImage(createImageOptions.width, createImageOptions.height, createImageOptions.backgroundColor);
+      this.pushAndAddImageToStack(newImage, data);
 
       observer.next(data);
       observer.complete();
@@ -554,10 +538,10 @@ export class FilterCore {
   }
 
   drawLayer({sourceImgPos = null, targetImgPos = null, layerIDs = null}: { sourceImgPos: number, targetImgPos: number, layerIDs: string[] }) {
-    return flatMap((data: FilterData) => DrawUtil.loadBase64AsCanvas(FilterCore.getImage(targetImgPos, data)).pipe(map(canvas => {
+    return flatMap((data: FilterData) => DrawUtil.loadBase64AsCanvas(this.getImage(targetImgPos, data)).pipe(map(canvas => {
 
-      const img = FilterCore.getImage(sourceImgPos, data);
-      const targetImage = FilterCore.getImage(targetImgPos, data);
+      const img = this.getImage(sourceImgPos, data);
+      const targetImage = this.getImage(targetImgPos, data);
 
       if (img === null || targetImage === null) {
         return data;
@@ -588,10 +572,10 @@ export class FilterCore {
   }
 
   extractSubImage(sourceImgPos: number, targetImgPos: number, polygonLayer: string) {
-    return flatMap((data: FilterData) => DrawUtil.loadBase64AsCanvas(FilterCore.getImage(sourceImgPos, data)).pipe(map(canvas => {
+    return flatMap((data: FilterData) => DrawUtil.loadBase64AsCanvas(this.getImage(sourceImgPos, data)).pipe(map(canvas => {
 
-      const img = FilterCore.getImage(sourceImgPos, data);
-      const targetImage = FilterCore.getImage(targetImgPos, data);
+      const img = this.getImage(sourceImgPos, data);
+      const targetImage = this.getImage(targetImgPos, data);
 
       if (img == null || targetImage == null) {
         return data;
@@ -620,17 +604,17 @@ export class FilterCore {
   public toColorType(sourceImgPos: number, colorType: string, colorTypeOptions?: ColorTypeOptions) {
     return flatMap((data: FilterData) => new Observable<FilterData>((observer) => {
 
-        const source = FilterCore.getImage(sourceImgPos, data);
-        const target = (colorTypeOptions && colorTypeOptions.targetImagePos) ? FilterCore.getImage(colorTypeOptions.targetImagePos, data) : source
+      const source = this.getImage(sourceImgPos, data);
+      const target = (colorTypeOptions && colorTypeOptions.targetImagePos) ? this.getImage(colorTypeOptions.targetImagePos, data) : source
 
-        if (source == null || target == null) {
-          observer.error(`Image not found index source ${source} or target ${target}!`);
-        }
+      if (source == null || target == null) {
+        observer.error(`Image not found index source ${source} or target ${target}!`);
+      }
 
-        const buff = new Buffer(data.img.data, 'base64');
-        const png = PNG.sync.read(buff);
-        const buffer = PNG.sync.write(png, {colorType: FilterCore.getColorType(colorType)});
-        target.data = buffer.toString('base64');
+      const buff = new Buffer(data.img.data, 'base64');
+      const png = PNG.sync.read(buff);
+      const buffer = PNG.sync.write(png, {colorType: FilterCore.getColorType(colorType)});
+      target.data = buffer.toString('base64');
 
         observer.next(data);
         observer.complete();
@@ -649,7 +633,7 @@ export class FilterCore {
         observer.error(`Clone Image out of bounds IMG ${imgPos}`);
       }
 
-      this.displayCallback.displayCallBack(data.imgStack[imgPos]);
+      this.services.displayCallback.displayCallBack(data.imgStack[imgPos]);
 
       observer.next(data);
       observer.complete();
@@ -680,7 +664,7 @@ export class FilterCore {
         result += `ID: ${count.tag} &emsp;  Value: ${count.value} &emsp; Volume: ${count.value * processCountedPixelsOptions.pixelInMM} mm2<br>`
       }
 
-      this.processCallback.displayData(result);
+      this.services.processCallback.displayData(result);
 
       observer.next(data);
       observer.complete();
@@ -742,8 +726,8 @@ export class FilterCore {
         targetImgName += ".png";
 
       let sourceImage = data.img;
-      if (saveOptions.sourceImage !== undefined && FilterCore.getImage(saveOptions.sourceImage, data) !== null) {
-        sourceImage = FilterCore.getImage(saveOptions.sourceImage, data);
+      if (saveOptions.sourceImage !== undefined && this.getImage(saveOptions.sourceImage, data) !== null) {
+        sourceImage = this.getImage(saveOptions.sourceImage, data);
       }
 
       const saveImage = Object.assign(new CImage(), sourceImage);
@@ -756,7 +740,7 @@ export class FilterCore {
 
       observer.next({data: data, img: saveImage});
       observer.complete();
-    }).pipe(flatMap(data => this.imageService.createImage(data.img, 'png').pipe(
+    }).pipe(flatMap(data => this.services.imageService.createImage(data.img, 'png').pipe(
       map(newImg => {
         return data.data;
       }))
@@ -765,21 +749,28 @@ export class FilterCore {
 
   private pushAndAddImageToStack(img: CImage, data: FilterData) {
     data.pushIMG(img);
-    this.displayCallback.addImage(img);
+    this.services.displayCallback.addImage(img);
   }
 
   private loadICImage(img: ICImage): Observable<ICImage> {
     if (img instanceof CImage) {
-      return this.imageService.getImage(img.id);
+      return this.services.imageService.getImage(img.id);
     } else {
-      return this.imageGroupService.getImageGroup(img.id);
+      return this.services.imageGroupService.getImageGroup(img.id);
     }
   }
 
-  private static getImage(index: number, data: FilterData): CImage {
-    if (index < 0 || index >= data.imgStack.length) {
+  private getImage(index: number, data: FilterData): CImage {
+    if (index < -1 || index >= data.imgStack.length) {
       return null;
     }
+
+    if (index === -1) {
+      const img = FilterHelper.createNewImage(1, 1);
+      this.pushAndAddImageToStack(img, data);
+      return img;
+    }
+
     return data.imgStack[index];
   }
 
@@ -805,14 +796,7 @@ export class FilterCore {
     }
   }
 
-  // function componentToHex(c: number) {
-  //   const hex = c.toString(16);
-  //   return hex.length == 1 ? "0" + hex : hex;
-  // }
-  //
-  // function rgbToHex(r, g, b): string {
-  //   return componentToHex(r) + componentToHex(g) + componentToHex(b);
-  // }
+
 }
 
 export interface SaveOptions {
@@ -874,4 +858,9 @@ export interface HistogramOptions {
   clipMin?: number
   clipMax?: number
   max?: number
+}
+
+export interface ContrastOptions {
+  targetPos?: number
+  contrast?: number
 }

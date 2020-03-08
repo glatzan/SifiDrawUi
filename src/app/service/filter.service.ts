@@ -33,6 +33,7 @@ import {ICImage} from '../model/ICImage';
 import {CImageGroup} from '../model/CImageGroup';
 import {ImageGroupService} from './image-group.service';
 import {FilterCore} from "../worker/filter-core";
+import {Services} from "../worker/filter/abstract-filter";
 
 @Injectable({
   providedIn: 'root'
@@ -109,9 +110,11 @@ export class FilterService {
     const splittedString = func.split('\n');
     const ops = [];
 
-    const filterCore = new FilterCore(env.processCallback, env.displayCallback)
-    filterCore.imageGroupService = this.imageGroupService;
-    filterCore.imageService = this.imageService;
+    const services = new Services(env.processCallback, env.displayCallback);
+    services.imageGroupService = this.imageGroupService;
+    services.imageService = this.imageService;
+
+    const filterCore = new FilterCore(services);
 
     try {
       for (const c of splittedString) {

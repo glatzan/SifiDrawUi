@@ -29,6 +29,7 @@ export class WorkViewService implements OnInit {
 
   @Output() onAddNewFilteredImage: EventEmitter<ICImage> = new EventEmitter();
 
+  @Output() onKeyPressedOverCanvas: EventEmitter<{ key: string, mousePosition: MousePosition }> = new EventEmitter();
 
   @Output() onChangedParentImage: EventEmitter<ICImage> = new EventEmitter();
 

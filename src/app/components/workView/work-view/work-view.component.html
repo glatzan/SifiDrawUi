@@ -18,7 +18,7 @@
 
         <div class="contrast" *ngIf="renderComponent">
           Kontrast:
-          <mat-slider min="1" max="200" step="1" value="100"></mat-slider>
+          <mat-slider min="0" max="3" step="0.1" value="1" [(ngModel)]="contrast" (change)="onContrastChange($event)"></mat-slider>
         </div>
 
         <span class="mouse" *ngIf="renderComponent">
