@@ -6,10 +6,17 @@ import {CanvasDisplaySettings} from "../../../helpers/canvas-display-settings";
 import {CImageGroup} from "../../../model/CImageGroup";
 import {MatSnackBar} from "@angular/material/snack-bar";
 import {FlickerService} from "../flicker.service";
-import {FilterHelper} from "../../../worker/filter/filter-helper";
 import {ContrastFilter} from "../../../worker/filter/contrast-filter";
 import {CImage} from "../../../model/CImage";
 import {MatSliderChange} from "@angular/material/slider";
+import {Dataset} from "../../../model/dataset";
+import {FilterService} from "../../../service/filter.service";
+import {InitializeFilter} from "../../../worker/filter/initialize-filter";
+import {Services} from "../../../worker/filter/abstract-filter";
+import {ProcessCallback} from "../../../worker/processCallback";
+import {DisplayCallback} from "../../../worker/display-callback";
+import {JPGToPNGConverterFilter} from "../../../worker/filter/jpgto-pngconverter-filter";
+import {DisplayFilter} from "../../../worker/filter/display-filter";
 
 @Component({
   selector: 'app-work-view',
@@ -20,6 +27,7 @@ export class WorkViewComponent implements OnInit {
 
   constructor(private workViewService: WorkViewService,
               private flickerService: FlickerService,
+              private filterService: FilterService,
               private snackBar: MatSnackBar) {
   }
 
@@ -50,6 +58,7 @@ export class WorkViewComponent implements OnInit {
       this.contrastCopy = image;
       this.renderComponent = image.hasData();
       this.renderColor = false;
+      this.contrast = 1;
       this.mousePositionInCanvas.clear();
     });
 
@@ -59,6 +68,7 @@ export class WorkViewComponent implements OnInit {
 
       if (this.activeImage.id !== "contrast") {
         this.contrastCopy = image;
+        this.contrast = 1;
       }
 
     });
@@ -110,10 +120,44 @@ export class WorkViewComponent implements OnInit {
     if ($event.value === 1) {
       this.workViewService.onChangedActiveImage.emit(this.contrastCopy);
     } else {
-      const target = FilterHelper.createNewImage(this.activeImage.getWidth(), this.activeImage.getHeight(), "#000","contrast");
-      const contrastFilter = new ContrastFilter(null);
-      const img = contrastFilter.doFilter(this.contrastCopy as CImage, target, $event.value);
-      this.workViewService.onChangedActiveImage.emit(target);
+
+      const img = Object.assign(new CImage(), this.contrastCopy)
+      img.id = "contrast";
+      const dataset = new Dataset();
+      dataset.images = [img];
+
+      const filters = [];
+      const me = this;
+      const services = new Services({
+        callback(): void {
+        },
+        displayData(data: string): void {
+        }
+      } as ProcessCallback, {
+        displayCallBack(image: CImage): void {
+          me.workViewService.onChangedActiveImage.emit(image);
+        }, addImage(image: CImage): void {
+
+        }
+      } as DisplayCallback);
+
+      const init = new InitializeFilter(services);
+      filters.push(init.doFilter());
+      const jpgToPNG = new JPGToPNGConverterFilter(services);
+      filters.push(jpgToPNG.doFilter(0));
+      const contrast = new ContrastFilter(services);
+      filters.push(contrast.doFilter(0, {targetPos: 0, contrast: $event.value}));
+      const display = new DisplayFilter(services);
+      filters.push(display.doFilter());
+
+      this.filterService.runFilters(filters, dataset).subscribe(value => {
+        console.log('Ende');
+      });
+
+      // const target = FilterHelper.createNewImage(this.activeImage.getWidth(), this.activeImage.getHeight(), "#000", "contrast");
+      // const contrastFilter = new ContrastFilter(null);
+      // const img = contrastFilter.doFilter(this.contrastCopy as CImage, target, $event.value);
+
     }
   }
 

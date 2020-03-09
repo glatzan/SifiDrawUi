@@ -59,4 +59,12 @@ export class CImageGroup implements ICImage {
   public hasData() {
     return this.getData() !== ''
   }
+
+  public getImage() {
+    if (this.activeImage >= 0 && this.activeImage < this.images.length) {
+      return this.images[this.activeImage];
+    } else {
+      return null;
+    }
+  }
 }

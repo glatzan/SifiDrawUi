@@ -18,4 +18,6 @@ export interface ICImage {
   getFileExtension();
 
   hasData();
+
+  getImage();
 }

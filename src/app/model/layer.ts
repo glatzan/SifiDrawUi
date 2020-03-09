@@ -1,8 +1,5 @@
 import {Point} from './point';
 import {LayerType} from "./layer-type.enum";
-import {flatMap, map} from "rxjs/operators";
-import {ICImage} from "./ICImage";
-import {FilterData} from "../worker/filter-data";
 
 export class Layer {
   id: string;
@@ -30,7 +27,4 @@ export class Layer {
 
     this.type = LayerType.Line;
   }
-
-
-
 }

@@ -11,11 +11,15 @@ export class FlickerService {
     console.log("Initialize");
 
     workViewService.onChangedParentImage.subscribe(x => {
+      this.currentImage = x;
+      this.flickerImageOne = x;
       this.stopFlicker();
     });
 
     workViewService.onChangedActiveImage.subscribe(x => {
       this.currentImage = x;
+      if (!this.active)
+        this.flickerImageOne = x;
     });
 
     workViewService.onAddFlickerImage.subscribe(x => {
@@ -89,6 +93,9 @@ export class FlickerService {
     this.active = false;
     this.startFilterIfValid = false;
     this.cancelTimeout();
+
+    this.flickerImageOne = this.currentImage;
+    this.flickerImageTwo = null;
   }
 
   toggleImage() {

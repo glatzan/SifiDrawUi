@@ -411,26 +411,14 @@ export class FilterCore {
   }
 
   contrast(sourcePos: number, contrastOptions?: ContrastOptions) {
-    return flatMap((data: FilterData) => new Observable<FilterData>((observer) => {
-      const source = this.getImage(sourcePos, data);
-
-      if (!contrastOptions)
-        contrastOptions = {};
-
-      if (!contrastOptions.targetPos)
-        contrastOptions.targetPos = sourcePos;
-
-      if (!contrastOptions.contrast)
-        contrastOptions.contrast = 1;
-
-      const target = this.getImage(contrastOptions.targetPos, data);
-
-      const contrastFilter = new ContrastFilter(this.services);
-      contrastFilter.doFilter(source, target, contrastOptions.contrast)
-
-      observer.next(data);
-      observer.complete();
-    }));
+    if (!contrastOptions)
+      contrastOptions = {};
+    if (!contrastOptions.targetPos)
+      contrastOptions.targetPos = sourcePos;
+    if (!contrastOptions.contrast)
+      contrastOptions.contrast = 1;
+    const contrastFilter = new ContrastFilter(this.services);
+    return contrastFilter.doFilter(sourcePos, contrastOptions)
   }
 
 

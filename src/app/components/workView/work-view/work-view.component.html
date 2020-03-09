@@ -11,14 +11,18 @@
 
       <div class="canvasControl">
 
-        <div class="contrast" *ngIf="renderComponent">
+        <div class="drawMode" *ngIf="renderComponent">
           Zeichnen:
-          <mat-slide-toggle [(ngModel)]="displaySettings.enableDrawing" (change)="changeDrawMode()" class="drawMode" [disabled]="displaySettings.enableDrawingSliderDisabled"></mat-slide-toggle>
+          <mat-slide-toggle [(ngModel)]="displaySettings.enableDrawing" (change)="changeDrawMode()" class="drawMode"
+                            [disabled]="displaySettings.enableDrawingSliderDisabled"></mat-slide-toggle>
         </div>
 
-        <div class="contrast" *ngIf="renderComponent">
+        <div class="contrastText" *ngIf="renderComponent">
           Kontrast:
-          <mat-slider min="0" max="3" step="0.1" value="1" [(ngModel)]="contrast" (change)="onContrastChange($event)"></mat-slider>
+        </div>
+        <div class="contrast"  *ngIf="renderComponent">
+          <mat-slider min="0" max="3" step="0.1" value="1" [(ngModel)]="contrast" (change)="onContrastChange($event)"
+                      style="width: 60px"></mat-slider>
         </div>
 
         <span class="mouse" *ngIf="renderComponent">
@@ -38,18 +42,18 @@
           <mat-slider min="0" max="1000" step="50" value="500" style="width: 60px" [(ngModel)]="displaySettings.flickerTimer" (ngModelChange)="onFlickerChange($event)"></mat-slider>
         </span>
 
-        <i class="material-icons flicker-btn {{flickerActive() ? 'flickerActive' : ''}}" (click)="flicker()" title="Flicker" *ngIf="renderComponent">
-          broken_image
-        </i>
+        <button mat-icon-button class="flicker-btn {{flickerActive() ? 'flickerActive' : ''}}" (click)="flicker()" title="Flicker" *ngIf="renderComponent">
+          <mat-icon>broken_image</mat-icon>
+        </button>
+
 
         <span class="zoom" *ngIf="renderComponent">
           Zoom {{currentZoomLevel}} %
         </span>
 
-        <i class="material-icons resetBtn" (click)="resetCanvasZoom()" title="Bild zurücksetzten"
-           *ngIf="renderComponent">
-          control_camera
-        </i>
+        <button mat-icon-button class="resetBtn" (click)="resetCanvasZoom()" title="Bild zurücksetzten" *ngIf="renderComponent">
+          <mat-icon>control_camera</mat-icon>
+        </button>
       </div>
 
       <div class="drawControl">

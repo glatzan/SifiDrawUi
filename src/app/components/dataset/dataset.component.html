@@ -21,7 +21,7 @@
                       (click)="onSelectImage($event, img)"
                       appEditableOnEnter>
           <ng-template appViewMode>
-            <div class="holderGrid  clickAble">
+            <div class="holderGrid  clickAble" title="{{img.name}}">
               <mat-icon class="list-icons">folder open icon</mat-icon>
               {{img.name}}
             </div>
@@ -45,10 +45,10 @@
                         [cdkDragData]="subimage"
                         [cdkDragDisabled]="'edit'===imageEdit.mode"
                         [ngClass]="selectedImageId === subimage.id ? 'selectedElement' : ''"
-                        (contextmenu)="openContextMenu($event,img)"
+                        (contextmenu)="openContextMenu($event,subimage)"
                         class="subImage">
             <ng-template appViewMode>
-              <div class="holderGrid clickAble">
+              <div class="holderGrid clickAble" title="{{subimage.name}}">
                 <mat-icon class="list-icons">image icon</mat-icon>
                 {{subimage.name}}
               </div>
@@ -79,7 +79,7 @@
                       [cdkDragDisabled]="'edit'===imageEdit.mode"
                       [ngClass]="selectedImageId === img.id ? 'selectedElement' : ''">
           <ng-template appViewMode>
-            <div class="holderGrid clickAble">
+            <div class="holderGrid clickAble" title="{{img.name}}">
               <mat-icon class="list-icons">image icon</mat-icon>
               {{img.name}}
             </div>

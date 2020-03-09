@@ -15,6 +15,7 @@ import {CanvasDisplaySettings, CanvasDrawMode} from "../../../helpers/canvas-dis
 import {FlickerService} from "../flicker.service";
 import {CImageGroup} from "../../../model/CImageGroup";
 import {AuthenticationService} from "../../../service/authentication.service";
+import {CanvasDrawAction, CanvasHistory} from "./canvas-hisotry";
 
 @Component({
   selector: 'app-draw-canvas',
@@ -64,9 +65,10 @@ export class DrawCanvasComponent implements AfterViewInit, OnInit {
   private currentZoomRounded = 100;
 
 
-
   // last point of the mouse
   private lastMousePoint = new MousePosition();
+
+  private history: CanvasHistory;
 
   /**
    * Settings for image
@@ -145,7 +147,8 @@ export class DrawCanvasComponent implements AfterViewInit, OnInit {
       } else {
         if (this.imageSettings.mouseBtn === this.MOUSE_LEFT_BTN) {
           const pt = this.cx.transformedPoint(this.lastMousePoint.x, this.lastMousePoint.y);
-          CImageUtil.addPointToCurrentLine(this.currentLayer, pt.x, pt.y);
+          CImageUtil.addPointToCurrentLine(this.currentLayer, pt.x, pt.y, this.history);
+
           this.workViewService.saveContent();
           this.canvasRedraw();
         }
@@ -171,7 +174,7 @@ export class DrawCanvasComponent implements AfterViewInit, OnInit {
           switch (this.imageSettings.mouseBtn) {
             case this.MOUSE_LEFT_BTN:
               if (this.displaySettings.drawMode == CanvasDrawMode.LineMode && this.currentLayer.type != LayerType.Dot) {
-                CImageUtil.addPointToCurrentLine(this.currentLayer, pt.x, pt.y);
+                CImageUtil.addPointToCurrentLine(this.currentLayer, pt.x, pt.y, this.history);
                 this.workViewService.saveContent();
                 this.canvasRedraw();
               }
@@ -295,13 +298,15 @@ export class DrawCanvasComponent implements AfterViewInit, OnInit {
           this.currentLayer= layer;
           this.snackBar.open(`Layer ${layer.id} ausgewählt`);
         } else if ($event.key === 'h') {
-          this.displaySettings.displayLayer = !this.displaySettings.displayLayer
+          this.displaySettings.displayLayer = !this.displaySettings.displayLayer;
           this.snackBar.open(`Linien ${this.displaySettings.displayLayer ? 'angezeigt' : 'ausgeblendet'}`);
           this.canvasRedraw();
         } else if ($event.key === 'r') {
           this.canvasResetZoom();
         } else if ($event.key === 't') {
           this.flickerService.toggleImage();
+        } else if ($event.key === 'z') {
+          this.undoLastAction();
         } else {
           console.log($event.key);
         }
@@ -349,6 +354,7 @@ export class DrawCanvasComponent implements AfterViewInit, OnInit {
     // save manually if image should be changed
     this.image = image;
     this.currentLayer = new Layer('-');
+    this.history = new CanvasHistory();
 
     if (image.hasData()) {
       this.drawImage.src = `data:image/${image.getFileExtension()};base64,` + this.image.getData();
@@ -395,6 +401,12 @@ export class DrawCanvasComponent implements AfterViewInit, OnInit {
 
   public onEvent(event: MouseEvent): boolean {
     return false;
+  }
+
+  public undoLastAction(){
+    this.history.undoLastAction(this.image.getImage());
+    this.workViewService.saveContent();
+    this.canvasRedraw();
   }
 }
 

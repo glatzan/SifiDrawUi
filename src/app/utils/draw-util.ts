@@ -63,7 +63,7 @@ export default class DrawUtil {
    * @param canvas
    */
   static canvasAsBase64(canvas): string {
-    const result = canvas.toDataURL()
+    const result = canvas.toDataURL();
     return result.substr(result.indexOf(',') + 1);
   }
 

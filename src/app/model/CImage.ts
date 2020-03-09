@@ -39,4 +39,8 @@ export class CImage implements ICImage {
   public hasData() {
     return this.data != null && this.data.length > 0
   }
+
+  public getImage() {
+    return this;
+  }
 }

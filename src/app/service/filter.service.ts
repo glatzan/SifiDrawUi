@@ -3,7 +3,7 @@ import {ImageMagicService} from './image-magic.service';
 import {CImage} from '../model/CImage';
 import {ImageService} from './image.service';
 import {Dataset} from '../model/dataset';
-import {forkJoin, from, Observable, OperatorFunction} from 'rxjs';
+import {from, Observable, OperatorFunction} from 'rxjs';
 import {concatMap, flatMap, map, mergeMap} from 'rxjs/operators';
 import {FilterData} from '../worker/filter-data';
 import {ColorType, PNG} from 'pngjs';
@@ -126,14 +126,16 @@ export class FilterService {
         }
       }
 
-      const result = ops.reduce((ob: Observable<{}>, op: OperatorFunction<{}, {}>) => ob.pipe(op), from(dataset.images));
-      result.subscribe(value => {
-        // process.callback();
+      this.runFilters(ops, dataset).subscribe(value => {
         console.log('Ende');
       });
     } catch (e) {
 
     }
+  }
+
+  public runFilters(filters: any[], dataset: Dataset) {
+    return filters.reduce((ob: Observable<{}>, op: OperatorFunction<{}, {}>) => ob.pipe(op), from(dataset.images));
   }
 
   // public runWorkers(datasets: Dataset[], filterChain: string, env: { processCallback?: ProcessCallback, displayCallback?: DisplayCallback }) {

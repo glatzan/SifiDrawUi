@@ -18,7 +18,7 @@
     bottom: 0;
     top: 35px;
     display: grid;
-    grid-template-columns: 90% 10%;
+    grid-template-columns: auto 200px;
     grid-column-gap: 10px;
 
     .workView {
@@ -46,20 +46,24 @@
 
         grid-area: cc;
         display: grid;
-        grid-template-columns: 150px 400px 200px 250px 250px auto 40px 150px 100px 40px;
-        grid-template-areas: "drawMode contrast mouse colorFiled imageSize . flicker flickerTime zoom resetBtn";
+        grid-template-columns: 130px 50px 150px 175px 200px 250px auto 40px 150px 100px 40px;
+        grid-template-areas: "drawMode contrastText contrast mouse colorFiled imageSize . flicker flickerTime zoom resetBtn";
 
         .drawMode {
           grid-area: drawMode;
           align-self: center;
         }
 
+        .contrastText {
+          align-self: center;
+          grid-area: contrastText;
+        }
+
         .contrast {
           align-self: center;
-
+          grid-area: contrast;
           .mat-slider-horizontal {
             padding: 0;
-            width: 300px;
           }
         }
 
@@ -87,13 +91,12 @@
           grid-area: flicker;
           justify-self: center;
           align-self: center;
-
+          background-color: transparent;
+          border: none;
           &:hover {
             cursor: pointer;
             color: $dark-focused;
           }
-
-
         }
 
         .flickerActive {
@@ -111,7 +114,8 @@
           grid-area: resetBtn;
           justify-self: center;
           align-self: center;
-
+          background-color: transparent;
+          border: none;
           &:hover {
             cursor: pointer;
             color: $dark-focused;

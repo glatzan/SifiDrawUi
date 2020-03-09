@@ -4,6 +4,7 @@ import {Point} from '../model/point';
 import {ICImage} from '../model/ICImage';
 import {CImageGroup} from '../model/CImageGroup';
 import {LayerType} from "../model/layer-type.enum";
+import {CanvasDrawAction, CanvasHistory} from "../components/workView/draw-canvas/canvas-hisotry";
 
 export default class CImageUtil {
 
@@ -95,13 +96,26 @@ export default class CImageUtil {
     }
   }
 
-  static addPointToCurrentLine(layer: Layer, x: number, y: number) {
+  static addPointToCurrentLine(layer: Layer, x: number, y: number, history: CanvasHistory) {
+    if (history)
+      history.addHistoryForPoint(layer, CImageUtil.getCurrentLinePosition(layer), null, new Point(x, y), CanvasDrawAction.New);
     CImageUtil.addPointToLine(layer.line, x, y);
   }
 
   static addPointToLine(line: Point[], x: number, y: number) {
     line.push(new Point(x, y));
   }
+
+  static removePointFromLine(line: Point[], x, y) {
+    let i = line.length;
+    while (i--) {
+      if (line[i].x === x && line[i].y === y) {
+        line.splice(i, 1);
+        return;
+      }
+    }
+  }
+
 
   static findOrAddLayer(image: ICImage, layerID: string, layerPresets?: Layer[]) {
     if (!CImageUtil.hasLayer(image)) {
@@ -113,6 +127,20 @@ export default class CImageUtil {
       }
       return CImageUtil.addLayer(image, layerPresets, layerID);
     }
+  }
+
+  static getCurrentLinePosition(layer: Layer) {
+    return CImageUtil.getLinePosition(layer, layer.line);
+  }
+
+  static getLinePosition(layer: Layer, sline: Point[]) {
+    let i = 0;
+    for (let line of layer.lines) {
+      if (sline == line)
+        return i;
+      i++;
+    }
+    return -1;
   }
 
   static findLayer(image: ICImage, layerID: string) {
@@ -192,6 +220,7 @@ export default class CImageUtil {
 
     return String(layerName);
   }
+
 
   private static getColor(id: string) {
     try {
