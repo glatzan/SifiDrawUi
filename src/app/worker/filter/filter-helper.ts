@@ -2,6 +2,7 @@ import {CImage} from "../../model/CImage";
 import {PNG} from "pngjs";
 import DrawUtil from "../../utils/draw-util";
 import CImageUtil from "../../utils/cimage-util";
+import {Layer} from "../../model/layer";
 
 export namespace FilterHelper {
 
@@ -37,6 +38,15 @@ export namespace FilterHelper {
     CImageUtil.prepareImage(image);
     image.data = DrawUtil.canvasAsBase64(canvas);
     return image;
+  }
+
+  export function findLayer(layers: Layer[], id: string): Layer {
+    for (let layer of layers) {
+      if (layer.id == id) {
+        return layer;
+      }
+    }
+    return null
   }
 
   export function canvasToBase64(canvas: HTMLCanvasElement, imageType: string = "image/png"): string {

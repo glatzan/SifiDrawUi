@@ -5,6 +5,7 @@ import {ImageService} from "./image.service";
 import {forkJoin, Observable} from 'rxjs';
 import {flatMap} from "rxjs/operators";
 import {AuthenticationService} from "./authentication.service";
+import {Point} from "../model/point";
 
 @Injectable({
   providedIn: 'root'
@@ -58,7 +59,7 @@ export class ScImportService {
           const lastLIne = CImageUtil.initLastLineOfLayer(layer);
 
           if (col.x >= 0 && col.x <= mapping.maxX && col.y >= 0 && col.y <= mapping.maxY)
-            CImageUtil.addPointToLine(lastLIne, col.x, col.y);
+            CImageUtil.addPointToLine(layer,lastLIne, new Point(col.x, col.y));
           else
             console.log(`Fehler Punkt ${col.x}/${col.y} nicht in bounds (${mapping.maxX}/${mapping.maxY})`)
         }

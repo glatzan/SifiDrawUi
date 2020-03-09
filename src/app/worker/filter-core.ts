@@ -5,7 +5,7 @@ import {FilterData} from "./filter-data";
 import {Observable} from "rxjs";
 import {CImageGroup} from "../model/CImageGroup";
 import {Layer} from "../model/layer";
-import {applyToPoints, fromObject, fromTriangles, transform} from "transformation-matrix";
+import {applyToPoints} from "transformation-matrix";
 import {Point} from "../model/point";
 import {LayerType} from "../model/layer-type.enum";
 import {ColorType, PNG} from "pngjs";
@@ -13,6 +13,8 @@ import DrawUtil from "../utils/draw-util";
 import {ContrastFilter} from "./filter/contrast-filter";
 import {Services} from "./filter/abstract-filter";
 import {FilterHelper} from "./filter/filter-helper";
+import {AffineTransformationMatrixFilter} from "./filter/affine-transformation-matrix-filter";
+import {CreateImageFilter, CreateImageOptions} from "./filter/create-image-filter";
 
 export class FilterCore {
 
@@ -32,80 +34,9 @@ export class FilterCore {
     })));
   }
 
-  createAffineTransformationMatrix({img1Pos = null, img2Pos = null, layerImg1ID = null, layerImg2ID = layerImg1ID, targetName = 'affineMatrix'}: { img1Pos: number, img2Pos: number, layerImg1ID: string, layerImg2ID: string, targetName?: string }) {
-    return flatMap((data: FilterData) => new Observable<FilterData>((observer) => {
-      console.log(`Create affine Matrix`);
-      if (img1Pos < 0 || img1Pos >= data.imgStack.length || img2Pos < 0 || img2Pos >= data.imgStack.length) {
-        observer.error(`Clone Image out of bounds IMG 1 ${img1Pos} or IMG 2 ${img2Pos}; Max size: ${data.imgStack.length}`);
-      }
-
-      const findLayer = function (layers: Layer[], id: string): Layer {
-        for (let layer of layers) {
-          if (layer.id == layerImg1ID) {
-            return layer;
-          }
-        }
-        return null
-      };
-
-      const img1 = data.imgStack[img1Pos];
-      const img2 = data.imgStack[img2Pos];
-
-      const layer1 = findLayer(img1.layers, layerImg1ID);
-      const layer2 = findLayer(img2.layers, layerImg2ID);
-
-      if (layer1 === null || layer2 === null || layer1.lines.length == 0) {
-        observer.error(`Layer not found on IMG 1 ${layerImg1ID} or IMG 2 ${layerImg2ID};`);
-      }
-
-      if (layer1.lines[0].length < 3 || layer2.lines.length == 0 || layer2.lines[0].length !== layer1.lines[0].length) {
-        observer.error(`Three dots in layer (line 1) needed Layer 1 ${layerImg1ID} or Layer 2 ${layerImg2ID};`);
-      }
-
-      const t1 = layer1.lines[0].map(x => {
-        return {x: x.x, y: x.y}
-      });
-      const t2 = layer2.lines[0].map(x => {
-        return {x: x.x, y: x.y}
-      });
-
-      const resultArrs = [];
-
-      for (let i = 0; i < t1.length - 2; i++) {
-        resultArrs.push(fromTriangles(t1.slice(i, i + 3), t2.slice(i, i + 3)));
-        console.log(resultArrs[i])
-      }
-
-      let t = { a : 0,b :0,c:0,d:0,e:0,f:0};
-      resultArrs.forEach( x =>{
-        t.a += x.a;
-        t.b += x.b;
-        t.c += x.c;
-        t.d += x.d;
-        t.e += x.e;
-        t.f += x.f;
-      })
-
-      t.a = t.a /resultArrs.length;
-      t.b = t.b /resultArrs.length;
-      t.c = t.c /resultArrs.length;
-      t.d = t.d/resultArrs.length;
-      t.e = t.e/resultArrs.length;
-      t.f = t.f/resultArrs.length;
-
-      const test = fromObject(t);
-
-
-      const result = transform(resultArrs);
-
-      console.log(result)
-      console.log(test)
-
-      data.setData(targetName, test);
-
-      observer.next(data);
-      observer.complete();
-    }));
+  createAffineTransformationMatrix(sourcePos: number, targetPos: number, sourceLayerID: string, targetLayerID: string = sourceLayerID, targetDataName = 'affineMatrix') {
+    const affineTransformationMatrixFilter = new AffineTransformationMatrixFilter(this.services);
+    return affineTransformationMatrixFilter.doFilter(sourcePos, sourceLayerID, targetPos, targetLayerID, targetDataName);
   }
 
   applyTransformation(sourceImgPos, targetImgPos = sourceImgPos, applyTransformationOptions?: ApplyTransformationOptions) {
@@ -213,7 +144,7 @@ export class FilterCore {
               return new Point(Math.round(x.x), Math.round(x.y));
             }));
           } else {
-            const objs = Object.assign([], item)
+            const objs = Object.assign([], item);
             nLayer.lines.push(objs);
           }
         }
@@ -483,46 +414,9 @@ export class FilterCore {
     }));
   }
 
-  /**
-   * @param width
-   * @param height
-   * @param color
-   * @param imageType 0 (grayscale -> grey), colortype 2 (RGB -> rgb), colortype 4 (grayscale alpha -> greya) and colortype 6 (RGBA -> rgba)
-   */
   createImage(createImageOptions?: CreateImageOptions) {
-    return flatMap((data: FilterData) => new Observable<FilterData>((observer) => {
-
-      if (!createImageOptions)
-        createImageOptions = {};
-
-      if (!createImageOptions.backgroundColor)
-        createImageOptions.backgroundColor = "#000";
-
-
-      if (!createImageOptions.colorType)
-        createImageOptions.colorType = 0
-
-
-      if (createImageOptions.referenceImagePos) {
-        const refIMG = this.getImage(createImageOptions.referenceImagePos, data);
-        if (refIMG) {
-          createImageOptions.width = refIMG.width || 1000;
-          createImageOptions.height = refIMG.height || 1000;
-        }
-      }
-
-      if (createImageOptions.width === -1 || !createImageOptions.width)
-        createImageOptions.width = data.img.width || 1000;
-
-      if (createImageOptions.height == -1 || !createImageOptions.height)
-        createImageOptions.height = data.img.height || 1000;
-
-      const newImage = FilterHelper.createNewImage(createImageOptions.width, createImageOptions.height, createImageOptions.backgroundColor);
-      this.pushAndAddImageToStack(newImage, data);
-
-      observer.next(data);
-      observer.complete();
-    }));
+    const createImageFilter = new CreateImageFilter(this.services);
+    return createImageFilter.doFilter(createImageOptions);
   }
 
   drawLayer({sourceImgPos = null, targetImgPos = null, layerIDs = null}: { sourceImgPos: number, targetImgPos: number, layerIDs: string[] }) {
@@ -826,14 +720,6 @@ export interface ProcessCountedPixelsOptions {
 
 export interface ColorTypeOptions {
   targetImagePos?: number
-}
-
-export interface CreateImageOptions {
-  width?: number;
-  height?: number;
-  referenceImagePos?: number;
-  colorType?: ColorType;
-  backgroundColor?: string;
 }
 
 export interface ApplyTransformationOptions {

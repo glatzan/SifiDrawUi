@@ -104,7 +104,7 @@ export default class CImageUtil {
   }
 
   static addPointToLine(layer: Layer, line: Point[], p: Point): Point {
-    const np = new Point(p.x, p.y, line.length, layer.totalPointCounter++);
+    const np = new Point(p.x, p.y, line.length);
     line.push(np);
     return np;
   }
@@ -125,7 +125,7 @@ export default class CImageUtil {
   static removePointFromLine(line: Point[], point: Point) {
     let i = line.length;
     while (i--) {
-      if (line[i].id === point.id) {
+      if (line[i].pos === point.pos) {
         line.splice(i, 1);
         return;
       }

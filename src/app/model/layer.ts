@@ -12,8 +12,6 @@ export class Layer {
 
   type: number;
 
-  totalPointCounter = 0;
-
   constructor(id: string)
   constructor(id: string, points?: Point[][])
   constructor(id: string, points?: Point[][], name?: string) {

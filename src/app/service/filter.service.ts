@@ -17,7 +17,7 @@ import {ImageJService} from './image-j.service';
 import {FlaskService} from './flask.service';
 import CImageUtil from '../utils/cimage-util';
 import {DatasetService} from './dataset.service';
-import {isNumber} from 'util';
+import {error, isNumber} from 'util';
 import {ProcessCallback} from '../worker/processCallback';
 import {DisplayCallback} from '../worker/display-callback';
 import {Equation, parse} from 'algebra.js';
@@ -126,11 +126,13 @@ export class FilterService {
         }
       }
 
-      this.runFilters(ops, dataset).subscribe(value => {
-        console.log('Ende');
-      });
+      this.runFilters(ops, dataset).subscribe(
+        data => console.log('Ende'),
+        e => {
+          env.processCallback.displayData("Error:<br> " + e);
+        });
     } catch (e) {
-
+console.log(e)
     }
   }
 
