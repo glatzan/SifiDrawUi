@@ -67,65 +67,71 @@ export default class VectorUtils {
     return new Point(Math.round(p1.x - dirVec.x * offset), Math.round(p1.y - dirVec.y * offset));
   }
 
-  static removeCollidingPointListsOfCircle(poinst: Point[][], origin: Point, radius: number): boolean {
-    let removed = false;
-    poinst.forEach((x, index) => {
-      removed = removed || VectorUtils.removeCollidingPointsOfCircle(x, origin, radius);
-    });
-    return removed;
-  }
-
-  static removeCollidingPointsOfCircle(poinst: Point[], origin: Point, radius: number): boolean {
-    let removed = false;
-    poinst.forEach((x, index) => {
-      if (this.distance(x, origin) < radius) {
-        poinst.splice(index, 1);
-        removed = true;
+  static removeCollidingPointListsOfCircle(points: Point[][], origin: Point, radius: number): { lineIndex: number, points: Point[] }[] {
+    let removedPoints = [];
+    points.forEach((x, index) => {
+      const res = VectorUtils.removeCollidingPointsOfCircle(x, origin, radius);
+      if (res.length > 0) {
+        removedPoints = removedPoints.concat({
+          lineIndex: index,
+          points: res
+        })
       }
     });
-
-    return removed;
+    return removedPoints;
   }
 
-  static movePointListsToCircleBoundaries(points: Point[][], origin: Point, radius: number, addHelperPoints: boolean = true): boolean {
-    let changed = false;
+  static removeCollidingPointsOfCircle(points: Point[], origin: Point, radius: number): Point[] {
+    const removedPoints = [];
+    points.forEach((x, index) => {
+      if (this.distance(x, origin) < radius) {
+        removedPoints.push(x);
+        points.splice(index, 1);
+      }
+    });
+    return removedPoints;
+  }
+
+  static movePointListsToCircleBoundaries(points: Point[][], origin: Point, radius: number, addHelperPoints: boolean = true): { lineIndex: number, oldPoints: Point[], newPoints: Point[] }[] {
+    const movedPoints: { lineIndex: number, oldPoints: Point[], newPoints: Point[] }[] = [];
     for (let i = 0; i < points.length; i++) {
       const result = this.movePointsToCircleBoundaries(points[i], origin, radius);
 
-      if (result != null && result.length > 0) {
+      if (result && result.oldPoints.length > 0) {
         if (addHelperPoints)
           VectorUtils.updatePoints(points[i], result);
-        changed = true;
+        movedPoints.push({lineIndex: i, oldPoints: result.oldPoints, newPoints: result.newPoints});
       }
     }
-
-    return changed;
-  }
-
-  static movePointsToCircleBoundaries(points: Point[], origin: Point, radius: number): { index: number, point: Point }[] {
-    let movedPoints: { index: number, point: Point }[] = [];
-    points.forEach((x, index, object) => {
-      const res = VectorUtils.calculateNewPoint(origin, x, radius);
-      if (res != null) {
-        object[index] = res;
-        movedPoints.push({index: index, point: res});
-      }
-    });
 
     return movedPoints;
   }
 
-  static updatePoints(points: Point[], movedPoints: { index: number, point: Point }[]): boolean {
-    let sections: { start: number, end: number }[] = [{start: movedPoints[0].index, end: movedPoints[0].index}];
+  static movePointsToCircleBoundaries(points: Point[], origin: Point, radius: number): { oldPoints: Point[], newPoints: Point[] } {
+    let movedPoints: { oldPoints: Point[], newPoints: Point[] } = {oldPoints: [], newPoints: []};
+    points.forEach((x, index, object) => {
+      const tmpP = new Point(x.x, x.y, x.pos);
+      const res = VectorUtils.calculateNewPoint(origin, x, radius);
+      if (res != null) {
+        res.pos = x.pos;
+        movedPoints.oldPoints.push(x);
+        movedPoints.oldPoints.push(res);
+        object[index] = res;
+      }
+    });
+    return movedPoints;
+  }
+
+  static updatePoints(points: Point[], movedPoints: { oldPoints: Point[], newPoints: Point[] }): boolean {
+    let sections: { start: number, end: number }[] = [{start: movedPoints.newPoints[0].pos, end: movedPoints.newPoints[0].pos}];
     let currentIndex = 0;
 
-
-    for (let i = 1; i < movedPoints.length; i++) {
-      if ((sections[currentIndex].end + 1) === movedPoints[i].index) {
-        sections[currentIndex].end = movedPoints[i].index;
+    for (let i = 1; i < movedPoints.newPoints.length; i++) {
+      if ((sections[currentIndex].end + 1) ===  movedPoints.newPoints[i].pos) {
+        sections[currentIndex].end = movedPoints.newPoints[i].pos;
       } else {
         currentIndex++;
-        sections[currentIndex] = {start: movedPoints[i].index, end: movedPoints[i].index};
+        sections[currentIndex] = {start: movedPoints.newPoints[i].pos, end: movedPoints.newPoints[i].pos};
       }
     }
 

@@ -147,10 +147,12 @@ export class DrawCanvasComponent implements AfterViewInit, OnInit {
       } else {
         if (this.imageSettings.mouseBtn === this.MOUSE_LEFT_BTN) {
           const pt = this.cx.transformedPoint(this.lastMousePoint.x, this.lastMousePoint.y);
-          CImageUtil.addPointToCurrentLine(this.currentLayer, pt.x, pt.y, this.history);
-
-          this.workViewService.saveContent();
-          this.canvasRedraw();
+          const pointChangeEvent = CImageUtil.addPointToCurrentLine(this.currentLayer, pt);
+          if (pointChangeEvent.isContent()) {
+            this.history.addHistoryForPoint(this.currentLayer, CanvasDrawAction.New, [pointChangeEvent], true);
+            this.workViewService.saveContent();
+            this.canvasRedraw();
+          }
         }
       }
     },
@@ -174,15 +176,20 @@ export class DrawCanvasComponent implements AfterViewInit, OnInit {
           switch (this.imageSettings.mouseBtn) {
             case this.MOUSE_LEFT_BTN:
               if (this.displaySettings.drawMode == CanvasDrawMode.LineMode && this.currentLayer.type != LayerType.Dot) {
-                CImageUtil.addPointToCurrentLine(this.currentLayer, pt.x, pt.y, this.history);
-                this.workViewService.saveContent();
-                this.canvasRedraw();
+                const pointChangeEvent = CImageUtil.addPointToCurrentLine(this.currentLayer, pt);
+                if (pointChangeEvent.isContent()) {
+                  this.history.addHistoryForPoint(this.currentLayer, CanvasDrawAction.New, [pointChangeEvent], true);
+                  this.workViewService.saveContent();
+                  this.canvasRedraw();
+                }
               }
               break;
             case this.MOUSE_RIGHT_BTN:
               // check ctrl key again, for better editing
               if (evt.ctrlKey) {
-                if (VectorUtils.removeCollidingPointListsOfCircle(this.currentLayer.lines, new Point(pt.x, pt.y), this.displaySettings.eraserSize)) {
+                const result = CImageUtil.removeCollidingPointListsOfCircle(this.currentLayer, this.currentLayer.lines, new Point(pt.x, pt.y), this.displaySettings.eraserSize);
+                if (result) {
+                  this.history.addHistoryForPoint(this.currentLayer, CanvasDrawAction.Delete, result, false);
                   this.workViewService.saveContent();
                 }
               } else {

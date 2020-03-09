@@ -4,7 +4,8 @@ import {Point} from '../model/point';
 import {ICImage} from '../model/ICImage';
 import {CImageGroup} from '../model/CImageGroup';
 import {LayerType} from "../model/layer-type.enum";
-import {CanvasDrawAction, CanvasHistory} from "../components/workView/draw-canvas/canvas-hisotry";
+import {CanvasHistory, LineHistory} from "../components/workView/draw-canvas/canvas-hisotry";
+import VectorUtils from "./vector-utils";
 
 export default class CImageUtil {
 
@@ -48,6 +49,8 @@ export default class CImageUtil {
           CImageUtil.addLine(layer);
         }
       }
+
+      CImageUtil.updatePointOrders(layer.lines);
     }
 
     return image;
@@ -96,26 +99,63 @@ export default class CImageUtil {
     }
   }
 
-  static addPointToCurrentLine(layer: Layer, x: number, y: number, history: CanvasHistory) {
-    if (history)
-      history.addHistoryForPoint(layer, CImageUtil.getCurrentLinePosition(layer), null, new Point(x, y), CanvasDrawAction.New);
-    CImageUtil.addPointToLine(layer.line, x, y);
+  static addPointToCurrentLine(layer: Layer, p: Point): LineHistory {
+    return new LineHistory(null, [CImageUtil.addPointToLine(layer, layer.line, p)], CImageUtil.getLinePosition(layer, layer.line))
   }
 
-  static addPointToLine(line: Point[], x: number, y: number) {
-    line.push(new Point(x, y));
+  static addPointToLine(layer: Layer, line: Point[], p: Point): Point {
+    const np = new Point(p.x, p.y, line.length, layer.totalPointCounter++);
+    line.push(np);
+    return np;
   }
 
-  static removePointFromLine(line: Point[], x, y) {
+  static addPointsToLineAtPosition(line: Point[], points: Point[]) {
+    points.forEach(x => {
+      if (x.pos >= line.length)
+        line.push(x);
+      else
+        line.splice(x.pos, 0, x);
+    })
+  }
+
+  static removePointFromCurrentLine(layer: Layer, point: Point) {
+    CImageUtil.removePointFromLine(layer.line, point);
+  }
+
+  static removePointFromLine(line: Point[], point: Point) {
     let i = line.length;
     while (i--) {
-      if (line[i].x === x && line[i].y === y) {
+      if (line[i].id === point.id) {
         line.splice(i, 1);
         return;
       }
     }
   }
 
+  static updatePointOrders(points: Point[][]) {
+    points.forEach(point => this.updatePointOrder(point))
+  }
+
+  static updatePointOrder(points: Point[]) {
+    points.forEach((x, index) => {
+      x.pos = index;
+    });
+  }
+
+  static removeCollidingPointListsOfCircle(layer: Layer, lines: Point[][], origin: Point, radius: number): LineHistory[] {
+    const removedPoints = VectorUtils.removeCollidingPointListsOfCircle(lines, origin, radius);
+    if (removedPoints.length > 0) {
+      CImageUtil.updatePointOrders(lines);
+      return removedPoints.map(x => {
+        return new LineHistory(x.points, null, x.lineIndex);
+      });
+    }
+    return null;
+  }
+
+  static movePointListsToCircleBoundaries(layer: Layer, points: Point[][], origin: Point, radius: number, addHelperPoints: boolean, helperPointDistance: number, history: CanvasHistory, mergeHistory: boolean = true) {
+    //const movedPoints = VectorUtils.movePointListsToCircleBoundaries(this.currentLayer.lines, new Point(pt.x, pt.y), this.displaySettings.eraserSize, this.currentLayer.type !== LayerType.Dot)
+  }
 
   static findOrAddLayer(image: ICImage, layerID: string, layerPresets?: Layer[]) {
     if (!CImageUtil.hasLayer(image)) {
