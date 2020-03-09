@@ -1,6 +1,12 @@
 <div class="content">
   <div class="headline">
-    Bild {{parentImage !== undefined ? parentImage.name : ""}} {{activeImage !== undefined && activeImage !== parentImage ? " - Aktives Bild " + activeImage.name : ""}}</div>
+    Bild {{parentImage !== undefined ? parentImage.name : ""}} {{activeImage !== undefined && activeImage !== parentImage ? " - Aktives Bild " + activeImage.name : ""}}
+    <span [ngSwitch]="contentSaveStatus">
+        <mat-icon class="notSaved" *ngSwitchCase="0">save icon</mat-icon>
+        <mat-icon class="saved" *ngSwitchCase="1">save icon</mat-icon>
+        <mat-icon class="saveFailed" *ngSwitchDefault>save icon</mat-icon>
+    </span>
+  </div>
   <div class="drawContent">
 
     <div class="workView">

@@ -1,5 +1,5 @@
 import {Component, OnInit} from '@angular/core';
-import {WorkViewService} from '../work-view.service';
+import {DataSaveStatus, WorkViewService} from '../work-view.service';
 import {ICImage} from '../../../model/ICImage';
 import {MousePosition} from "../../../helpers/mouse-position";
 import {CanvasDisplaySettings} from "../../../helpers/canvas-display-settings";
@@ -49,6 +49,8 @@ export class WorkViewComponent implements OnInit {
 
   contrast: number = 1;
 
+  contentSaveStatus: DataSaveStatus = DataSaveStatus.Saved;
+
   ngOnInit() {
     this.displaySettings = this.workViewService.getDisplaySettings();
 
@@ -77,6 +79,26 @@ export class WorkViewComponent implements OnInit {
       this.mousePositionInCanvas = v;
       this.renderColor = true;
     });
+
+    this.workViewService.onDataSaveEvent.subscribe(x => {
+      this.contentSaveStatus = x;
+      switch (x) {
+        case DataSaveStatus.WaitingForSave:
+          break;
+        case DataSaveStatus.Saved:
+          break;
+        case DataSaveStatus.FailedConcurrency:
+          this.snackBar.open("Versionsfehler, Speicher nicht mögich!", '', {
+            duration: 2000
+          });
+          break;
+        case DataSaveStatus.FailedUnknown:
+          this.snackBar.open("Unbekannter Fehler, Speicher nicht mögich!", '', {
+            duration: 2000
+          });
+          break;
+      }
+    })
   }
 
   public resetCanvasZoom() {

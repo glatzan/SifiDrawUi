@@ -36,7 +36,12 @@ export class ImageGroupService {
 
   public updateImageGroup(group: CImageGroup): Observable<CImageGroup> {
     console.log(`${environment.backendUrl}/imagegroup/update`);
-    return this.http.put<CImageGroup>(`${environment.backendUrl}/imagegroup/update`, group, ImageGroupService.httpJsonContent);
+    group.concurrencyCounter++;
+    return this.http.put<CImageGroup>(`${environment.backendUrl}/imagegroup/update`, group, ImageGroupService.httpJsonContent).pipe(
+      map(x => {
+        return CImageMapper.mapToTypescriptObject<CImageGroup>(x);
+      })
+    );
   }
 
   public getImageGroup(id: string, format : string = "png"): Observable<CImageGroup> {

@@ -9,6 +9,7 @@ export class CImage implements ICImage {
   width: number;
   height: number;
   fileExtension: string;
+  concurrencyCounter: number;
 
   public type = 'img';
 

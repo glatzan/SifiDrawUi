@@ -117,15 +117,12 @@ export class DatasetComponent implements OnInit {
     if (control.valid) {
       const item = this.getControl(index, 'item');
       item.value.name = control.value;
-      if (item.value.type === 'group') {
-        this.imageGroupService.updateImageGroup(item.value).subscribe( x=> {
-          this.reload();
-        });
-      } else {
-        this.imageService.updateImage(item.value).subscribe( x=> {
-          this.reload();
-        });
-      }
+
+      this.imageService.updateICImage(item.value).subscribe( x=> {
+        this.reload();
+      }, e => {
+        console.log(e)
+      });
     }
   }
 

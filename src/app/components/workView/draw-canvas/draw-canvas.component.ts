@@ -410,10 +410,11 @@ export class DrawCanvasComponent implements AfterViewInit, OnInit {
     return false;
   }
 
-  public undoLastAction(){
-    this.history.undoLastAction(this.image.getImage());
-    this.workViewService.saveContent();
-    this.canvasRedraw();
+  public undoLastAction() {
+    if (this.history.undoLastAction(this.image.getImage())) {
+      this.workViewService.saveContent();
+      this.canvasRedraw();
+    }
   }
 }
 

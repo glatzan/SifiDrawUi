@@ -49,6 +49,8 @@ export class WorkViewService implements OnInit {
 
   @Output() onMouseCoordinatesCanvasChanged: EventEmitter<MousePosition> = new EventEmitter();
 
+  @Output() onDataSaveEvent: EventEmitter<DataSaveStatus> = new EventEmitter();
+
   private image: ICImage;
 
   private currentImage: ICImage;
@@ -136,6 +138,7 @@ export class WorkViewService implements OnInit {
 
   saveContent() {
     this.cancelSaveTimeout();
+    this.onDataSaveEvent.emit(DataSaveStatus.WaitingForSave);
     this.currentSaveTimeout = setTimeout(() => {
       this.save();
     }, 1000);
@@ -148,11 +151,19 @@ export class WorkViewService implements OnInit {
 
   private save() {
     if (this.image.id != null) {
-      this.imageService.updateICImage(this.image).subscribe(() => {
+      // this.image.concurrencyCounter++;
+      this.imageService.updateICImage(this.image).subscribe(result => {
         console.log('saved');
+        console.log(result)
+        this.onDataSaveEvent.emit(DataSaveStatus.Saved);
       }, error1 => {
         console.log('Fehler beim laden der Dataset Datein');
+        if (error1.toString().startsWith("Concurrency Error"))
+          this.onDataSaveEvent.emit(DataSaveStatus.FailedConcurrency);
+        else
+          this.onDataSaveEvent.emit(DataSaveStatus.FailedUnknown);
         console.error(error1);
+
       });
     }
   }
@@ -160,4 +171,11 @@ export class WorkViewService implements OnInit {
   public getDisplaySettings(): CanvasDisplaySettings {
     return this.displaySettings;
   }
+}
+
+export enum DataSaveStatus {
+  WaitingForSave,
+  Saved,
+  FailedConcurrency,
+  FailedUnknown
 }

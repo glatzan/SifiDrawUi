@@ -9,6 +9,7 @@ export class CImageGroup implements ICImage {
   public type = 'group';
 
   public activeImage = 0;
+  concurrencyCounter: number;
 
   public getData(): string {
     if (this.activeImage >= 0 && this.activeImage < this.images.length) {

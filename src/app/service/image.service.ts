@@ -8,6 +8,7 @@ import {CImageMapper} from "../utils/cimage-mapper";
 import {CImageGroup} from "../model/CImageGroup";
 import {ICImage} from "../model/ICImage";
 import {ImageGroupService} from "./image-group.service";
+import CImageUtil from "../utils/cimage-util";
 
 @Injectable({
   providedIn: 'root'
@@ -34,7 +35,11 @@ export class ImageService {
 
   public updateImage(image: CImage): Observable<any> {
     console.log(`${environment.backendUrl}/image/update`);
-    return this.http.put<CImage>(`${environment.backendUrl}/image/update`, image, ImageService.httpJsonContent);
+    image.concurrencyCounter++;
+    return this.http.put<CImage>(`${environment.backendUrl}/image/update`, image, ImageService.httpJsonContent).pipe(
+      map(x => {
+        return CImageMapper.mapToTypescriptObject<CImage>(x);
+      }));
   }
 
   public updateExistingImage(image: CImage): Observable<any> {
@@ -71,7 +76,7 @@ export class ImageService {
     }
   }
 
-  public updateICImage(image: ICImage): Observable<any> {
+  public updateICImage(image: ICImage): Observable<ICImage> {
     if (image instanceof CImage) {
       return this.updateImage(image);
     } else {

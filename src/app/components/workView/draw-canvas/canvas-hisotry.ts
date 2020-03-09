@@ -58,7 +58,7 @@ export class CanvasHistory {
     return this.history.pop();
   }
 
-  undoLastAction(image: CImage) {
+  undoLastAction(image: CImage) : boolean{
     const lastAction = this.getLastAction();
     if (lastAction) {
       switch (lastAction.action) {
@@ -78,7 +78,10 @@ export class CanvasHistory {
           }
           break;
       }
+
+      return true;
     }
+    return false;
   }
 }
 
