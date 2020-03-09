@@ -81,7 +81,7 @@ export class WorkViewComponent implements OnInit {
     });
 
     this.workViewService.onDataSaveEvent.subscribe(x => {
-      this.contentSaveStatus = x;
+      this.contentSaveStatus = x.status;
       switch (x) {
         case DataSaveStatus.WaitingForSave:
           break;

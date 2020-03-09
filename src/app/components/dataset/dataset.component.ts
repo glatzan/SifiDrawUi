@@ -1,7 +1,7 @@
 import {Component, OnInit, TemplateRef, ViewChild, ViewContainerRef} from '@angular/core';
 import {Dataset} from '../../model/dataset';
 import {DatasetService} from '../../service/dataset.service';
-import {WorkViewService} from '../workView/work-view.service';
+import {DataSaveStatus, WorkViewService} from '../workView/work-view.service';
 import {ImageGroupService} from '../../service/image-group.service';
 import {FormArray, FormBuilder, FormControl, FormGroup, Validators} from '@angular/forms';
 import {ICImage} from '../../model/ICImage';
@@ -59,6 +59,53 @@ export class DatasetComponent implements OnInit {
     this.workViewService.selectDataset.subscribe(x => {
       this.loadDataset(x.id);
     });
+
+    this.workViewService.onDataSaveEvent.subscribe(result => {
+      if (result.status === DataSaveStatus.Saved) {
+
+        let dataset = null;
+        this.dataset.images.forEach((value, index) => {
+          if (value.id == result.image.id) {
+            this.dataset.images[index] = result.image;
+            console.log("replace image");
+            return;
+          }
+
+          if (value instanceof CImageGroup) {
+            value.images.forEach((subValue, index) => {
+              if (subValue.id == result.image.id) {
+                value.images[index] = result.image;
+                dataset = value;
+                console.log("replace image in imagegroup");
+                return;
+              }
+            })
+          }
+        });
+
+        console.log(result)
+        for (let i = 0; i < this.controls.length; i++) {
+          if (this.controls.at(i).value.item.id === result.id) {
+            this.controls.at(i).patchValue({item: result, name: result.name});
+            console.log("replacing form control");
+            break
+          }
+        }
+
+        if (dataset) {
+          for (let i = 0; i < this.controls.length; i++) {
+            console.log(this.controls.at(i).value.item.id);
+            console.log(dataset.id)
+            console.log("--")
+            if (this.controls.at(i).value.item.id === dataset.id) {
+              this.controls.at(i).patchValue({item: dataset, name: dataset.name});
+              console.log("replacing dataset control");
+              break
+            }
+          }
+        }
+      }
+    })
   }
 
   public loadDataset(datasetID: string) {

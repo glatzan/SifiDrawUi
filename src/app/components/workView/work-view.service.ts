@@ -49,7 +49,7 @@ export class WorkViewService implements OnInit {
 
   @Output() onMouseCoordinatesCanvasChanged: EventEmitter<MousePosition> = new EventEmitter();
 
-  @Output() onDataSaveEvent: EventEmitter<DataSaveStatus> = new EventEmitter();
+  @Output() onDataSaveEvent: EventEmitter<DataSaveStatusContainer> = new EventEmitter();
 
   private image: ICImage;
 
@@ -138,7 +138,7 @@ export class WorkViewService implements OnInit {
 
   saveContent() {
     this.cancelSaveTimeout();
-    this.onDataSaveEvent.emit(DataSaveStatus.WaitingForSave);
+    this.onDataSaveEvent.emit({image: this.image, status: DataSaveStatus.WaitingForSave});
     this.currentSaveTimeout = setTimeout(() => {
       this.save();
     }, 1000);
@@ -155,13 +155,13 @@ export class WorkViewService implements OnInit {
       this.imageService.updateICImage(this.image).subscribe(result => {
         console.log('saved');
         console.log(result)
-        this.onDataSaveEvent.emit(DataSaveStatus.Saved);
+        this.onDataSaveEvent.emit({image: result, status: DataSaveStatus.Saved});
       }, error1 => {
         console.log('Fehler beim laden der Dataset Datein');
         if (error1.toString().startsWith("Concurrency Error"))
-          this.onDataSaveEvent.emit(DataSaveStatus.FailedConcurrency);
+          this.onDataSaveEvent.emit({image: null, status: DataSaveStatus.FailedConcurrency});
         else
-          this.onDataSaveEvent.emit(DataSaveStatus.FailedUnknown);
+          this.onDataSaveEvent.emit({image: null, status: DataSaveStatus.FailedUnknown});
         console.error(error1);
 
       });
@@ -172,6 +172,11 @@ export class WorkViewService implements OnInit {
     return this.displaySettings;
   }
 }
+export class DataSaveStatusContainer{
+  image : ICImage;
+  status : DataSaveStatus;
+}
+
 
 export enum DataSaveStatus {
   WaitingForSave,
