@@ -8,7 +8,6 @@ import {CImageMapper} from "../utils/cimage-mapper";
 import {CImageGroup} from "../model/CImageGroup";
 import {ICImage} from "../model/ICImage";
 import {ImageGroupService} from "./image-group.service";
-import CImageUtil from "../utils/cimage-util";
 
 @Injectable({
   providedIn: 'root'
@@ -25,8 +24,16 @@ export class ImageService {
               private imageGroupService: ImageGroupService) {
   }
 
-  public getImage(id: string, format : string = "png"): Observable<CImage> {
+  public getImage(id: string, format: string = "png"): Observable<CImage> {
     return this.http.get<CImage>(`${environment.backendUrl}/image/${id}?format=${format}`, ImageService.httpJsonContent).pipe(
+      map(x => {
+        return CImageMapper.mapToTypescriptObject<CImage>(x);
+      })
+    );
+  }
+
+  public cloneImage(image: CImage, targetDir: string = null): Observable<CImage> {
+    return this.http.get<CImage>(`${environment.backendUrl}/image/clone/${image.id}${targetDir ? '?targetDir=' + btoa(targetDir) : ''}`, ImageService.httpJsonContent).pipe(
       map(x => {
         return CImageMapper.mapToTypescriptObject<CImage>(x);
       })
@@ -83,4 +90,13 @@ export class ImageService {
       return this.imageGroupService.updateImageGroup(image as CImageGroup);
     }
   }
+
+  public cloneICImage(image: ICImage): Observable<ICImage> {
+    if (image instanceof CImage) {
+      return this.cloneImage(image);
+    } else {
+      return this.imageGroupService.cloneImageGroup(image as CImageGroup)
+    }
+  }
+
 }

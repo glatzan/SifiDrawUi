@@ -1,11 +1,6 @@
 <div class="content">
   <div class="headline">
     Bild {{parentImage !== undefined ? parentImage.name : ""}} {{activeImage !== undefined && activeImage !== parentImage ? " - Aktives Bild " + activeImage.name : ""}}
-    <span [ngSwitch]="contentSaveStatus">
-        <mat-icon class="notSaved" *ngSwitchCase="0">save icon</mat-icon>
-        <mat-icon class="saved" *ngSwitchCase="1">save icon</mat-icon>
-        <mat-icon class="saveFailed" *ngSwitchDefault>save icon</mat-icon>
-    </span>
   </div>
   <div class="drawContent">
 
@@ -13,6 +8,12 @@
 
       <div class="drawCanvas">
         <app-draw-canvas></app-draw-canvas>
+      </div>
+
+      <div [ngSwitch]="contentSaveStatus" class="saveDisplay">
+        <mat-icon class="notSaved" *ngSwitchCase="0" title="Speichere...">save icon</mat-icon>
+        <mat-icon class="saved" *ngSwitchCase="1" title="Gespeichert">save icon</mat-icon>
+        <mat-icon class="saveFailed" *ngSwitchDefault title="Fehler beim Speichern">save icon</mat-icon>
       </div>
 
       <div class="canvasControl">

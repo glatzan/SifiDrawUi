@@ -10,18 +10,6 @@
     height: 30px;
     font-family: Roboto, Helvetica Neue Light, Helvetica Neue, Helvetica, Arial, Lucida Grande, sans-serif;
     font-size: 20px;
-
-    .saved{
-      color: green;
-    }
-
-    .notSaved{
-      color: orange;
-    }
-
-    .saveFailed{
-      color: red;
-    }
   }
 
   .drawContent {
@@ -43,12 +31,32 @@
       min-width: 1300px;
 
       .drawCanvas {
+        grid-area: c;
         border: 1px solid LightGray;
         border-radius: 3px;
-        grid-area: c;
         display: flex;
         justify-content: center;
         align-content: center;
+        z-index: 500;
+      }
+
+      .saveDisplay {
+        grid-area: c;
+        justify-self: right;
+        z-index: 999;
+        margin: 5px;
+
+        .saved{
+          color: green;
+        }
+
+        .notSaved{
+          color: orange;
+        }
+
+        .saveFailed{
+          color: red;
+        }
       }
 
       .canvasControl {

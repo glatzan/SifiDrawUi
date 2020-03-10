@@ -82,7 +82,7 @@ export class WorkViewComponent implements OnInit {
 
     this.workViewService.onDataSaveEvent.subscribe(x => {
       this.contentSaveStatus = x.status;
-      switch (x) {
+      switch (x.status) {
         case DataSaveStatus.WaitingForSave:
           break;
         case DataSaveStatus.Saved:
@@ -93,7 +93,7 @@ export class WorkViewComponent implements OnInit {
           });
           break;
         case DataSaveStatus.FailedUnknown:
-          this.snackBar.open("Unbekannter Fehler, Speicher nicht mögich!", '', {
+          this.snackBar.open(`Fehler, speichern nicht mögich! (${x.text})`, '', {
             duration: 2000
           });
           break;

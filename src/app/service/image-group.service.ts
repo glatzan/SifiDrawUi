@@ -58,4 +58,13 @@ export class ImageGroupService {
   public deleteImageGroup(id: string): Observable<any> {
     return this.http.delete<any>(`${environment.backendUrl}/imagegroup/delete/${id}`);
   }
+
+
+  public cloneImageGroup(group: CImageGroup, targetDir: string = null): Observable<CImageGroup> {
+    return this.http.get<CImage>(`${environment.backendUrl}/imagegroup/clone/${group.id}${targetDir ? '?targetDir=' + btoa(targetDir) : ''}`, ImageGroupService.httpJsonContent).pipe(
+      map(x => {
+        return CImageMapper.mapToTypescriptObject<CImageGroup>(x);
+      })
+    );
+  }
 }

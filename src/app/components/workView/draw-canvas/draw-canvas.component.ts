@@ -150,8 +150,7 @@ export class DrawCanvasComponent implements AfterViewInit, OnInit {
           const pointChangeEvent = CImageUtil.addPointToCurrentLine(this.currentLayer, pt);
           if (pointChangeEvent.isContent()) {
             this.history.addHistoryForPoint(this.currentLayer, CanvasDrawAction.New, [pointChangeEvent], true);
-            this.workViewService.saveContent();
-            this.canvasRedraw();
+            this.saveAndUpdate();
           }
         }
       }
@@ -179,8 +178,7 @@ export class DrawCanvasComponent implements AfterViewInit, OnInit {
                 const pointChangeEvent = CImageUtil.addPointToCurrentLine(this.currentLayer, pt);
                 if (pointChangeEvent.isContent()) {
                   this.history.addHistoryForPoint(this.currentLayer, CanvasDrawAction.New, [pointChangeEvent], true);
-                  this.workViewService.saveContent();
-                  this.canvasRedraw();
+                  this.saveAndUpdate();
                 }
               }
               break;
@@ -190,14 +188,17 @@ export class DrawCanvasComponent implements AfterViewInit, OnInit {
                 const result = CImageUtil.removeCollidingPointListsOfCircle(this.currentLayer, this.currentLayer.lines, new Point(pt.x, pt.y), this.displaySettings.eraserSize);
                 if (result) {
                   this.history.addHistoryForPoint(this.currentLayer, CanvasDrawAction.Delete, result, false);
-                  this.workViewService.saveContent();
+                  this.saveAndUpdate();
+                }else{
+                  this.canvasRedraw();
                 }
               } else {
                 if (VectorUtils.movePointListsToCircleBoundaries(this.currentLayer.lines, new Point(pt.x, pt.y), this.displaySettings.eraserSize, this.currentLayer.type !== LayerType.Dot)) {
-                  this.workViewService.saveContent();
+                  this.saveAndUpdate();
+                }else{
+                  this.canvasRedraw();
                 }
               }
-              this.canvasRedraw();
               DrawUtil.drawCircle(this.cx, new Point(pt.x, pt.y), this.displaySettings.eraserSize);
               break;
           }
@@ -244,7 +245,7 @@ export class DrawCanvasComponent implements AfterViewInit, OnInit {
     });
 
     this.workViewService.onDisplayImageRedraw.subscribe(x => {
-      this.canvasRedraw();
+      this.saveAndUpdate();
     });
 
     this.workViewService.onLayerChange.subscribe(x => {
@@ -406,14 +407,18 @@ export class DrawCanvasComponent implements AfterViewInit, OnInit {
     this.cx.restore();
   }
 
+  private saveAndUpdate(){
+    this.workViewService.saveContent(true);
+    this.canvasRedraw();
+  }
+
   public onEvent(event: MouseEvent): boolean {
     return false;
   }
 
   public undoLastAction() {
     if (this.history.undoLastAction(this.image.getImage())) {
-      this.workViewService.saveContent();
-      this.canvasRedraw();
+      this.saveAndUpdate()
     }
   }
 }

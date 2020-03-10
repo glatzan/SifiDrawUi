@@ -115,7 +115,7 @@ export default class VectorUtils {
       if (res != null) {
         res.pos = x.pos;
         movedPoints.oldPoints.push(x);
-        movedPoints.oldPoints.push(res);
+        movedPoints.newPoints.push(res);
         object[index] = res;
       }
     });

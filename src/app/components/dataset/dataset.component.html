@@ -100,6 +100,6 @@
 <ng-template #imageMenu let-image>
   <section class="image-menu">
     <div (click)="delete(image)">{{image.type == "img" ? "Bild löschen" : "Bildergruppe löschen"}}</div>
-    <div>{{image.type == "img" ? "Bild klonen" : "Bildergruppe klonen"}}</div>
+    <div (click)="cloneItem(image)">{{image.type == "img" ? "Bild klonen" : "Bildergruppe klonen"}}</div>
   </section>
 </ng-template>

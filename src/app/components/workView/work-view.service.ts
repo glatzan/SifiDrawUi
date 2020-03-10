@@ -109,10 +109,10 @@ export class WorkViewService implements OnInit {
   }
 
   private submitLoadedImage(image: ICImage) {
+    this.forceSave();
     const img = CImageUtil.prepare(image);
     this.image = img;
     this.currentImage = img;
-    this.forceSave();
     this.onChangedParentImage.emit(img);
     this.submitLastLayer(img);
   }
@@ -129,18 +129,22 @@ export class WorkViewService implements OnInit {
     }
   }
 
-  forceSave() {
-    if (this.currentSaveTimeout !== undefined) {
+  forceSave(callback: () => any = null) {
+    if (this.currentSaveTimeout != null) {
       this.cancelSaveTimeout();
-      this.save();
+      this.save(true, callback);
+    } else {
+      if (callback)
+        callback();
     }
   }
 
-  saveContent() {
+  saveContent(saveImage: boolean = false) {
     this.cancelSaveTimeout();
     this.onDataSaveEvent.emit({image: this.image, status: DataSaveStatus.WaitingForSave});
     this.currentSaveTimeout = setTimeout(() => {
-      this.save();
+      this.save(saveImage);
+      this.currentSaveTimeout = undefined;
     }, 1000);
   }
 
@@ -149,19 +153,24 @@ export class WorkViewService implements OnInit {
     this.currentSaveTimeout = undefined;
   }
 
-  private save() {
-    if (this.image.id != null) {
+  private save(saveImage: boolean = false, callback: () => any = null) {
+    let image = this.image;
+    if (saveImage && image)
+      image = image.getImage();
+
+    if (image) {
       // this.image.concurrencyCounter++;
-      this.imageService.updateICImage(this.image).subscribe(result => {
+      this.imageService.updateICImage(image).subscribe(result => {
         console.log('saved');
-        console.log(result)
         this.onDataSaveEvent.emit({image: result, status: DataSaveStatus.Saved});
+        if (callback)
+          callback();
       }, error1 => {
         console.log('Fehler beim laden der Dataset Datein');
         if (error1.toString().startsWith("Concurrency Error"))
           this.onDataSaveEvent.emit({image: null, status: DataSaveStatus.FailedConcurrency});
         else
-          this.onDataSaveEvent.emit({image: null, status: DataSaveStatus.FailedUnknown});
+          this.onDataSaveEvent.emit({image: null, status: DataSaveStatus.FailedUnknown, text: error1});
         console.error(error1);
 
       });
@@ -174,7 +183,8 @@ export class WorkViewService implements OnInit {
 }
 export class DataSaveStatusContainer{
   image : ICImage;
-  status : DataSaveStatus;
+  status: DataSaveStatus;
+  text?: string
 }
 
 
