@@ -67,4 +67,15 @@ export namespace FilterHelper {
   export function rgbToHex(r, g, b): string {
     return componentToHex(r) + componentToHex(g) + componentToHex(b);
   }
+
+  export function getCanvas(width: number, height: number): HTMLCanvasElement {
+    const canvas = document.createElement("canvas");
+    canvas.width = width;
+    canvas.height = height;
+    return canvas;
+  }
+
+  export function get2DContext(canvas: HTMLCanvasElement) {
+    return canvas.getContext("2d");
+  }
 }

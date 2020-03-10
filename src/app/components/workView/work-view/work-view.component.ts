@@ -17,6 +17,10 @@ import {ProcessCallback} from "../../../worker/processCallback";
 import {DisplayCallback} from "../../../worker/display-callback";
 import {JPGToPNGConverterFilter} from "../../../worker/filter/jpgto-pngconverter-filter";
 import {DisplayFilter} from "../../../worker/filter/display-filter";
+import {ImageService} from "../../../service/image.service";
+import {iif, Observable, of} from "rxjs";
+import {HistogramFilter} from "../../../worker/filter/histogram-filter";
+import {flatMap} from "rxjs/operators";
 
 @Component({
   selector: 'app-work-view',
@@ -28,6 +32,7 @@ export class WorkViewComponent implements OnInit {
   constructor(private workViewService: WorkViewService,
               private flickerService: FlickerService,
               private filterService: FilterService,
+              private imageService: ImageService,
               private snackBar: MatSnackBar) {
   }
 

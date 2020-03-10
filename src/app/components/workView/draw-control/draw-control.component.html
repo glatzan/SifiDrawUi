@@ -13,13 +13,19 @@
     </mat-button-toggle-group>
   </div>
 
-  <mat-checkbox [(ngModel)]="displaySettings.displayLayer" (change)="onDisplaySettingsChanged($event)" class="hideLine">Layer anzeigen</mat-checkbox>
+  <div class="hideLine">
+    <mat-checkbox [(ngModel)]="displaySettings.displayLayer" (change)="onDisplaySettingsChanged($event)">Layer
+      anzeigen
+    </mat-checkbox>
+  </div>
 
   <div class="copyLayer">
-    <button mat-icon-button class="addButton" (click)="copyLayersFromClipboardToImage($event)" title="Layer aus Zwischenablage der in Bild kopieren" [disabled]="!isLayerClipboardEmpty()">
+    <button mat-icon-button style="transform: scale(0.8);"  (click)="copyLayersFromClipboardToImage($event)"
+            title="Layer aus Zwischenablage der in Bild kopieren" [disabled]="!isLayerClipboardEmpty()">
       <mat-icon>layers_icon</mat-icon>
     </button>
-    <button mat-icon-button class="removeButton" (click)="copyLayersToClipboard($event)" title="Layer in die Zwischenablage kopieren">
+    <button mat-icon-button style="transform: scale(0.8);" (click)="copyLayersToClipboard($event)"
+            title="Layer in die Zwischenablage kopieren">
       <mat-icon>file_copy_icon</mat-icon>
     </button>
   </div>
@@ -36,10 +42,10 @@
       </mat-select>
     </mat-form-field>
 
-    <button mat-icon-button class="addButton" (click)="onAddLayer($event)" title="Layer hinzufügen">
+    <button mat-icon-button class="addButton"  style="transform: scale(0.8);"(click)="onAddLayer($event)" title="Layer hinzufügen">
       <mat-icon>playlist_add</mat-icon>
     </button>
-    <button mat-icon-button class="removeButton" (click)="onRemoveLayer($event)" title="Layer löschen">
+    <button mat-icon-button class="removeButton" style="transform: scale(0.8);" (click)="onRemoveLayer($event)" title="Layer löschen">
       <mat-icon>delete sweep icon</mat-icon>
     </button>
   </div>
@@ -115,7 +121,6 @@
     <span style="white-space: nowrap; float: right">(Rechtsklick: <b>verschieben</b>)</span><br>
     <span style="white-space: nowrap">(Rechtsklick+strg: <b>löschen</b>)</span>
   </label>
-
 </div>
 
 <div class="selectImage" *ngIf="!renderComponent">

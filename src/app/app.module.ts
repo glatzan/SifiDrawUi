@@ -57,6 +57,7 @@ import {FocusOnShowDirective} from './components/editable/focus-on-show-directiv
 import { EnumToArrayPipePipe } from './helpers/enum-to-array-pipe.pipe';
 import {WorkViewService} from "./components/workView/work-view.service";
 import { LayerPresetDialogComponent } from './components/layer-preset-dialog/layer-preset-dialog.component';
+import { HistoViewComponent } from './components/workView/histo-view/histo-view.component';
 
 @NgModule({
   declarations: [
@@ -82,6 +83,7 @@ import { LayerPresetDialogComponent } from './components/layer-preset-dialog/lay
     FocusOnShowDirective,
     EnumToArrayPipePipe,
     LayerPresetDialogComponent,
+    HistoViewComponent,
   ],
   imports: [
     HttpClientModule,
