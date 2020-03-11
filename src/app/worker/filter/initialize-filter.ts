@@ -1,9 +1,7 @@
-import {flatMap} from "rxjs/operators";
 import {ICImage} from "../../model/ICImage";
 import {FilterData} from "../filter-data";
 import {AbstractFilter, Services} from "./abstract-filter";
-import {ContrastOptions} from "../filter-core";
-import {Observable} from "rxjs";
+import {map} from "rxjs/operators";
 
 export class InitializeFilter extends AbstractFilter {
 
@@ -12,13 +10,12 @@ export class InitializeFilter extends AbstractFilter {
   }
 
   doFilter() {
-    return flatMap((data: ICImage) => new Observable<FilterData>((observer) => {
+    return map((data: ICImage) => {
       const filterData = new FilterData();
       filterData.pushICIMG(data);
       filterData.originalImage = data;
-      observer.next(filterData);
-      observer.complete();
-    }));
+      return filterData
+    });
   }
 }
 

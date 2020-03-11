@@ -1,9 +1,8 @@
 import {AbstractFilter, Services} from "./abstract-filter";
-import {flatMap} from "rxjs/operators";
 import {FilterData} from "../filter-data";
-import {Observable} from "rxjs";
 import {FilterHelper} from "./filter-helper";
 import {ColorType} from "pngjs";
+import {map} from "rxjs/operators";
 
 export class CreateImageFilter extends AbstractFilter {
 
@@ -12,7 +11,7 @@ export class CreateImageFilter extends AbstractFilter {
   }
 
   doFilter(createImageOptions?: CreateImageOptions) {
-    return flatMap((data: FilterData) => new Observable<FilterData>((observer) => {
+    return map((data: FilterData) => {
 
       if (!createImageOptions)
         createImageOptions = {};
@@ -42,9 +41,8 @@ export class CreateImageFilter extends AbstractFilter {
       const newImage = FilterHelper.createNewImage(createImageOptions.width, createImageOptions.height, createImageOptions.backgroundColor);
       this.pushAndAddImageToStack(newImage, data);
 
-      observer.next(data);
-      observer.complete();
-    }));
+      return data;
+    });
   }
 }
 

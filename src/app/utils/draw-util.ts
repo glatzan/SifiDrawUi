@@ -142,6 +142,7 @@ export default class DrawUtil {
   }
 
   /**
+   * @deprecated
    * Draws a text on the canvas
    * @param canvas
    * @param text
@@ -192,11 +193,23 @@ export default class DrawUtil {
     cx.clearRect(point_.x, point_.y, width, height);
   }
 
-  static drawRect(cx: CanvasRenderingContext2D, x: number, y: number, width: number, height: number, color: string) {
+  static drawRect(cx: CanvasRenderingContext2D, x: number, y: number, width: number, height: number, color: string, filled: boolean = true) {
     cx.beginPath();
     cx.rect(x, y, width, height);
-    cx.fillStyle = color;
-    cx.fill();
+
+    if (filled) {
+      cx.fillStyle = color;
+      cx.fill();
+    }else{
+      cx.strokeStyle = color;
+      cx.stroke();
+    }
+  }
+
+  static drawText(cx: CanvasRenderingContext2D, text: string,  x: number, y: number, style: string = "20px Arial", fontColor: string = "#ff0000") {
+    cx.fillStyle = fontColor;
+    cx.font = style;
+    cx.fillText(text, x, y);
   }
 
   static drawPolygons(cx: CanvasRenderingContext2D, points: Point[][], width: number, color: string, closed = false, filled = false, cliped = false) {

@@ -6,23 +6,6 @@ import {Layer} from "../../model/layer";
 
 export namespace FilterHelper {
 
-  export function updateImageFromPNG(image: CImage, png: PNG) {
-    const targetBuffer = PNG.sync.write(png, {colorType: 2});
-    image.data = targetBuffer.toString('base64');
-    image.width = png.width;
-    image.height = png.height;
-    return image;
-  }
-
-  export function updateImageFromCanvas(image: CImage, canvas: HTMLCanvasElement, imageType: string = "image/png") {
-    image.data = FilterHelper.canvasToBase64(canvas, imageType);
-    image.width = canvas.width;
-    image.height = canvas.height;
-    image.fileExtension = imageType.substr(imageType.lastIndexOf('/') + 1);
-    return image;
-  }
-
-
   export function createNewImage(width: number, height: number, background: string = "#000", name: string = "tmp") {
     const canvas = document.createElement("canvas");
     canvas.width = width;
@@ -54,10 +37,31 @@ export namespace FilterHelper {
     return result.substr(result.indexOf(',') + 1);
   }
 
-  export function loadAsPNG(image: CImage): PNG {
+  export function canvasToImage(canvas: HTMLCanvasElement, image: CImage, imageType: string = "image/png") {
+    image.data = FilterHelper.canvasToBase64(canvas, imageType);
+    image.width = canvas.width;
+    image.height = canvas.height;
+    image.fileExtension = imageType.substr(imageType.lastIndexOf('/') + 1);
+    return image;
+  }
+
+  export function imageToPNG(image: CImage): PNG {
     const sourceBuffer = new Buffer(image.data, 'base64');
     return PNG.sync.read(sourceBuffer);
   }
+
+  export function pngToBase64(png: PNG) {
+    const targetBuff = PNG.sync.write(png, {colorType: 2});
+    return targetBuff.toString('base64');
+  }
+
+  export function pngToImage(png: PNG, image: CImage) {
+    image.data = FilterHelper.pngToBase64(png);
+    image.width = png.width;
+    image.height = png.height;
+    return image
+  }
+
 
   export function componentToHex(c: number) {
     const hex = c.toString(16);
@@ -68,7 +72,7 @@ export namespace FilterHelper {
     return componentToHex(r) + componentToHex(g) + componentToHex(b);
   }
 
-  export function getCanvas(width: number, height: number): HTMLCanvasElement {
+  export function createCanvas(width: number, height: number): HTMLCanvasElement {
     const canvas = document.createElement("canvas");
     canvas.width = width;
     canvas.height = height;
@@ -77,5 +81,16 @@ export namespace FilterHelper {
 
   export function get2DContext(canvas: HTMLCanvasElement) {
     return canvas.getContext("2d");
+  }
+
+  export function base64StringToCanvas(base64: string): HTMLCanvasElement {
+    const buffer = new Buffer(base64, 'base64');
+    const png = PNG.sync.read(buffer);
+    const array = new Uint8ClampedArray(png.data);
+    const imageData = new ImageData(array, png.width, png.height);
+    const canvas = FilterHelper.createCanvas(png.width, png.height);
+    const cx = FilterHelper.get2DContext(canvas);
+    cx.putImageData(imageData, 0, 0);
+    return canvas
   }
 }

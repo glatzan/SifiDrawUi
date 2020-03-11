@@ -16,6 +16,8 @@ import {FilterHelper} from "./filter/filter-helper";
 import {AffineTransformationMatrixFilter} from "./filter/affine-transformation-matrix-filter";
 import {CreateImageFilter, CreateImageOptions} from "./filter/create-image-filter";
 import {HistogramFilter, HistogramOptions} from "./filter/histogram-filter";
+import {MergeFilter} from "./filter/merge-filter";
+import {ApplyTransformationFilter} from "./filter/apply-transformation-filter";
 
 export class FilterCore {
 
@@ -36,53 +38,11 @@ export class FilterCore {
   }
 
   createAffineTransformationMatrix(sourcePos: number, targetPos: number, sourceLayerID: string, targetLayerID: string = sourceLayerID, targetDataName = 'affineMatrix') {
-    const affineTransformationMatrixFilter = new AffineTransformationMatrixFilter(this.services);
-    return affineTransformationMatrixFilter.doFilter(sourcePos, sourceLayerID, targetPos, targetLayerID, targetDataName);
+    return new AffineTransformationMatrixFilter(this.services).doFilter(sourcePos, sourceLayerID, targetPos, targetLayerID, targetDataName);
   }
 
-  applyTransformation(sourceImgPos, targetImgPos = sourceImgPos, applyTransformationOptions?: ApplyTransformationOptions) {
-    return flatMap((data: FilterData) => new Observable<FilterData>((observer) => {
-
-      const source = this.getImage(sourceImgPos, data);
-      const target = this.getImage(targetImgPos, data);
-
-      if (!applyTransformationOptions)
-        applyTransformationOptions = {}
-
-      if (!applyTransformationOptions.sourceData)
-        applyTransformationOptions.sourceData = "affineMatrix";
-
-      const transformation = data.getData(applyTransformationOptions.sourceData);
-
-      if (!source || !target || !transformation) {
-        observer.error("Target or source not found")
-      }
-
-      const buff = new Buffer(source.data, 'base64');
-      const png = PNG.sync.read(buff);
-
-      const canvas = document.createElement("canvas");
-      canvas.width = png.width;
-      canvas.height = png.height;
-      const cx = canvas.getContext("2d");
-
-      const canvasResult = document.createElement("canvas");
-      canvasResult.width = png.width;
-      canvasResult.height = png.height;
-      const cx2 = canvasResult.getContext("2d");
-
-      const array = new Uint8ClampedArray(png.data);
-      const imageData = new ImageData(array, cx.canvas.width, cx.canvas.height);
-
-      cx.putImageData(imageData, 0, 0);
-
-      cx2.transform(transformation.a, transformation.b, transformation.c, transformation.d, transformation.e, transformation.f);
-      cx2.drawImage(canvas, 0, 0);
-
-      target.data = DrawUtil.canvasAsBase64(canvasResult);
-      observer.next(data);
-      observer.complete();
-    }));
+  applyTransformation(sourcePos: number, targetPos: number = sourcePos, sourceData: string = "affineMatrix") {
+    return new ApplyTransformationFilter(this.services).doFilter(sourcePos, targetPos, sourceData);
   }
 
   copyLayerToImage({sourceImgPos = null, targetImgPos = null, layerIDs = null, affineTransformation = false, affineMatrixSource = "affineMatrix"}: { sourceImgPos: number, targetImgPos: number, layerIDs: [{ oldID: string, newID: string, name: string, type?: string, color?: string }], affineTransformation?: boolean, affineMatrixSource?: string }) {
@@ -303,43 +263,8 @@ export class FilterCore {
     }));
   }
 
-  merge(imageOnePos: number, imageTwoPos: number, targetImagePos: number = imageOnePos) {
-    return flatMap((data: FilterData) => new Observable<FilterData>((observer) => {
-      const imgOne = this.getImage(imageOnePos, data);
-      const imgTwo = this.getImage(imageTwoPos, data);
-      const targetImage = this.getImage(targetImagePos, data);
-
-      if (imgOne === null || imgTwo === null || targetImage === null) {
-        observer.error(`Image not found index img 1 ${imageOnePos} or img 2 ${imageTwoPos} or target ${targetImage}!`);
-      }
-
-      const buff1 = new Buffer(imgOne.data, 'base64');
-      const png1 = PNG.sync.read(buff1);
-
-      const buff2 = new Buffer(imgTwo.data, 'base64');
-      const png2 = PNG.sync.read(buff2);
-
-      const dst = new PNG({width: png1.width, height: png1.height, colorType: 2});
-
-      if (png1.width > png2.width || png1.height > png2.height) {
-        observer.error(`Image two must be equal or bigger in size ${png1.width} - ${png2.width} / ${png1.height} - ${png2.height}`);
-      }
-
-      for (let y = 0; y < png1.height; y++) {
-        for (let x = 0; x < png1.width; x++) {
-          const idx = (png1.width * y + x) << 2;
-          dst.data[idx] = png1.data[idx] | png2.data[idx];
-          dst.data[idx + 1] = png1.data[idx + 1] | png2.data[idx + 1];
-          dst.data[idx + 2] = png1.data[idx + 2] | png2.data[idx + 2];
-          dst.data[idx + 3] = 255
-        }
-      }
-      const targetBuff = PNG.sync.write(dst, {colorType: 2});
-      const tmo = targetBuff.toString('base64')
-      targetImage.data = targetBuff.toString('base64');
-      observer.next(data);
-      observer.complete();
-    }));
+  merge(sourcePos: number, sourcePos2: number, targetPos: number = sourcePos) {
+    return new MergeFilter(this.services).doFilter(sourcePos, sourcePos2, targetPos)
   }
 
   contrast(sourcePos: number, contrastOptions?: ContrastOptions) {
@@ -349,8 +274,7 @@ export class FilterCore {
       contrastOptions.targetPos = sourcePos;
     if (!contrastOptions.contrast)
       contrastOptions.contrast = 1;
-    const contrastFilter = new ContrastFilter(this.services);
-    return contrastFilter.doFilter(sourcePos, contrastOptions)
+    return new ContrastFilter(this.services).doFilter(sourcePos, contrastOptions)
   }
 
 
@@ -361,13 +285,11 @@ export class FilterCore {
     if (!histogramOptions.targetData)
       histogramOptions.targetData = "histogram";
 
-    const histogramFilter = new HistogramFilter(this.services)
-    return histogramFilter.doFilter(imageOnePos, channel, histogramOptions)
+    return new HistogramFilter(this.services).doFilter(imageOnePos, channel, histogramOptions)
   }
 
   createImage(createImageOptions?: CreateImageOptions) {
-    const createImageFilter = new CreateImageFilter(this.services);
-    return createImageFilter.doFilter(createImageOptions);
+    return new CreateImageFilter(this.services).doFilter(createImageOptions);
   }
 
   drawLayer({sourceImgPos = null, targetImgPos = null, layerIDs = null}: { sourceImgPos: number, targetImgPos: number, layerIDs: string[] }) {
@@ -671,10 +593,6 @@ export interface ProcessCountedPixelsOptions {
 
 export interface ColorTypeOptions {
   targetImagePos?: number
-}
-
-export interface ApplyTransformationOptions {
-  sourceData?: string;
 }
 
 export interface ContrastOptions {

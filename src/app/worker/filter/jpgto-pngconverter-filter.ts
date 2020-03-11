@@ -19,7 +19,7 @@ export class JPGToPNGConverterFilter extends AbstractFilter {
         return data;
       }
 
-      FilterHelper.updateImageFromCanvas(target, canvas);
+      FilterHelper.canvasToImage(canvas,target);
       return data;
     })));
   }

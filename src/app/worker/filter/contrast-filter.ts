@@ -1,10 +1,9 @@
 import {PNG} from "pngjs";
 import {AbstractFilter, Services} from "./abstract-filter";
 import {FilterHelper} from "./filter-helper";
-import {flatMap} from "rxjs/operators";
 import {FilterData} from "../filter-data";
-import {Observable} from "rxjs";
 import {ContrastOptions} from "../filter-core";
+import {map} from "rxjs/operators";
 
 export class ContrastFilter extends AbstractFilter {
 
@@ -13,16 +12,16 @@ export class ContrastFilter extends AbstractFilter {
   }
 
   doFilter(sourcePos: number, contrastOptions: ContrastOptions) {
-    return flatMap((data: FilterData) => new Observable<FilterData>((observer) => {
+    return map((data: FilterData) => {
 
       const source = this.getImage(sourcePos, data);
       const target = this.getImage(contrastOptions.targetPos, data);
 
       if (!source || !target) {
-        observer.error("Source or target not found!")
+        throw new Error("Source or target not found!")
       }
 
-      const sourceImage = FilterHelper.loadAsPNG(source);
+      const sourceImage = FilterHelper.imageToPNG(source);
       const targetImage = new PNG({width: sourceImage.width, height: sourceImage.height});
 
       let i = 0;
@@ -40,9 +39,8 @@ export class ContrastFilter extends AbstractFilter {
         }
       }
 
-      FilterHelper.updateImageFromPNG(target, targetImage);
-      observer.next(data);
-      observer.complete();
-    }));
+      FilterHelper.pngToImage(targetImage, target);
+      return data;
+    });
   }
 }
