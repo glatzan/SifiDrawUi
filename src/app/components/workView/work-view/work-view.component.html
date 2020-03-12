@@ -24,13 +24,11 @@
                             [disabled]="displaySettings.enableDrawingSliderDisabled"></mat-slide-toggle>
         </div>
 
-        <div class="contrastText" *ngIf="renderComponent">
-          Kontrast:
-        </div>
-        <div class="contrast"  *ngIf="renderComponent">
-          <mat-slider min="0" max="3" step="0.1" value="1" [(ngModel)]="contrast" (change)="onContrastChange($event)"
-                      style="width: 60px"></mat-slider>
-        </div>
+        <button mat-icon-button class="showFilter" (click)="toggleFilterView()" title="Filter / Bild-Tools"
+                *ngIf="renderComponent">
+          <mat-icon>image_search_icon</mat-icon>
+        </button>
+
 
         <span class="mouse" *ngIf="renderComponent">
           Maus: X {{mousePositionInCanvas.x}} Y {{mousePositionInCanvas.y}}
@@ -45,37 +43,33 @@
           Bildgröße: {{activeImage.getWidth()}}x{{activeImage.getHeight()}} px (WxH)
         </span>
 
-        <span class="flickerTime" *ngIf="renderComponent">
-          <mat-slider min="0" max="1000" step="50" value="500" style="width: 60px" [(ngModel)]="displaySettings.flickerTimer" (ngModelChange)="onFlickerChange($event)"></mat-slider>
-        </span>
-
-        <button mat-icon-button class="flicker-btn {{flickerActive() ? 'flickerActive' : ''}}" (click)="flicker()" title="Flicker" *ngIf="renderComponent">
+        <button mat-icon-button class="flicker-btn {{flickerActive() ? 'flickerActive' : ''}}" (click)="flicker()"
+                title="Flicker" *ngIf="renderComponent">
           <mat-icon>broken_image</mat-icon>
         </button>
 
+        <span class="flickerTime" *ngIf="renderComponent">
+          <mat-slider min="0" max="1000" step="50" value="500" style="width: 60px"
+                      [(ngModel)]="displaySettings.flickerTimer" (ngModelChange)="onFlickerChange($event)"></mat-slider>
+        </span>
 
         <span class="zoom" *ngIf="renderComponent">
           Zoom {{currentZoomLevel}} %
         </span>
 
-        <button mat-icon-button class="resetBtn" (click)="resetCanvasZoom()" title="Bild zurücksetzten" *ngIf="renderComponent">
+        <button mat-icon-button class="resetBtn" (click)="resetCanvasZoom()" title="Bild zurücksetzten"
+                *ngIf="renderComponent">
           <mat-icon>control_camera</mat-icon>
         </button>
       </div>
 
       <div class="drawControl">
-        <mat-tab-group class="tabs">
-          <mat-tab label="Filter">
             <app-draw-control></app-draw-control>
-          </mat-tab>
-          <mat-tab label="Ausgabe">
-            <app-histo-view></app-histo-view>
-          </mat-tab>
-        </mat-tab-group>
       </div>
 
       <div class="filterControl">
-        <app-filter-control></app-filter-control>
+        <app-filter-control  [hidden]="showFilter"></app-filter-control>
+        <app-histo-view  [hidden]="!showFilter"></app-histo-view>
       </div>
     </div>
 

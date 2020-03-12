@@ -50,8 +50,8 @@ export class FilterControlComponent implements OnInit, DisplayCallback {
 
   ngOnInit() {
     this.loadFilters();
-    this.workViewService.onChangedParentImage.subscribe(image => {
-      this.image = image;
+    this.workViewService.onChangedImage.subscribe(image => {
+      this.image = image.parent;
     });
 
     this.workViewService.onFilterSetChanged.subscribe(_ => {
@@ -131,7 +131,7 @@ export class FilterControlComponent implements OnInit, DisplayCallback {
   }
 
   public resetImage() {
-    this.workViewService.onChangedParentImage.emit(this.image)
+    this.workViewService.resetImage();
   }
 
   public displayCallBack(image: CImage): void {

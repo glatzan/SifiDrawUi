@@ -1,6 +1,7 @@
 import {CImage} from './CImage';
 import {ICImage} from './ICImage';
 import {Layer} from "./layer";
+import CImageUtil from "../utils/cimage-util";
 
 export class CImageGroup implements ICImage {
   public id: string;
@@ -65,7 +66,7 @@ export class CImageGroup implements ICImage {
     if (this.activeImage >= 0 && this.activeImage < this.images.length) {
       return this.images[this.activeImage];
     } else {
-      return null;
+      return  CImageUtil.prepareImage(new CImage());
     }
   }
 }

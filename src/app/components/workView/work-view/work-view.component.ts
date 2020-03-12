@@ -18,9 +18,6 @@ import {DisplayCallback} from "../../../worker/display-callback";
 import {JPGToPNGConverterFilter} from "../../../worker/filter/jpgto-pngconverter-filter";
 import {DisplayFilter} from "../../../worker/filter/display-filter";
 import {ImageService} from "../../../service/image.service";
-import {iif, Observable, of} from "rxjs";
-import {HistogramFilter} from "../../../worker/filter/histogram-filter";
-import {flatMap} from "rxjs/operators";
 
 @Component({
   selector: 'app-work-view',
@@ -36,6 +33,10 @@ export class WorkViewComponent implements OnInit {
               private snackBar: MatSnackBar) {
   }
 
+  parentImage: ICImage;
+
+  activeImage: ICImage;
+
   displaySettings: CanvasDisplaySettings;
 
   renderComponent = false;
@@ -46,38 +47,22 @@ export class WorkViewComponent implements OnInit {
 
   currentZoomLevel = 100;
 
-  parentImage: ICImage;
-
-  activeImage: ICImage;
-
-  contrastCopy: ICImage;
-
   contrast: number = 1;
 
   contentSaveStatus: DataSaveStatus = DataSaveStatus.Saved;
 
+  showFilter: boolean = true;
+
   ngOnInit() {
     this.displaySettings = this.workViewService.getDisplaySettings();
 
-    this.workViewService.onChangedParentImage.subscribe(image => {
-      this.parentImage = image;
-      this.activeImage = image;
-      this.contrastCopy = image;
-      this.renderComponent = image.hasData();
+    this.workViewService.onChangedImage.subscribe(change => {
+      this.parentImage = change.parent;
+      this.activeImage = change.active;
+      this.renderComponent = change.active.hasData();
       this.renderColor = false;
       this.contrast = 1;
       this.mousePositionInCanvas.clear();
-    });
-
-    this.workViewService.onChangedActiveImage.subscribe(image => {
-      this.activeImage = image;
-      this.renderComponent = image.hasData();
-
-      if (this.activeImage.id !== "contrast") {
-        this.contrastCopy = image;
-        this.contrast = 1;
-      }
-
     });
 
     this.workViewService.onMouseCoordinatesCanvasChanged.subscribe(v => {
@@ -145,10 +130,10 @@ export class WorkViewComponent implements OnInit {
   onContrastChange($event: MatSliderChange) {
     console.log($event.value);
     if ($event.value === 1) {
-      this.workViewService.onChangedActiveImage.emit(this.contrastCopy);
+      this.workViewService.selectActiveImage(this.activeImage);
     } else {
 
-      const img = Object.assign(new CImage(), this.contrastCopy)
+      const img = Object.assign(new CImage(), this.activeImage);
       img.id = "contrast";
       const dataset = new Dataset();
       dataset.images = [img];
@@ -162,7 +147,7 @@ export class WorkViewComponent implements OnInit {
         }
       } as ProcessCallback, {
         displayCallBack(image: CImage): void {
-          me.workViewService.onChangedActiveImage.emit(image);
+          me.workViewService.onChangeDisplayImage.emit(image);
         }, addImage(image: CImage): void {
 
         }
@@ -173,7 +158,14 @@ export class WorkViewComponent implements OnInit {
       const jpgToPNG = new JPGToPNGConverterFilter(services);
       filters.push(jpgToPNG.doFilter(0));
       const contrast = new ContrastFilter(services);
-      filters.push(contrast.doFilter(0, {targetPos: 0, contrast: $event.value}));
+      filters.push(contrast.doFilter(0, {
+        targetPos: 0,
+        contrast: $event.value,
+        maxValue: 255,
+        minValue: 0,
+        offset: 0,
+        rgb: false
+      }));
       const display = new DisplayFilter(services);
       filters.push(display.doFilter());
 
@@ -181,14 +173,15 @@ export class WorkViewComponent implements OnInit {
         console.log('Ende');
       });
 
-      // const target = FilterHelper.createNewImage(this.activeImage.getWidth(), this.activeImage.getHeight(), "#000", "contrast");
-      // const contrastFilter = new ContrastFilter(null);
-      // const img = contrastFilter.doFilter(this.contrastCopy as CImage, target, $event.value);
-
     }
   }
 
   flickerActive() {
     return this.flickerService.isActive();
+  }
+
+  toggleFilterView() {
+    this.showFilter = !this.showFilter;
+    this.workViewService.onRenderImageTools.emit(this.showFilter);
   }
 }

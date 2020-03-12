@@ -19,13 +19,13 @@ export class SubImageListComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.workViewService.onChangedParentImage.subscribe(img => {
+    this.workViewService.onChangedImage.subscribe(change => {
       let arr: Array<CImage> = [];
 
-      if (img instanceof CImageGroup) {
-        arr = arr.concat(img.images);
+      if (change.parent instanceof CImageGroup) {
+        arr = arr.concat(change.parent.images);
       } else {
-        arr.push(img);
+        arr.push(change.parent);
       }
       this.imageArray = arr;
     });

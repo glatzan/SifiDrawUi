@@ -66,24 +66,24 @@
 
         grid-area: cc;
         display: grid;
-        grid-template-columns: 130px 50px 150px 175px 200px 250px auto 40px 150px 100px 40px;
-        grid-template-areas: "drawMode contrastText contrast mouse colorFiled imageSize . flicker flickerTime zoom resetBtn";
+        grid-template-columns: 130px 175px 200px 250px auto 50px 150px 100px 40px 50px;
+        grid-template-areas: "drawMode  mouse colorFiled imageSize . flicker flickerTime zoom resetBtn showFilter";
 
         .drawMode {
           grid-area: drawMode;
           align-self: center;
         }
 
-        .contrastText {
+        .showFilter {
           align-self: center;
-          grid-area: contrastText;
-        }
+          justify-self: center;
+          grid-area: showFilter;
+          background-color: transparent;
+          border: none;
 
-        .contrast {
-          align-self: center;
-          grid-area: contrast;
-          .mat-slider-horizontal {
-            padding: 0;
+          &:hover {
+            cursor: pointer;
+            color: $dark-focused;
           }
         }
 

@@ -92,6 +92,8 @@ export class HistogramFilter extends AbstractFilter {
 
 export interface HistogramOptions {
   targetPos?: number
+  targetDisplayMinValue?: number
+  targetDisplayMaxValue?: number
   targetData?: string
   bins?: number
 }

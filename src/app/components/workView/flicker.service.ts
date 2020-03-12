@@ -10,16 +10,10 @@ export class FlickerService {
   constructor(private workViewService: WorkViewService) {
     console.log("Initialize");
 
-    workViewService.onChangedParentImage.subscribe(x => {
-      this.currentImage = x;
-      this.flickerImageOne = x;
+    workViewService.onChangedImage.subscribe(change => {
+      this.currentImage = change.active;
+      this.flickerImageOne = change.active;
       this.stopFlicker();
-    });
-
-    workViewService.onChangedActiveImage.subscribe(x => {
-      this.currentImage = x;
-      if (!this.active)
-        this.flickerImageOne = x;
     });
 
     workViewService.onAddFlickerImage.subscribe(x => {
@@ -142,4 +136,5 @@ export class FlickerService {
   private flickerValid(): boolean {
     return this.flickerImageOne != null && this.flickerImageTwo != null && this.flickerImageOne !== this.flickerImageTwo;
   }
+
 }

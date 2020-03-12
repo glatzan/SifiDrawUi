@@ -16,6 +16,7 @@ import {FlickerService} from "../flicker.service";
 import {CImageGroup} from "../../../model/CImageGroup";
 import {AuthenticationService} from "../../../service/authentication.service";
 import {CanvasDrawAction, CanvasHistory} from "./canvas-hisotry";
+import {CImage} from "../../../model/CImage";
 
 @Component({
   selector: 'app-draw-canvas',
@@ -31,7 +32,7 @@ export class DrawCanvasComponent implements AfterViewInit, OnInit {
   /**
    * Image Data from Backend, display image
    */
-  private image: ICImage;
+  private image: CImage;
 
   /**
    * Current layer
@@ -236,16 +237,8 @@ export class DrawCanvasComponent implements AfterViewInit, OnInit {
 
     this.displaySettings = this.workViewService.getDisplaySettings();
 
-    this.workViewService.onChangedParentImage.subscribe(image => {
+    this.workViewService.onChangeDisplayImage.subscribe(image => {
       this.prepareImage(image);
-    });
-
-    this.workViewService.onChangedActiveImage.subscribe(image => {
-      this.prepareImage(image);
-    });
-
-    this.workViewService.onDisplayImageRedraw.subscribe(x => {
-      this.saveAndUpdate();
     });
 
     this.workViewService.onLayerChange.subscribe(x => {
@@ -358,7 +351,7 @@ export class DrawCanvasComponent implements AfterViewInit, OnInit {
     }
   }
 
-  private prepareImage(image: ICImage) {
+  private prepareImage(image: CImage) {
     // save manually if image should be changed
     this.image = image;
     this.currentLayer = new Layer('-');

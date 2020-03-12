@@ -12,6 +12,8 @@ import {FilterSet} from "../../model/FilterSet";
 import {MousePosition} from "../../helpers/mouse-position";
 import {CanvasDisplaySettings} from "../../helpers/canvas-display-settings";
 import {MatSnackBar} from "@angular/material/snack-bar";
+import {iif, Observable, of} from "rxjs";
+import {flatMap} from "rxjs/operators";
 
 @Injectable({
   providedIn: 'root'
@@ -31,9 +33,9 @@ export class WorkViewService implements OnInit {
 
   @Output() onKeyPressedOverCanvas: EventEmitter<{ key: string, mousePosition: MousePosition }> = new EventEmitter();
 
-  @Output() onChangedParentImage: EventEmitter<ICImage> = new EventEmitter();
+  @Output() onChangedImage: EventEmitter<{ parent: ICImage, active: CImage }> = new EventEmitter();
 
-  @Output() onChangedActiveImage: EventEmitter<ICImage> = new EventEmitter();
+  @Output() onChangeDisplayImage: EventEmitter<CImage> = new EventEmitter();
 
   @Output() onAddFlickerImage: EventEmitter<ICImage> = new EventEmitter();
 
@@ -51,15 +53,21 @@ export class WorkViewService implements OnInit {
 
   @Output() onDataSaveEvent: EventEmitter<DataSaveStatusContainer> = new EventEmitter();
 
+  @Output() onRenderImageTools: EventEmitter<boolean> = new EventEmitter();
+
   private image: ICImage;
 
-  private currentImage: ICImage;
+  private activeImage: CImage;
+
+  private displayImage: CImage;
 
   private lastLayerID: string;
 
   private displaySettings = new CanvasDisplaySettings();
 
   private currentSaveTimeout: any = undefined;
+
+  private pngImageBuffer: CImage[] = [];
 
   constructor(private imageService: ImageService,
               private imageGroupService: ImageGroupService,
@@ -71,11 +79,9 @@ export class WorkViewService implements OnInit {
   }
 
   public selectImage(image: ICImage) {
-
     if (image.id == null) {
       this.submitLoadedImage(image);
     } else {
-
       if (image instanceof CImageGroup) {
         this.imageGroupService.getImageGroup(image.id, "jpeg").subscribe((group: CImageGroup) => {
           this.submitLoadedImage(group);
@@ -93,10 +99,10 @@ export class WorkViewService implements OnInit {
   }
 
   public selectActiveImage(image: ICImage) {
-    const img = CImageUtil.prepare(image);
-    this.currentImage = img;
-    this.onChangedActiveImage.emit(img);
-    this.submitLastLayer(img);
+    this.activeImage = CImageUtil.prepare(image).getImage();
+    this.onChangedImage.emit({parent: this.image, active: this.activeImage});
+    this.onChangeDisplayImage.emit(this.activeImage);
+    this.submitLastLayer(this.activeImage);
   }
 
   public selectLayer(layer: Layer) {
@@ -105,16 +111,17 @@ export class WorkViewService implements OnInit {
   }
 
   public restoreLastSelectedLayer() {
-    this.submitLastLayer(this.currentImage);
+    this.submitLastLayer(this.activeImage);
   }
 
   private submitLoadedImage(image: ICImage) {
     this.forceSave();
-    const img = CImageUtil.prepare(image);
-    this.image = img;
-    this.currentImage = img;
-    this.onChangedParentImage.emit(img);
-    this.submitLastLayer(img);
+    this.image = CImageUtil.prepare(image);
+    this.activeImage = this.image.getImage();
+    this.displayImage = this.activeImage;
+    this.onChangeDisplayImage.emit(this.activeImage);
+    this.onChangedImage.emit({parent: this.image, active: this.activeImage});
+    this.submitLastLayer(this.activeImage);
   }
 
   private submitLastLayer(image: ICImage) {
@@ -148,6 +155,47 @@ export class WorkViewService implements OnInit {
     }, 1000);
   }
 
+  getDisplaySettings(): CanvasDisplaySettings {
+    return this.displaySettings;
+  }
+
+  getActiveImage(): CImage {
+    return this.activeImage;
+  }
+
+
+  resetImage() {
+    this.selectActiveImage(this.activeImage);
+  }
+
+  getPNGFromBuffer(imageID: string): Observable<CImage> {
+    return of(imageID).pipe(
+      flatMap((data: string) =>
+        iif(() => this.findImageFromBuffer(imageID) == null,
+          this.imageService.getImage(imageID).pipe(
+            flatMap((data: CImage) => new Observable<CImage>((observer) => {
+                this.pngImageBuffer.push(data);
+                if (this.pngImageBuffer.length > 10) {
+                  this.pngImageBuffer.splice(0, 1)
+                }
+                observer.next(data);
+                observer.complete();
+              }),
+            )
+          ),
+          of(this.findImageFromBuffer(imageID))
+        ))
+    );
+  }
+
+  private findImageFromBuffer(id: string) {
+    for (let img of this.pngImageBuffer) {
+      if (img.id === id)
+        return img;
+    }
+    return null;
+  }
+
   private cancelSaveTimeout(): void {
     clearTimeout(this.currentSaveTimeout);
     this.currentSaveTimeout = undefined;
@@ -159,8 +207,7 @@ export class WorkViewService implements OnInit {
       image = image.getImage();
 
     if (image) {
-      // this.image.concurrencyCounter++;
-      this.imageService.updateICImage(image).subscribe(result => {
+      this.imageService.updateICImage(this.activeImage).subscribe(result => {
         console.log('saved');
         this.onDataSaveEvent.emit({image: result, status: DataSaveStatus.Saved});
         if (callback)
@@ -176,13 +223,10 @@ export class WorkViewService implements OnInit {
       });
     }
   }
-
-  public getDisplaySettings(): CanvasDisplaySettings {
-    return this.displaySettings;
-  }
 }
-export class DataSaveStatusContainer{
-  image : ICImage;
+
+export class DataSaveStatusContainer {
+  image: ICImage;
   status: DataSaveStatus;
   text?: string
 }

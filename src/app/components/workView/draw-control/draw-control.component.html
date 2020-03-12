@@ -36,7 +36,7 @@
   <div class="labelSelect">
     <mat-form-field class="settingElement">
       <mat-select [(ngModel)]="currentLayer" (ngModelChange)="onLayerChange($event)">
-        <mat-option *ngFor="let layer of image.getLayers()" [value]="layer">
+        <mat-option *ngFor="let layer of activeImage.getLayers()" [value]="layer">
           {{layer.id}} - {{layer.name}}
         </mat-option>
       </mat-select>

@@ -2,8 +2,8 @@ import {Layer} from './layer';
 import {ICImage} from './ICImage';
 
 export class CImage implements ICImage {
-  public id: string;
-  public name: string;
+  id: string;
+  name: string;
   data: string;
   layers: Layer[] = [];
   width: number;

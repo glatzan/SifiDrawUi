@@ -66,9 +66,9 @@ export class DatasetComponent implements OnInit {
     this.datasetService.getDataset(datasetID).subscribe((data: Dataset) => {
       if (this.dataset.id !== data.id) {
         if(data.images.length > 0) {
-          this.onSelectImage('', data.images[0]);
+          this.onSelectImage(null, data.images[0]);
         }else{
-          this.onSelectImage('', new CImage());
+          this.onSelectImage(null, new CImage());
         }
       }
       this.dataset = data;

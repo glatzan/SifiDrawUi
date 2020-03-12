@@ -2,7 +2,6 @@ import {PNG} from "pngjs";
 import {AbstractFilter, Services} from "./abstract-filter";
 import {FilterHelper} from "./filter-helper";
 import {FilterData} from "../filter-data";
-import {ContrastOptions} from "../filter-core";
 import {map} from "rxjs/operators";
 
 export class ContrastFilter extends AbstractFilter {
@@ -24,12 +23,18 @@ export class ContrastFilter extends AbstractFilter {
       const sourceImage = FilterHelper.imageToPNG(source);
       const targetImage = new PNG({width: sourceImage.width, height: sourceImage.height});
 
+      let [r, g, b,] = [0, 0, 0];
       let i = 0;
       for (let y = 0; y < sourceImage.height; y++) {
         for (let x = 0; x < sourceImage.width; x++) {
-          const r = sourceImage.data[i] * contrastOptions.contrast;
-          const g = sourceImage.data[i + 1] * contrastOptions.contrast;
-          const b = sourceImage.data[i + 2] * contrastOptions.contrast;
+          if (contrastOptions.rgb) {
+            r = ContrastFilter.calcValue(sourceImage.data[i], contrastOptions.minValue, contrastOptions.maxValue, contrastOptions.contrast, contrastOptions.offset);
+            g = ContrastFilter.calcValue(sourceImage.data[i + 1], contrastOptions.minValue, contrastOptions.maxValue, contrastOptions.contrast, contrastOptions.offset);
+            b = ContrastFilter.calcValue(sourceImage.data[i + 2], contrastOptions.minValue, contrastOptions.maxValue, contrastOptions.contrast, contrastOptions.offset);
+          } else {
+            r = ContrastFilter.calcValue(sourceImage.data[i], contrastOptions.minValue, contrastOptions.maxValue, contrastOptions.contrast, contrastOptions.offset);
+            [g, b] = [r, r];
+          }
 
           targetImage.data[i] = r > 255 ? 255 : r;
           targetImage.data[i + 1] = g > 255 ? 255 : g;
@@ -42,5 +47,25 @@ export class ContrastFilter extends AbstractFilter {
       FilterHelper.pngToImage(targetImage, target);
       return data;
     });
+
   }
+
+  private static calcValue(value: number, minValue: number, maxValue: number, contrast: number, offset: number) {
+    const result = value * contrast * offset;
+    if (result > maxValue)
+      return maxValue;
+    else if (result < minValue)
+      return minValue;
+    else
+      return result;
+  }
+}
+
+export interface ContrastOptions {
+  targetPos?: number
+  contrast?: number
+  offset?: number;
+  minValue?: number
+  maxValue?: number
+  rgb?: boolean;
 }

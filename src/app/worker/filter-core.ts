@@ -10,7 +10,7 @@ import {Point} from "../model/point";
 import {LayerType} from "../model/layer-type.enum";
 import {ColorType, PNG} from "pngjs";
 import DrawUtil from "../utils/draw-util";
-import {ContrastFilter} from "./filter/contrast-filter";
+import {ContrastFilter, ContrastOptions} from "./filter/contrast-filter";
 import {Services} from "./filter/abstract-filter";
 import {FilterHelper} from "./filter/filter-helper";
 import {AffineTransformationMatrixFilter} from "./filter/affine-transformation-matrix-filter";
@@ -18,6 +18,7 @@ import {CreateImageFilter, CreateImageOptions} from "./filter/create-image-filte
 import {HistogramFilter, HistogramOptions} from "./filter/histogram-filter";
 import {MergeFilter} from "./filter/merge-filter";
 import {ApplyTransformationFilter} from "./filter/apply-transformation-filter";
+import {LoadFilter} from "./filter/load-filter";
 
 export class FilterCore {
 
@@ -28,13 +29,7 @@ export class FilterCore {
   }
 
   load() {
-    return flatMap((data: ICImage) => this.loadICImage(data).pipe(map(cimg => {
-      console.log(`Load img ${atob(cimg.id)}`);
-      const filterData = new FilterData();
-      filterData.pushICIMG(cimg);
-      filterData.originalImage = cimg;
-      return filterData;
-    })));
+   return new LoadFilter(this.services).doFilter()
   }
 
   createAffineTransformationMatrix(sourcePos: number, targetPos: number, sourceLayerID: string, targetLayerID: string = sourceLayerID, targetDataName = 'affineMatrix') {
@@ -274,6 +269,12 @@ export class FilterCore {
       contrastOptions.targetPos = sourcePos;
     if (!contrastOptions.contrast)
       contrastOptions.contrast = 1;
+    if (!contrastOptions.offset)
+      contrastOptions.offset = 0;
+    if (!contrastOptions.minValue)
+      contrastOptions.minValue = 0;
+    if (!contrastOptions.maxValue)
+      contrastOptions.maxValue = 255;
     return new ContrastFilter(this.services).doFilter(sourcePos, contrastOptions)
   }
 
@@ -281,10 +282,8 @@ export class FilterCore {
   histogram(imageOnePos: number, channel: number, histogramOptions?: HistogramOptions) {
     if (!histogramOptions)
       histogramOptions = {};
-
     if (!histogramOptions.targetData)
       histogramOptions.targetData = "histogram";
-
     return new HistogramFilter(this.services).doFilter(imageOnePos, channel, histogramOptions)
   }
 
@@ -507,14 +506,6 @@ export class FilterCore {
     this.services.displayCallback.addImage(img);
   }
 
-  private loadICImage(img: ICImage): Observable<ICImage> {
-    if (img instanceof CImage) {
-      return this.services.imageService.getImage(img.id);
-    } else {
-      return this.services.imageGroupService.getImageGroup(img.id);
-    }
-  }
-
   private getImage(index: number, data: FilterData): CImage {
     if (index < -1 || index >= data.imgStack.length) {
       return null;
@@ -593,9 +584,4 @@ export interface ProcessCountedPixelsOptions {
 
 export interface ColorTypeOptions {
   targetImagePos?: number
-}
-
-export interface ContrastOptions {
-  targetPos?: number
-  contrast?: number
 }
