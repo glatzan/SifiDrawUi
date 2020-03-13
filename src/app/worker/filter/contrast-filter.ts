@@ -13,6 +13,19 @@ export class ContrastFilter extends AbstractFilter {
   doFilter(sourcePos: number, contrastOptions: ContrastOptions) {
     return map((data: FilterData) => {
 
+      if (!contrastOptions)
+        contrastOptions = {};
+      if (!contrastOptions.targetPos)
+        contrastOptions.targetPos = sourcePos;
+      if (!contrastOptions.contrast)
+        contrastOptions.contrast = 1;
+      if (!contrastOptions.offset)
+        contrastOptions.offset = 0;
+      if (!contrastOptions.minValue)
+        contrastOptions.minValue = 0;
+      if (!contrastOptions.maxValue)
+        contrastOptions.maxValue = 255;
+
       const source = this.getImage(sourcePos, data);
       const target = this.getImage(contrastOptions.targetPos, data);
 

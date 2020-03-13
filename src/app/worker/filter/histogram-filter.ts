@@ -13,6 +13,12 @@ export class HistogramFilter extends AbstractFilter {
 
   doFilter(sourcePos: number = 0, channel: number = 0, histogramOptions?: HistogramOptions) {
     return map((data: FilterData) => {
+      if (!histogramOptions)
+        histogramOptions = {};
+
+      if (!histogramOptions.targetData)
+        histogramOptions.targetData = "histogram";
+
       const source = this.getImage(sourcePos, data);
 
       let target = null;

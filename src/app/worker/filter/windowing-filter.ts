@@ -10,11 +10,26 @@ export class WindowingFilter extends AbstractFilter {
     super(services);
   }
 
-  doFilter(sourcePos: number, windowingOptions: WindowingOptions) {
+  doFilter(sourcePos: number, targetPos: number, windowingOptions: WindowingOptions) {
     return map((data: FilterData) => {
 
+      if (!windowingOptions)
+        windowingOptions = {};
+
+      if (!windowingOptions.minValue)
+        windowingOptions.minValue = 0;
+
+      if (!windowingOptions.maxValue)
+        windowingOptions.maxValue = 255;
+
+      if(!windowingOptions.aMin)
+        windowingOptions.aMin = 0;
+
+      if(!windowingOptions.aMax)
+        windowingOptions.aMax = 255;
+
       const source = this.getImage(sourcePos, data);
-      const target = this.getImage(windowingOptions.targetPos, data);
+      const target = this.getImage(targetPos, data);
 
       if (!source || !target) {
         throw new Error("Source or target not found!")
@@ -62,7 +77,6 @@ export class WindowingFilter extends AbstractFilter {
 }
 
 export interface WindowingOptions {
-  targetPos?: number
   aMin?: number
   aMax?: number
   minValue?: number

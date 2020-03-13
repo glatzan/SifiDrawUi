@@ -1,9 +1,7 @@
 import {CImage} from "../model/CImage";
 import {flatMap, map} from "rxjs/operators";
-import {ICImage} from "../model/ICImage";
 import {FilterData} from "./filter-data";
 import {Observable} from "rxjs";
-import {CImageGroup} from "../model/CImageGroup";
 import {Layer} from "../model/layer";
 import {applyToPoints} from "transformation-matrix";
 import {Point} from "../model/point";
@@ -19,6 +17,10 @@ import {HistogramFilter, HistogramOptions} from "./filter/histogram-filter";
 import {MergeFilter} from "./filter/merge-filter";
 import {ApplyTransformationFilter} from "./filter/apply-transformation-filter";
 import {LoadFilter} from "./filter/load-filter";
+import {SaveFilter, SaveOptions} from "./filter/save-filter";
+import {ThresholdFilter, ThresholdOptions} from "./filter/threshold-filter";
+import {WindowByLabel, WindowByLabelFilter} from "./filter/window-by-label-filter";
+import {MaxifyColorChannelFilter, MaxifyOptions} from "./filter/maxify-color-channel-filter";
 
 export class FilterCore {
 
@@ -128,134 +130,12 @@ export class FilterCore {
     }
   }
 
-  maxifyColorChannel(sourceImgPos: number, maxifyOptions?: MaxifyOptions) {
-    return flatMap((data: FilterData) => new Observable<FilterData>((observer) => {
-
-      if (maxifyOptions === undefined)
-        maxifyOptions = {};
-
-      const img = this.getImage(sourceImgPos, data);
-
-      if (img === null) {
-        observer.error(`Image not found index ${sourceImgPos}!`);
-      }
-
-      let targetImage = img;
-      if (maxifyOptions.targetImagePos !== undefined) {
-        targetImage = this.getImage(maxifyOptions.targetImagePos, data);
-        if (img === null) {
-          observer.error(`TargetImage not found index ${maxifyOptions.targetImagePos}!`);
-        }
-      }
-
-      const r = maxifyOptions.threshold_r !== undefined ? maxifyOptions.threshold_r : 256;
-      const g = maxifyOptions.threshold_g !== undefined ? maxifyOptions.threshold_g : 256;
-      const b = maxifyOptions.threshold_b !== undefined ? maxifyOptions.threshold_b : 256;
-
-      const buff = new Buffer(img.data, 'base64');
-      const png = PNG.sync.read(buff);
-
-      for (let x = 0; x < png.width; x++) {
-        for (let y = 0; y < png.height; y++) {
-          const idx = (png.width * y + x) << 2;
-
-          if (png.data[idx] >= r) {
-            png.data[idx] = 255;
-          }
-          if (png.data[idx + 1] >= g) {
-            png.data[idx + 1] = 255;
-          }
-
-          if (png.data[idx] >= b) {
-            png.data[idx + 2] = 255;
-          }
-        }
-      }
-
-      const buffer = PNG.sync.write(png, {colorType: 2});
-      targetImage.data = buffer.toString('base64');
-
-      observer.next(data);
-      observer.complete();
-    }));
+  maxifyColorChannel(sourcePos: number, maxifyOptions?: MaxifyOptions) {
+    return new MaxifyColorChannelFilter(this.services).doFilter(sourcePos, maxifyOptions);
   }
 
-  threshold(sourceImgPos: number, countPixelsOptions?: ThresholdOptions) {
-    return flatMap((data: FilterData) => new Observable<FilterData>((observer) => {
-      if (countPixelsOptions === undefined)
-        countPixelsOptions = {};
-
-      let r, g, b = -1
-      if (countPixelsOptions.threshold_grey) {
-        r = countPixelsOptions.threshold_grey;
-      } else {
-        r = countPixelsOptions.threshold_r !== undefined ? countPixelsOptions.threshold_r : -1;
-        g = countPixelsOptions.threshold_g !== undefined ? countPixelsOptions.threshold_g : -1;
-        b = countPixelsOptions.threshold_b !== undefined ? countPixelsOptions.threshold_b : -1;
-      }
-
-      if (!countPixelsOptions.targetData)
-        countPixelsOptions.targetData = "countData";
-
-      const source = this.getImage(sourceImgPos, data);
-      const target = (countPixelsOptions.targetImagePos) ? this.getImage(countPixelsOptions.targetImagePos, data) : null;
-
-      if (source === null) {
-        observer.error(`Image not found index ${sourceImgPos}!`);
-      }
-
-
-      const buff = new Buffer(source.data, 'base64');
-      const png = PNG.sync.read(buff);
-      const targetPNG = new PNG({width: png.width, height: png.height});
-
-      let counter = 0;
-
-      for (let x = 0; x < png.width; x++) {
-        for (let y = 0; y < png.height; y++) {
-          const idx = (png.width * y + x) << 2;
-          let c = true;
-
-          if (r != -1) {
-            if (png.data[idx] < r)
-              c = false;
-          }
-
-          if (g != -1) {
-            if (png.data[idx + 1] < g)
-              c = false;
-          }
-
-          if (b != -1) {
-            if (png.data[idx + 2] < b)
-              c = false;
-          }
-
-          if (c) {
-            counter++;
-            if (target) {
-              targetPNG.data[idx] = png.data[idx];
-              targetPNG.data[idx + 1] = png.data[idx + 1];
-              targetPNG.data[idx + 2] = png.data[idx + 2];
-              targetPNG.data[idx + 3] = png.data[idx + 3];
-            }
-          }
-        }
-      }
-
-      console.log("count" + counter);
-
-      if (target) {
-        const targetBuff = PNG.sync.write(targetPNG, {colorType: 2});
-        target.data = targetBuff.toString('base64');
-      }
-
-      const entry = {tag: sourceImgPos.toString(), name: source.name, value: counter};
-      data.pushData(countPixelsOptions.targetData, entry)
-
-      observer.next(data);
-      observer.complete();
-    }));
+  threshold(sourcePos: number, thresholdOptions?: ThresholdOptions) {
+    return new ThresholdFilter(this.services).doFilter(sourcePos, thresholdOptions);
   }
 
   merge(sourcePos: number, sourcePos2: number, targetPos: number = sourcePos) {
@@ -263,27 +143,14 @@ export class FilterCore {
   }
 
   contrast(sourcePos: number, contrastOptions?: ContrastOptions) {
-    if (!contrastOptions)
-      contrastOptions = {};
-    if (!contrastOptions.targetPos)
-      contrastOptions.targetPos = sourcePos;
-    if (!contrastOptions.contrast)
-      contrastOptions.contrast = 1;
-    if (!contrastOptions.offset)
-      contrastOptions.offset = 0;
-    if (!contrastOptions.minValue)
-      contrastOptions.minValue = 0;
-    if (!contrastOptions.maxValue)
-      contrastOptions.maxValue = 255;
     return new ContrastFilter(this.services).doFilter(sourcePos, contrastOptions)
   }
 
+  windowByLabel(sourcePos: number, targetPos: number, windowByLabelOptions: WindowByLabel) {
+    return new WindowByLabelFilter(this.services).doFilter(sourcePos, targetPos, windowByLabelOptions);
+  }
 
   histogram(imageOnePos: number, channel: number, histogramOptions?: HistogramOptions) {
-    if (!histogramOptions)
-      histogramOptions = {};
-    if (!histogramOptions.targetData)
-      histogramOptions.targetData = "histogram";
     return new HistogramFilter(this.services).doFilter(imageOnePos, channel, histogramOptions)
   }
 
@@ -426,79 +293,7 @@ export class FilterCore {
   }
 
   save(targetProject: string, saveOptions?: SaveOptions) {
-    return flatMap((data: FilterData) => new Observable<{ data: FilterData, img: CImage }>((observer) => {
-
-      if (saveOptions === undefined)
-        saveOptions = {};
-
-      let fullImgName = atob(data.originalImage.id);
-      let imgName = data.originalImage.name;
-
-      if (data.originalImage instanceof CImageGroup) {
-        // remove last /
-        fullImgName = fullImgName.slice(0, -1);
-        fullImgName = fullImgName.slice(0, fullImgName.lastIndexOf("/") + 1);
-        fullImgName += data.originalImage.name
-      } else {
-        imgName = fullImgName.slice(fullImgName.lastIndexOf("/") + 1, -1);
-      }
-
-      const dataset = fullImgName.substr(0, fullImgName.lastIndexOf("/") + 1);
-
-      let targetDataset = targetProject + "/filtered";
-
-
-      if (saveOptions.datasetMapping !== undefined) {
-        targetDataset = targetProject + saveOptions.datasetMapping;
-      } else if (saveOptions.datasetsMapping !== undefined) {
-        for (let i = 0; i < saveOptions.datasetsMapping.length; i++) {
-          if (dataset === saveOptions.datasetsMapping[i].dataset) {
-            targetDataset = targetProject + saveOptions.datasetsMapping[i].mapping;
-            break;
-          }
-        }
-      }
-
-      if (targetDataset.charAt(targetDataset.length - 1) !== '/') {
-        targetDataset += "/"
-      }
-
-
-      let targetImgName = targetDataset;
-
-      if (saveOptions.addDatasetAsPrefix) {
-        targetImgName += dataset.replace('/', '-') + '-';
-      }
-
-      targetImgName += imgName;
-
-      if (saveOptions.imageSuffix !== undefined) {
-        targetImgName += saveOptions.imageSuffix;
-      }
-
-      if (!targetImgName.endsWith(".png"))
-        targetImgName += ".png";
-
-      let sourceImage = data.img;
-      if (saveOptions.sourceImage !== undefined && this.getImage(saveOptions.sourceImage, data) !== null) {
-        sourceImage = this.getImage(saveOptions.sourceImage, data);
-      }
-
-      const saveImage = Object.assign(new CImage(), sourceImage);
-      saveImage.id = btoa(targetImgName);
-      saveImage.name = imgName
-
-      if (!saveOptions.saveLayers) {
-        saveImage.layers = [];
-      }
-
-      observer.next({data: data, img: saveImage});
-      observer.complete();
-    }).pipe(flatMap(data => this.services.imageService.createImage(data.img, 'png').pipe(
-      map(newImg => {
-        return data.data;
-      }))
-    )));
+    return new SaveFilter(this.services).doFilter(targetProject, saveOptions);
   }
 
   private pushAndAddImageToStack(img: CImage, data: FilterData) {
@@ -545,37 +340,12 @@ export class FilterCore {
 
 }
 
-export interface SaveOptions {
-  targetProject?: string
-  datasetsMapping?: [{ dataset: string, mapping: string }]
-  datasetMapping?: string
-  addDatasetAsPrefix?: boolean
-  saveLayers?: boolean
-  imageSuffix?: string
-  sourceImage?: number
-}
-
-export interface MaxifyOptions {
-  targetImagePos?: number
-  threshold_r?: number
-  threshold_g?: number
-  threshold_b?: number
-}
 
 export interface BinaryOptions {
   targetImagePos?: number
   threshold?: number
 }
 
-export interface ThresholdOptions {
-  targetData?: string
-  targetTag?: string
-  threshold_r?: number
-  threshold_g?: number
-  threshold_b?: number
-  threshold_grey?: number
-  targetImagePos?: number
-}
 
 export interface ProcessCountedPixelsOptions {
   sourceData?: string
