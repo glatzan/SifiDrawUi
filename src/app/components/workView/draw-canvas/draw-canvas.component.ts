@@ -8,7 +8,6 @@ import CImageUtil from '../../../utils/cimage-util';
 import {PointTracker} from '../../../utils/point-tracker';
 import {MatSnackBar} from '@angular/material';
 import {WorkViewService} from '../work-view.service';
-import {ICImage} from '../../../model/ICImage';
 import {MousePosition} from "../../../helpers/mouse-position";
 import {LayerType} from "../../../model/layer-type.enum";
 import {CanvasDisplaySettings, CanvasDrawMode} from "../../../helpers/canvas-display-settings";
@@ -247,6 +246,10 @@ export class DrawCanvasComponent implements AfterViewInit, OnInit {
 
     this.workViewService.onResetCanvasZoom.subscribe(x => {
       this.canvasResetZoom();
+    });
+
+    this.workViewService.onDisplayImageRedraw.subscribe(x => {
+      this.canvasRedraw();
     });
 
     this.workViewService.highlightLineOfLayer.subscribe(x => {

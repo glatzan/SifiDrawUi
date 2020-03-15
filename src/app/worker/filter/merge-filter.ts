@@ -1,7 +1,6 @@
 import {AbstractFilter, Services} from "./abstract-filter";
 import {map} from "rxjs/operators";
 import {FilterData} from "../filter-data";
-import {PNG} from "pngjs";
 import {FilterHelper} from "./filter-helper";
 
 export class MergeFilter extends AbstractFilter {
@@ -24,7 +23,7 @@ export class MergeFilter extends AbstractFilter {
       const image1 = FilterHelper.imageToPNG(source1);
       const image2 = FilterHelper.imageToPNG(source2);
 
-      const targetImage = new PNG({width: image1.width, height: image1.height, colorType: 2});
+      const targetImage = FilterHelper.createPNG(image1.width, image1.height, 2);
 
       if (image1.width > image2.width || image1.height > image2.height) {
         throw new Error(`Image two must be equal or bigger in size ${image1.width} - ${image2.width} / ${image1.height} - ${image2.height}`);

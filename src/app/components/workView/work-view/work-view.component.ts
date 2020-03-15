@@ -55,6 +55,7 @@ export class WorkViewComponent implements OnInit {
 
   ngOnInit() {
     this.displaySettings = this.workViewService.getDisplaySettings();
+    this.showFilter = true;
 
     this.workViewService.onChangedImage.subscribe(change => {
       this.parentImage = change.parent;

@@ -32,6 +32,17 @@ export class AbstractFilter {
     data.pushIMG(img);
     this.services.displayCallback.addImage(img);
   }
+
+  protected getSourceAndTarget(data: FilterData, sourcePos: number, targetPos: number): [CImage, CImage] {
+    const source = this.getImage(sourcePos, data);
+    const target = (targetPos) ? this.getImage(targetPos, data) : null;
+
+    if (source === null) {
+      throw new Error(`Image not found index ${sourcePos}!`);
+    }
+
+    return [source, target];
+  }
 }
 
 

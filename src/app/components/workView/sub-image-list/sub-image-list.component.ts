@@ -4,6 +4,7 @@ import {WorkViewService} from '../work-view.service';
 import {CImageGroup} from '../../../model/CImageGroup';
 import {FlickerService} from "../flicker.service";
 import CImageUtil from "../../../utils/cimage-util";
+import {ICImage} from "../../../model/ICImage";
 
 @Component({
   selector: 'app-sub-image-list',
@@ -12,7 +13,9 @@ import CImageUtil from "../../../utils/cimage-util";
 })
 export class SubImageListComponent implements OnInit {
 
-  imageArray: Array<CImage> = [];
+  imageArray: Array<ImageContainer> = [];
+
+  parentImage: ICImage;
 
   constructor(private workViewService: WorkViewService,
               private flickerService: FlickerService) {
@@ -20,27 +23,49 @@ export class SubImageListComponent implements OnInit {
 
   ngOnInit() {
     this.workViewService.onChangedImage.subscribe(change => {
-      let arr: Array<CImage> = [];
 
-      if (change.parent instanceof CImageGroup) {
-        arr = arr.concat(change.parent.images);
-      } else {
-        arr.push(change.parent);
+      if (this.parentImage !== change.parent) {
+
+        this.imageArray = [];
+
+        if (change.parent instanceof CImageGroup) {
+          this.imageArray = this.imageArray.concat(change.parent.images.map(x => new ImageContainer(ImageType.Original, x)));
+        } else {
+          this.imageArray.push(new ImageContainer(ImageType.Original, change.parent));
+        }
+
+        this.parentImage = change.parent;
       }
-      this.imageArray = arr;
     });
 
     this.workViewService.onAddNewFilteredImage.subscribe(img => {
-      this.imageArray = [...this.imageArray, img];
+      this.imageArray = [...this.imageArray, new ImageContainer(ImageType.Filtered, img)];
     });
   }
 
-  public selectImage(image: CImage) {
+  public selectImage(image: ImageContainer) {
     if (this.flickerService.isActive()) {
-      this.workViewService.onAddFlickerImage.emit(CImageUtil.prepare(image))
+      this.workViewService.onAddFlickerImage.emit(CImageUtil.prepare(image.image))
     } else {
-      this.workViewService.selectActiveImage(image);
+      if (image.type === ImageType.Original)
+        this.workViewService.selectActiveImage(image.image);
+      else
+        this.workViewService.onChangeDisplayImage.emit(image.image);
     }
   }
+}
 
+class ImageContainer {
+  type: ImageType;
+  image: CImage;
+
+  constructor(type: ImageType, image: CImage) {
+    this.type = type;
+    this.image = image;
+  }
+}
+
+enum ImageType {
+  Original,
+  Filtered
 }

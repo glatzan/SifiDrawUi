@@ -36,7 +36,7 @@ export class WindowingFilter extends AbstractFilter {
       }
 
       const sourceImage = FilterHelper.imageToPNG(source);
-      const targetImage = new PNG({width: sourceImage.width, height: sourceImage.height});
+      const targetImage = FilterHelper.createPNG(sourceImage.width,sourceImage.height);
 
       let [r, g, b,] = [0, 0, 0];
       let i = 0;

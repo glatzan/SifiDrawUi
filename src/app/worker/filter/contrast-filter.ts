@@ -1,4 +1,3 @@
-import {PNG} from "pngjs";
 import {AbstractFilter, Services} from "./abstract-filter";
 import {FilterHelper} from "./filter-helper";
 import {FilterData} from "../filter-data";
@@ -34,7 +33,7 @@ export class ContrastFilter extends AbstractFilter {
       }
 
       const sourceImage = FilterHelper.imageToPNG(source);
-      const targetImage = new PNG({width: sourceImage.width, height: sourceImage.height});
+      const targetImage = FilterHelper.createPNG(sourceImage.width, sourceImage.height);
 
       let [r, g, b,] = [0, 0, 0];
       let i = 0;
@@ -64,7 +63,7 @@ export class ContrastFilter extends AbstractFilter {
   }
 
   private static calcValue(value: number, minValue: number, maxValue: number, contrast: number, offset: number) {
-    const result = value * contrast * offset;
+    const result = value * contrast + offset;
     if (result > maxValue)
       return maxValue;
     else if (result < minValue)

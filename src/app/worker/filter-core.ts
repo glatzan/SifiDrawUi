@@ -21,6 +21,12 @@ import {SaveFilter, SaveOptions} from "./filter/save-filter";
 import {ThresholdFilter, ThresholdOptions} from "./filter/threshold-filter";
 import {WindowByLabel, WindowByLabelFilter} from "./filter/window-by-label-filter";
 import {MaxifyColorChannelFilter, MaxifyOptions} from "./filter/maxify-color-channel-filter";
+import {ThresholdByPercentile, ThresholdPercentileOptions} from "./filter/threshold-by-percentile";
+import {DisplayFilter} from "./filter/display-filter";
+import {ExtractSubImageFilter} from "./filter/extract-sub-image-filter";
+import {ProcessCountedPixelsFilter, ProcessCountedPixelsOptions} from "./filter/process-counted-pixels-filter";
+import {OutputFilter} from "./filter/output-filter";
+import {InverseFilter, InverseFilterOptions} from "./filter/inverse-filter";
 
 export class FilterCore {
 
@@ -76,7 +82,7 @@ export class FilterCore {
       const layerToProcess = layerIDs.map(layerData => {
         return {
           layerData: layerData,
-          origLayer: FilterCore.findLayer(sourceImage.layers, layerData.oldID)
+          origLayer: FilterHelper.findLayer(sourceImage.layers, layerData.oldID)
         }
       });
 
@@ -117,9 +123,9 @@ export class FilterCore {
   }
 
   toBinary(sourceImgPos: number, binaryOptions?: BinaryOptions) {
-    if (binaryOptions !== undefined) {
+    if (binaryOptions) {
       const maxifyOptions = {
-        targetProject: binaryOptions.targetImagePos,
+        targetImagePos: binaryOptions.targetPos,
         threshold_r: binaryOptions.threshold,
         threshold_g: binaryOptions.threshold,
         threshold_b: binaryOptions.threshold
@@ -128,6 +134,10 @@ export class FilterCore {
     } else {
       return this.maxifyColorChannel(sourceImgPos)
     }
+  }
+
+  thresholdByPercentile(sourcePos: number, targetImagePos: number, thresholdPercentileOptions?: ThresholdPercentileOptions) {
+    return new ThresholdByPercentile(this.services).doFilter(sourcePos, targetImagePos, thresholdPercentileOptions);
   }
 
   maxifyColorChannel(sourcePos: number, maxifyOptions?: MaxifyOptions) {
@@ -174,7 +184,7 @@ export class FilterCore {
         layers = img.layers
       } else {
         layerIDs.forEach(layer => {
-          const result = FilterCore.findLayer(img.layers, layer);
+          const result = FilterHelper.findLayer(img.layers, layer);
           if (result !== undefined) {
             layers.push(result);
           }
@@ -187,55 +197,29 @@ export class FilterCore {
         DrawUtil.drawLayer(cx, layer);
       });
 
-      targetImage.data = DrawUtil.canvasAsBase64(canvas);
+      FilterHelper.canvasToImage(canvas,targetImage);
       return data;
     })));
   }
 
-  extractSubImage(sourceImgPos: number, targetImgPos: number, polygonLayer: string) {
-    return flatMap((data: FilterData) => DrawUtil.loadBase64AsCanvas(this.getImage(sourceImgPos, data)).pipe(map(canvas => {
-
-      const img = this.getImage(sourceImgPos, data);
-      const targetImage = this.getImage(targetImgPos, data);
-
-      if (img == null || targetImage == null) {
-        return data;
-      }
-
-      const layer = FilterCore.findLayer(img.layers, polygonLayer);
-
-      if (layer == null) {
-        return data;
-      }
-
-      const canvas2 = document.createElement("canvas");
-      canvas2.width = canvas.width;
-      canvas2.height = canvas.height;
-      const cx2 = canvas2.getContext("2d");
-      DrawUtil.drawRect(cx2, 0, 0, canvas2.width, canvas2.height, "#000");
-
-      const cx = canvas.getContext("2d");
-      DrawUtil.drawPolygons(cx2, layer.lines, 1, "#fff", true, false, true);
-      cx2.drawImage(canvas, 0, 0, canvas2.width, canvas2.height, 0, 0, canvas2.width, canvas2.height);
-      targetImage.data = DrawUtil.canvasAsBase64(canvas2);
-      return data;
-    })));
+  extractSubImage(sourcePos: number, extractionLayerID: string, targetPos: number) {
+    return new ExtractSubImageFilter(this.services).doFilter(sourcePos, extractionLayerID, targetPos);
   }
 
   public toColorType(sourceImgPos: number, colorType: string, colorTypeOptions?: ColorTypeOptions) {
     return flatMap((data: FilterData) => new Observable<FilterData>((observer) => {
 
-      const source = this.getImage(sourceImgPos, data);
-      const target = (colorTypeOptions && colorTypeOptions.targetImagePos) ? this.getImage(colorTypeOptions.targetImagePos, data) : source
+        const source = this.getImage(sourceImgPos, data);
+        const target = (colorTypeOptions && colorTypeOptions.targetImagePos) ? this.getImage(colorTypeOptions.targetImagePos, data) : source
 
-      if (source == null || target == null) {
-        observer.error(`Image not found index source ${source} or target ${target}!`);
-      }
+        if (source == null || target == null) {
+          observer.error(`Image not found index source ${source} or target ${target}!`);
+        }
 
-      const buff = new Buffer(data.img.data, 'base64');
-      const png = PNG.sync.read(buff);
-      const buffer = PNG.sync.write(png, {colorType: FilterCore.getColorType(colorType)});
-      target.data = buffer.toString('base64');
+        const buff = new Buffer(data.img.data, 'base64');
+        const png = PNG.sync.read(buff);
+        const buffer = PNG.sync.write(png, {colorType: FilterCore.getColorType(colorType)});
+        target.data = buffer.toString('base64');
 
         observer.next(data);
         observer.complete();
@@ -243,57 +227,24 @@ export class FilterCore {
     ));
   }
 
-  display({imgPos = -1}: { imgPos: number }) {
-    return flatMap((data: FilterData) => new Observable<FilterData>((observer) => {
-      console.log(`Display img ${imgPos} of ${data.imgStack.length}`);
-
-      if (imgPos === -1)
-        imgPos = data.imgStack.length - 1;
-
-      if (imgPos < 0 || imgPos >= data.imgStack.length) {
-        observer.error(`Clone Image out of bounds IMG ${imgPos}`);
-      }
-
-      this.services.displayCallback.displayCallBack(data.imgStack[imgPos]);
-
-      observer.next(data);
-      observer.complete();
-    }));
+  display(sourcePos: number = -1) {
+    return new DisplayFilter(this.services).doFilter(sourcePos);
   }
 
   processCountedPixels(processCountedPixelsOptions?: ProcessCountedPixelsOptions) {
-    return flatMap((data: FilterData) => new Observable<FilterData>((observer) => {
-
-      if (!processCountedPixelsOptions) {
-        processCountedPixelsOptions = {};
-      }
-
-      if (!processCountedPixelsOptions.sourceData) {
-        processCountedPixelsOptions.sourceData = "countData";
-      }
-
-      if (!processCountedPixelsOptions.pixelInMM) {
-        processCountedPixelsOptions.pixelInMM = 1;
-      }
-
-      const counts = data.getData(processCountedPixelsOptions.sourceData );
-
-      let result = "Ergebniss <br>";
-
-      console.log(processCountedPixelsOptions.pixelInMM)
-      for (let count of counts) {
-        result += `ID: ${count.tag} &emsp;  Value: ${count.value} &emsp; Volume: ${count.value * processCountedPixelsOptions.pixelInMM} mm2<br>`
-      }
-
-      this.services.processCallback.displayData(result);
-
-      observer.next(data);
-      observer.complete();
-    }));
+    return new ProcessCountedPixelsFilter(this.services).doFilter(processCountedPixelsOptions);
   }
 
   save(targetProject: string, saveOptions?: SaveOptions) {
     return new SaveFilter(this.services).doFilter(targetProject, saveOptions);
+  }
+
+  invertColors(sourcePos: number, targetPos: number = sourcePos, inverseFilterOptions?: InverseFilterOptions){
+    return new InverseFilter(this.services).doFilter(sourcePos,targetPos,inverseFilterOptions);
+  }
+
+  outputData() {
+    return new OutputFilter(this.services).doFilter();
   }
 
   private pushAndAddImageToStack(img: CImage, data: FilterData) {
@@ -315,13 +266,6 @@ export class FilterCore {
     return data.imgStack[index];
   }
 
-  private static findLayer(layers: Layer[], id: string): Layer {
-    return layers.find(layer => {
-      if (layer.id == id) {
-        return layer;
-      }
-    });
-  }
 
   private static getColorType(type: string): ColorType {
     switch (type) {
@@ -340,17 +284,11 @@ export class FilterCore {
 
 }
 
-
 export interface BinaryOptions {
-  targetImagePos?: number
+  targetPos?: number
   threshold?: number
 }
 
-
-export interface ProcessCountedPixelsOptions {
-  sourceData?: string
-  pixelInMM?: number
-}
 
 export interface ColorTypeOptions {
   targetImagePos?: number

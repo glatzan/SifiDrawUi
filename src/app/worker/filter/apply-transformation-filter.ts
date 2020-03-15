@@ -21,7 +21,7 @@ export class ApplyTransformationFilter extends AbstractFilter {
 
       const transformation = data.getData(sourceData);
 
-      if (!!transformation) {
+      if (!transformation) {
         throw new Error("Transformation Matrix not found!")
       }
 

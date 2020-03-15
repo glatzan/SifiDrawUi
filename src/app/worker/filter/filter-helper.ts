@@ -1,5 +1,5 @@
 import {CImage} from "../../model/CImage";
-import {PNG} from "pngjs";
+import {ColorType, PNG} from "pngjs";
 import DrawUtil from "../../utils/draw-util";
 import CImageUtil from "../../utils/cimage-util";
 import {Layer} from "../../model/layer";
@@ -50,13 +50,17 @@ export namespace FilterHelper {
     return PNG.sync.read(sourceBuffer);
   }
 
-  export function pngToBase64(png: PNG) {
-    const targetBuff = PNG.sync.write(png, {colorType: 2});
+  export function createPNG(width: number, height: number, colorType: ColorType = 2): PNG {
+    return new PNG({width: width, height: height, colorType: 2});
+  }
+
+  export function pngToBase64(png: PNG, colorType: ColorType = 2) {
+    const targetBuff = PNG.sync.write(png, {colorType: colorType});
     return targetBuff.toString('base64');
   }
 
-  export function pngToImage(png: PNG, image: CImage) {
-    image.data = FilterHelper.pngToBase64(png);
+  export function pngToImage(png: PNG, image: CImage, colorType: ColorType = 2) {
+    image.data = FilterHelper.pngToBase64(png,colorType);
     image.width = png.width;
     image.height = png.height;
     return image

@@ -26,7 +26,10 @@ export class HistogramFilter extends AbstractFilter {
       if (histogramOptions.targetPos)
         target = this.getImage(histogramOptions.targetPos, data);
 
-      if (source === null)
+      if (!histogramOptions.ignoreAlphaNull)
+        histogramOptions.ignoreAlphaNull = false;
+
+      if (!source)
         throw new Error(`Images not found, images loaded: ${data.imgStack.length}, first image position ${sourcePos}. <br> Image position has to 0 <= position < ${data.imgStack.length}`);
 
       if (channel < 0 || channel > 2)
@@ -44,23 +47,31 @@ export class HistogramFilter extends AbstractFilter {
       let i = 0;
       for (let y = 0; y < sourceImage.height; y++) {
         for (let x = 0; x < sourceImage.width; x++) {
-          const bin = sourceImage.data[i + channel] * binValue;
-          result[bin] += 1;
+          if (!(histogramOptions.ignoreAlphaNull && sourceImage.data[i + 3] === 0)) {
+            const bin = sourceImage.data[i + channel] * binValue;
+            result[bin] += 1;
+          }
           i += 4;
         }
       }
+
+      const resultData = new HistogramData();
+      resultData.data = result;
+      resultData.binSize = histogramOptions.bins;
+      resultData.count = result.reduce((a, b) => a + b, 0);
+      resultData.maxValue = this.getMaxValue(result);
+      resultData.minValue = this.getMinValue(result);
 
       console.log(sourceImage);
       console.log(result);
 
       if (target) {
         const canvas = FilterHelper.createCanvas(1200, 500);
-        const max = result.reduce((a, b) => a > b ? a : b);
         HistogramFilter.drawHistogram(canvas, result, canvas.width, canvas.height, -1, histogramOptions.bins);
         FilterHelper.canvasToImage(canvas, target);
       }
 
-      data.setData(histogramOptions.targetData, result);
+      data.setData(histogramOptions.targetData, resultData);
       return data;
     });
   }
@@ -94,6 +105,21 @@ export class HistogramFilter extends AbstractFilter {
       DrawUtil.drawRect(cx, 1 + i * barWidth, drawHeight - 1 - tmpHeight, barWidth, tmpHeight, "#000");
     }
   }
+
+  private getMinValue(array: number[]) {
+    for (let i = 0; i < array.length; i++) {
+      if (array[i] !== 0)
+        return i;
+    }
+  }
+
+  private getMaxValue(array: number[]) {
+    for (let i = array.length - 1; i >= 0; i--) {
+      if (array[i] !== 0)
+        return i;
+    }
+  }
+
 }
 
 export interface HistogramOptions {
@@ -102,4 +128,13 @@ export interface HistogramOptions {
   targetDisplayMaxValue?: number
   targetData?: string
   bins?: number
+  ignoreAlphaNull?: boolean
+}
+
+export class HistogramData {
+  binSize: number;
+  maxValue: number;
+  minValue: number;
+  count: number;
+  data: number[];
 }

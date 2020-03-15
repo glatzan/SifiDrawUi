@@ -50,6 +50,7 @@ export class DrawControlComponent implements OnInit {
 
   onChange($event) {
     this.workViewService.onDisplayImageRedraw.emit();
+    this.workViewService.saveContent();
   }
 
   onAddLayer($event) {

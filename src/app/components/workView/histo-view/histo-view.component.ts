@@ -50,7 +50,7 @@ export class HistoViewComponent implements OnInit {
     ).subscribe(x => {
       const cx = FilterHelper.get2DContext(this.canvas.nativeElement);
       DrawUtil.drawRect(cx, 0, 0, this.canvas.nativeElement.width, this.canvas.nativeElement.height, "#fff");
-      HistogramFilter.drawHistogram(this.canvas.nativeElement, x.getData("histogram"));
+      HistogramFilter.drawHistogram(this.canvas.nativeElement, x.getData("histogram").data);
       console.log(x)
     })
   }

@@ -2,6 +2,7 @@ import {AbstractFilter, Services} from "./abstract-filter";
 import {map} from "rxjs/operators";
 import {FilterData} from "../filter-data";
 import {FilterHelper} from "./filter-helper";
+import {ColorType} from "pngjs";
 
 export class MaxifyColorChannelFilter extends AbstractFilter {
 
@@ -12,48 +13,38 @@ export class MaxifyColorChannelFilter extends AbstractFilter {
   doFilter(sourcePos: number, maxifyOptions?: MaxifyOptions) {
     return map((data: FilterData) => {
 
-      if (maxifyOptions === undefined)
-        maxifyOptions = {};
+        if (maxifyOptions === undefined)
+          maxifyOptions = {};
 
-      const source = this.getImage(sourcePos, data);
+        if(!maxifyOptions.colorType)
+          maxifyOptions.colorType = 4;
 
-      if (source == null)
-        throw new Error(`Image not found index ${sourcePos}!`);
+        let [source, target] = this.getSourceAndTarget(data, sourcePos, maxifyOptions.targetImagePos);
 
+        if (!target)
+          target = source;
 
-      let target = source;
-      if (maxifyOptions.targetImagePos != null) {
-        target = this.getImage(maxifyOptions.targetImagePos, data);
-        if (target == null)
-          throw new Error(`TargetImage not found index ${maxifyOptions.targetImagePos}!`);
-      }
+        const r = maxifyOptions.threshold_r ? maxifyOptions.threshold_r : 256;
+        const g = maxifyOptions.threshold_g ? maxifyOptions.threshold_g : 256;
+        const b = maxifyOptions.threshold_b ? maxifyOptions.threshold_b : 256;
 
-      const r = maxifyOptions.threshold_r !== undefined ? maxifyOptions.threshold_r : 256;
-      const g = maxifyOptions.threshold_g !== undefined ? maxifyOptions.threshold_g : 256;
-      const b = maxifyOptions.threshold_b !== undefined ? maxifyOptions.threshold_b : 256;
+        const sourceImage = FilterHelper.imageToPNG(source);
+        const targetImage = FilterHelper.createPNG(sourceImage.width, sourceImage.height);
 
-      const targetImage = FilterHelper.imageToPNG(source);
-
-      for (let x = 0; x < targetImage.width; x++) {
-        for (let y = 0; y < targetImage.height; y++) {
-          const idx = (targetImage.width * y + x) << 2;
-
-          if (targetImage.data[idx] >= r) {
-            targetImage.data[idx] = 255;
-          }
-          if (targetImage.data[idx + 1] >= g) {
-            targetImage.data[idx + 1] = 255;
-          }
-
-          if (targetImage.data[idx] >= b) {
-            targetImage.data[idx + 2] = 255;
+        for (let x = 0; x < sourceImage.width; x++) {
+          for (let y = 0; y < sourceImage.height; y++) {
+            const idx = (sourceImage.width * y + x) << 2;
+            targetImage.data[idx] = (sourceImage.data[idx] >= r) ? 255 : 0;
+            targetImage.data[idx + 1] = (sourceImage.data[idx + 1] >= g) ? 255 : 0;
+            targetImage.data[idx + 2] = (sourceImage.data[idx + 2] >= b) ? 255 : 0;
+            targetImage.data[idx + 3] = sourceImage.data[idx + 3];
           }
         }
-      }
 
-      FilterHelper.pngToImage(targetImage, target);
-      return data;
-    });
+        FilterHelper.pngToImage(targetImage, target,maxifyOptions.colorType);
+        return data;
+      }
+    );
   }
 }
 
@@ -62,4 +53,5 @@ export interface MaxifyOptions {
   threshold_r?: number
   threshold_g?: number
   threshold_b?: number
+  colorType?: ColorType
 }

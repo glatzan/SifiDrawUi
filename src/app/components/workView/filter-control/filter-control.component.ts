@@ -135,7 +135,7 @@ export class FilterControlComponent implements OnInit, DisplayCallback {
   }
 
   public displayCallBack(image: CImage): void {
-    this.workViewService.selectActiveImage(image);
+    this.workViewService.onChangeDisplayImage.emit(image);
   }
 
   public addImage(image: CImage): void {

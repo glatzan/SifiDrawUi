@@ -16,9 +16,12 @@ export class FilterData {
   public originalImage: ICImage;
 
   public batchSize: number;
+
   public numberInBatch: number;
 
   public dataStack: Map<string, any> = new Map<string, any>();
+
+  public output: string = "";
 
   public pushIMG(img: CImage, selectImage: boolean = true) {
     this.imgStack.push(img);

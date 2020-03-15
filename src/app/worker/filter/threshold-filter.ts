@@ -3,6 +3,7 @@ import {map} from "rxjs/operators";
 import {FilterData} from "../filter-data";
 import {FilterHelper} from "./filter-helper";
 import {PNG} from "pngjs";
+import {CImage} from "../../model/CImage";
 
 export class ThresholdFilter extends AbstractFilter {
 
@@ -15,28 +16,15 @@ export class ThresholdFilter extends AbstractFilter {
       if (thresholdOptions === undefined)
         thresholdOptions = {};
 
-      let r, g, b = -1;
-
-      if (thresholdOptions.threshold_grey) {
-        r = thresholdOptions.threshold_grey;
-      } else {
-        r = thresholdOptions.threshold_r !== undefined ? thresholdOptions.threshold_r : -1;
-        g = thresholdOptions.threshold_g !== undefined ? thresholdOptions.threshold_g : -1;
-        b = thresholdOptions.threshold_b !== undefined ? thresholdOptions.threshold_b : -1;
-      }
+      const [r, b, g] = this.getThreshold(thresholdOptions);
 
       if (!thresholdOptions.targetData)
         thresholdOptions.targetData = "countData";
 
-      const source = this.getImage(sourcePos, data);
-      const target = (thresholdOptions.targetImagePos) ? this.getImage(thresholdOptions.targetImagePos, data) : null;
-
-      if (source === null) {
-        throw new Error(`Image not found index ${sourcePos}!`);
-      }
+      const [source, target] = this.getSourceAndTarget(data, sourcePos, thresholdOptions.targetImagePos);
 
       const sourceImage = FilterHelper.imageToPNG(source);
-      const targetImage = new PNG({width: sourceImage.width, height: sourceImage.height});
+      const targetImage = FilterHelper.createPNG(sourceImage.width, sourceImage.height);
 
       let counter = 0;
 
@@ -67,6 +55,11 @@ export class ThresholdFilter extends AbstractFilter {
               targetImage.data[idx + 1] = sourceImage.data[idx + 1];
               targetImage.data[idx + 2] = sourceImage.data[idx + 2];
               targetImage.data[idx + 3] = sourceImage.data[idx + 3];
+            } else {
+              targetImage.data[idx] = 0;
+              targetImage.data[idx + 1] = 0;
+              targetImage.data[idx + 2] = 0;
+              targetImage.data[idx + 3] = 0;
             }
           }
         }
@@ -84,14 +77,27 @@ export class ThresholdFilter extends AbstractFilter {
       return data;
     });
   }
+
+  protected getThreshold(threshold: ThresholdOptions): [number, number, number] {
+    let r, g, b = -1;
+
+    if (threshold.threshold_grey) {
+      r = threshold.threshold_grey;
+    } else {
+      r = threshold.threshold_r !== undefined ? threshold.threshold_r : -1;
+      g = threshold.threshold_g !== undefined ? threshold.threshold_g : -1;
+      b = threshold.threshold_b !== undefined ? threshold.threshold_b : -1;
+    }
+
+    return [r, g, b]
+  }
 }
 
 export interface ThresholdOptions {
   targetData?: string
-  targetTag?: string
+  targetImagePos?: number
   threshold_r?: number
   threshold_g?: number
   threshold_b?: number
   threshold_grey?: number
-  targetImagePos?: number
 }

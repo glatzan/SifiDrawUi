@@ -21,7 +21,7 @@ export class CreateImageFilter extends AbstractFilter {
 
 
       if (!createImageOptions.colorType)
-        createImageOptions.colorType = 0;
+        createImageOptions.colorType = 2;
 
 
       if (createImageOptions.referenceImagePos) {
