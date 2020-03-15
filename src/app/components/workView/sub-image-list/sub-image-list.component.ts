@@ -24,7 +24,7 @@ export class SubImageListComponent implements OnInit {
   ngOnInit() {
     this.workViewService.onChangedImage.subscribe(change => {
 
-      if (this.parentImage !== change.parent) {
+      if (this.parentImage !== change.parent || change.reset) {
 
         this.imageArray = [];
 
@@ -33,6 +33,8 @@ export class SubImageListComponent implements OnInit {
         } else {
           this.imageArray.push(new ImageContainer(ImageType.Original, change.parent));
         }
+
+        this.flickerService.setFlickerPossible(this.imageArray.length > 1);
 
         this.parentImage = change.parent;
       }
@@ -45,12 +47,14 @@ export class SubImageListComponent implements OnInit {
 
   public selectImage(image: ImageContainer) {
     if (this.flickerService.isActive()) {
-      this.workViewService.onAddFlickerImage.emit(CImageUtil.prepare(image.image))
+      this.workViewService.onAddFlickerImage.emit({image: CImageUtil.prepare(image.image), position: 1})
     } else {
       if (image.type === ImageType.Original)
         this.workViewService.selectActiveImage(image.image);
-      else
+      else {
         this.workViewService.onChangeDisplayImage.emit(image.image);
+        this.workViewService.onAddFlickerImage.emit({image: CImageUtil.prepare(image.image), position: 0});
+      }
     }
   }
 }

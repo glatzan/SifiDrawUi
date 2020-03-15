@@ -76,7 +76,7 @@ export class HistogramFilter extends AbstractFilter {
     });
   }
 
-  public static drawHistogram(canvas: HTMLCanvasElement, data: Array<number>, width: number = -1, height: number = -1, maxBarHeight: number = -1, bins: number = 265) {
+  public static drawHistogram(canvas: HTMLCanvasElement, data: Array<number>, width: number = -1, height: number = -1, maxBarHeight: number = -1, bins: number = 256) {
 
     if (height === -1)
       height = canvas.height;

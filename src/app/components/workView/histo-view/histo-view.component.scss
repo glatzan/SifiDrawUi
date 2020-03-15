@@ -1,0 +1,21 @@
+.content {
+  display: grid;
+  grid-template-columns: 30% 70%;
+  grid-template-rows: auto;
+  grid-template-areas: "infos canvas";
+  height: 100%;
+
+  .info {
+    padding: 20px;
+    grid-area: infos;
+    display: grid;
+    grid-template-columns: 50% 50%;
+    grid-template-rows: repeat(4, 30px);
+  }
+
+  .canvas {
+    padding-top: 20px;
+    justify-self: center;
+    grid-area: canvas;
+  }
+}

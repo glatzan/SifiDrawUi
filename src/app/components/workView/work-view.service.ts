@@ -33,11 +33,11 @@ export class WorkViewService implements OnInit {
 
   @Output() onKeyPressedOverCanvas: EventEmitter<{ key: string, mousePosition: MousePosition }> = new EventEmitter();
 
-  @Output() onChangedImage: EventEmitter<{ parent: ICImage, active: CImage }> = new EventEmitter();
+  @Output() onChangedImage: EventEmitter<{ parent: ICImage, active: CImage, reset: boolean }> = new EventEmitter();
 
   @Output() onChangeDisplayImage: EventEmitter<CImage> = new EventEmitter();
 
-  @Output() onAddFlickerImage: EventEmitter<ICImage> = new EventEmitter();
+  @Output() onAddFlickerImage: EventEmitter<{image: ICImage, position: number}> = new EventEmitter();
 
   @Output() onDisplayImageRedraw: EventEmitter<void> = new EventEmitter();
 
@@ -98,9 +98,9 @@ export class WorkViewService implements OnInit {
     }
   }
 
-  public selectActiveImage(image: ICImage) {
+  public selectActiveImage(image: ICImage, forceReset = false) {
     this.activeImage = CImageUtil.prepare(image).getImage();
-    this.onChangedImage.emit({parent: this.image, active: this.activeImage});
+    this.onChangedImage.emit({parent: this.image, active: this.activeImage, reset: forceReset});
     this.onChangeDisplayImage.emit(this.activeImage);
     this.submitLastLayer(this.activeImage);
   }
@@ -120,7 +120,7 @@ export class WorkViewService implements OnInit {
     this.activeImage = this.image.getImage();
     this.displayImage = this.activeImage;
     this.onChangeDisplayImage.emit(this.activeImage);
-    this.onChangedImage.emit({parent: this.image, active: this.activeImage});
+    this.onChangedImage.emit({parent: this.image, active: this.activeImage, reset: true});
     this.submitLastLayer(this.activeImage);
   }
 
@@ -165,7 +165,7 @@ export class WorkViewService implements OnInit {
 
 
   resetImage() {
-    this.selectActiveImage(this.activeImage);
+    this.selectActiveImage(this.activeImage, true);
   }
 
   getPNGFromBuffer(imageID: string): Observable<CImage> {

@@ -1,2 +1,19 @@
-<canvas #histocanvas height="450" width="700" class="mainDisplay"></canvas>
+<div class="content">
+  <div class="info">
+    <div>Pixel:</div>
+    <div>{{histogramData.count}}</div>
+
+    <div>Bins:</div>
+    <div>{{histogramData.binSize}}</div>
+
+    <div>MinValue:</div>
+    <div>{{histogramData.minValue}}</div>
+
+    <div>MaxValue:</div>
+    <div>{{histogramData.maxValue}}</div>
+  </div>
+  <div class="canvas">
+    <canvas #histocanvas height="400" width="514" class="mainDisplay"></canvas>
+  </div>
+</div>
 

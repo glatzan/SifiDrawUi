@@ -1,6 +1,6 @@
 import {Component, ElementRef, OnInit, ViewChild} from '@angular/core';
 import {CImage} from "../../../model/CImage";
-import {HistogramFilter} from "../../../worker/filter/histogram-filter";
+import {HistogramData, HistogramFilter} from "../../../worker/filter/histogram-filter";
 import {WorkViewService} from "../work-view.service";
 import {ImageService} from "../../../service/image.service";
 import {FilterHelper} from "../../../worker/filter/filter-helper";
@@ -21,20 +21,25 @@ export class HistoViewComponent implements OnInit {
 
   displayImage: CImage;
 
+  histogramData: HistogramData;
+
   constructor(private workViewService: WorkViewService,
               private imageService: ImageService) {
   }
 
   ngOnInit() {
-      this.workViewService.onRenderImageTools.subscribe(renderHistogram => {
-        this.renderHistogram = renderHistogram;
-        if (renderHistogram && this.displayImage) {
-          this.showHistogram(this.displayImage.id);
-        }
-      });
 
-      this.workViewService.onChangeDisplayImage.subscribe(image => {
-        this.displayImage = image;
+    this.histogramData = new HistogramData();
+
+    this.workViewService.onRenderImageTools.subscribe(renderHistogram => {
+      this.renderHistogram = renderHistogram;
+      if (renderHistogram && this.displayImage) {
+        this.showHistogram(this.displayImage.id);
+      }
+    });
+
+    this.workViewService.onChangeDisplayImage.subscribe(image => {
+      this.displayImage = image;
 
         if (this.renderHistogram) {
           this.showHistogram(this.displayImage.id);
@@ -51,6 +56,7 @@ export class HistoViewComponent implements OnInit {
       const cx = FilterHelper.get2DContext(this.canvas.nativeElement);
       DrawUtil.drawRect(cx, 0, 0, this.canvas.nativeElement.width, this.canvas.nativeElement.height, "#fff");
       HistogramFilter.drawHistogram(this.canvas.nativeElement, x.getData("histogram").data);
+      this.histogramData = x.getData("histogram");
       console.log(x)
     })
   }

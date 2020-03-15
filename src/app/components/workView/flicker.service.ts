@@ -1,14 +1,15 @@
 import {Injectable} from '@angular/core';
-import {ICImage} from "../../model/ICImage";
 import {WorkViewService} from "./work-view.service";
+import {MatSnackBar} from "@angular/material/snack-bar";
+import {CImage} from "../../model/CImage";
 
 @Injectable({
   providedIn: 'root'
 })
 export class FlickerService {
 
-  constructor(private workViewService: WorkViewService) {
-    console.log("Initialize");
+  constructor(private workViewService: WorkViewService,
+              private snackBar: MatSnackBar) {
 
     workViewService.onChangedImage.subscribe(change => {
       this.currentImage = change.active;
@@ -17,10 +18,10 @@ export class FlickerService {
     });
 
     workViewService.onAddFlickerImage.subscribe(x => {
-      if (this.active) {
-        this.addImage(x);
-      } else if (this.startFilterIfValid) {
-        this.addImage(x);
+      if (x.position === 0) {
+        this.flickerImageOne = x.image;
+      } else {
+        this.flickerImageTwo = x.image;
         if (this.flickerValid()) {
           this.startFilterIfValid = false;
           this.startFlicker();
@@ -33,11 +34,11 @@ export class FlickerService {
 
   private flickerTimeout: any = undefined;
 
-  private flickerImageOne: ICImage;
+  private flickerImageOne: CImage;
 
-  private flickerImageTwo: ICImage;
+  private flickerImageTwo: CImage;
 
-  private currentImage: ICImage;
+  private currentImage: CImage;
 
   private active = false;
 
@@ -45,7 +46,9 @@ export class FlickerService {
 
   private startFilterIfValid = false;
 
-  addImage(image: ICImage) {
+  private imageListNotEmpty: boolean;
+
+  addImage(image: CImage) {
     if (!this.flickerImageOne) {
       this.flickerImageOne = image;
     } else {
@@ -54,8 +57,18 @@ export class FlickerService {
   }
 
   armFlicker(flickerTime: number) {
-    this.flickerTime = flickerTime;
-    this.startFilterIfValid = true;
+
+    if (this.imageListNotEmpty) {
+      this.flickerTime = flickerTime;
+      this.startFilterIfValid = true;
+      this.snackBar.open("Bitte Bild auswählen", '', {
+        duration: 1000
+      });
+    } else {
+      this.snackBar.open("Flicker nur mit einer Bildergruppe möglich", '', {
+        duration: 1000
+      });
+    }
   }
 
   startFlicker(): boolean {
@@ -83,13 +96,16 @@ export class FlickerService {
     }
   }
 
-  stopFlicker() {
+  stopFlicker(resetImage = false) {
     this.active = false;
     this.startFilterIfValid = false;
     this.cancelTimeout();
 
     this.flickerImageOne = this.currentImage;
     this.flickerImageTwo = null;
+
+    if (resetImage)
+      this.workViewService.selectActiveImage(this.currentImage);
   }
 
   toggleImage() {
@@ -100,6 +116,11 @@ export class FlickerService {
 
   isActive() {
     return this.active || this.startFilterIfValid;
+  }
+
+
+  setFlickerPossible(flicker: boolean) {
+    this.imageListNotEmpty = flicker;
   }
 
   private cancelTimeout(): void {
@@ -127,9 +148,11 @@ export class FlickerService {
 
   private flickerSwapImages() {
     if (this.currentImage !== this.flickerImageOne) {
-      this.workViewService.selectActiveImage(this.flickerImageOne);
+      this.workViewService.onChangeDisplayImage.emit(this.flickerImageOne);
+      this.currentImage = this.flickerImageOne;
     } else {
-      this.workViewService.selectActiveImage(this.flickerImageTwo);
+      this.workViewService.onChangeDisplayImage.emit(this.flickerImageTwo);
+      this.currentImage = this.flickerImageTwo;
     }
   }
 

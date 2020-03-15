@@ -3,7 +3,6 @@ import {DataSaveStatus, WorkViewService} from '../work-view.service';
 import {ICImage} from '../../../model/ICImage';
 import {MousePosition} from "../../../helpers/mouse-position";
 import {CanvasDisplaySettings} from "../../../helpers/canvas-display-settings";
-import {CImageGroup} from "../../../model/CImageGroup";
 import {MatSnackBar} from "@angular/material/snack-bar";
 import {FlickerService} from "../flicker.service";
 import {ContrastFilter} from "../../../worker/filter/contrast-filter";
@@ -97,20 +96,11 @@ export class WorkViewComponent implements OnInit {
   }
 
   public flicker() {
-    if (this.parentImage instanceof CImageGroup) {
       if (!this.flickerService.isActive()) {
-        this.flickerService.addImage(this.activeImage);
         this.flickerService.armFlicker(this.displaySettings.flickerTimer);
-        this.snackBar.open("Bitte Bild auswählen", '', {
-          duration: 1000
-        });
       } else {
-        this.flickerService.stopFlicker();
+        this.flickerService.stopFlicker(true);
       }
-    } else
-      this.snackBar.open("Flicker nur mit einer Bildergruppe möglich", '', {
-        duration: 1000
-      });
   }
 
   public onFlickerChange($event) {
@@ -183,6 +173,6 @@ export class WorkViewComponent implements OnInit {
 
   toggleFilterView() {
     this.showFilter = !this.showFilter;
-    this.workViewService.onRenderImageTools.emit(this.showFilter);
+    this.workViewService.onRenderImageTools.emit(!this.showFilter);
   }
 }
