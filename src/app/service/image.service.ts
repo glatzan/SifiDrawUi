@@ -49,6 +49,13 @@ export class ImageService {
       }));
   }
 
+  public updateName(image: CImage): Observable<any> {
+    console.log(`${environment.backendUrl}/image/update`);
+    image.concurrencyCounter++;
+    return this.http.get<any>(`${environment.backendUrl}/image/rename?id=${image.id}&newName=${btoa(image.name)}`);
+  }
+
+
   public updateExistingImage(image: CImage): Observable<any> {
     console.log(`${environment.backendUrl}/image/update/checked`);
     return this.http.put<CImage>(`${environment.backendUrl}/image/update/checked`, image, ImageService.httpJsonContent);
@@ -96,6 +103,14 @@ export class ImageService {
       return this.cloneImage(image);
     } else {
       return this.imageGroupService.cloneImageGroup(image as CImageGroup)
+    }
+  }
+
+  public updateNameICImage(image: ICImage){
+    if (image instanceof CImage) {
+      return this.updateName(image);
+    } else {
+      return this.imageGroupService.updateImageGroup(image as CImageGroup)
     }
   }
 

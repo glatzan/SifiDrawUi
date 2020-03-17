@@ -74,7 +74,6 @@ export class DrawControlComponent implements OnInit {
   onDisplaySettingsChanged($event) {
     this.workViewService.onDisplaySettingsChanged.emit(this.displaySettings);
   }
-
   onHighlightLine(id: number, highlight: boolean) {
     this.workViewService.highlightLineOfLayer.emit(highlight ? this.currentLayer.lines[id] : null);
   }

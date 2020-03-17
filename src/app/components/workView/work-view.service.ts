@@ -139,7 +139,7 @@ export class WorkViewService implements OnInit {
   forceSave(callback: () => any = null) {
     if (this.currentSaveTimeout != null) {
       this.cancelSaveTimeout();
-      this.save(true, callback);
+      this.saveActiveImage(callback);
     } else {
       if (callback)
         callback();
@@ -148,9 +148,9 @@ export class WorkViewService implements OnInit {
 
   saveContent(saveImage: boolean = false) {
     this.cancelSaveTimeout();
-    this.onDataSaveEvent.emit({image: this.image, status: DataSaveStatus.WaitingForSave});
+    this.onDataSaveEvent.emit({image: this.activeImage, status: DataSaveStatus.WaitingForSave});
     this.currentSaveTimeout = setTimeout(() => {
-      this.save(saveImage);
+      this.saveActiveImage();
       this.currentSaveTimeout = undefined;
     }, 1000);
   }
@@ -201,27 +201,50 @@ export class WorkViewService implements OnInit {
     this.currentSaveTimeout = undefined;
   }
 
-  private save(saveImage: boolean = false, callback: () => any = null) {
-    let image = this.image;
-    if (saveImage && image)
-      image = image.getImage();
-
-    if (image) {
-      this.imageService.updateICImage(this.activeImage).subscribe(result => {
-        console.log('saved');
-        this.onDataSaveEvent.emit({image: result, status: DataSaveStatus.Saved});
-        if (callback)
-          callback();
-      }, error1 => {
-        console.log('Fehler beim laden der Dataset Datein');
-        if (error1.toString().startsWith("Concurrency Error"))
-          this.onDataSaveEvent.emit({image: null, status: DataSaveStatus.FailedConcurrency});
-        else
-          this.onDataSaveEvent.emit({image: null, status: DataSaveStatus.FailedUnknown, text: error1});
-        console.error(error1);
-
-      });
+  private saveActiveImage(callback: () => any = null) {
+    if (this.activeImage) {
+      this.saveImage(this.activeImage, callback);
     }
+  }
+
+  private saveImage(image: ICImage, callback: () => any = null) {
+    this.imageService.updateICImage(image).subscribe(result => {
+      console.log('saved');
+      this.onDataSaveEvent.emit({image: result, status: DataSaveStatus.Saved});
+      if (callback)
+        callback();
+    }, error1 => {
+      console.log('Fehler beim laden der Dataset Datein');
+      if (error1.toString().startsWith("Concurrency Error"))
+        this.onDataSaveEvent.emit({image: null, status: DataSaveStatus.FailedConcurrency});
+      else
+        this.onDataSaveEvent.emit({image: null, status: DataSaveStatus.FailedUnknown, text: error1});
+      console.error(error1);
+
+    });
+  }
+
+  saveNameSpecificImage(image: ICImage, callback: () => any = null) {
+    console.log("image change");
+    if (image.id === this.image.id) {
+      console.log("parent changed");
+      this.image.name = image.name;
+      this.saveImage(this.image);
+      return;
+    } else {
+      if (this.image instanceof CImageGroup) {
+        console.log("subimage");
+        for (let subImg of this.image.images) {
+          if (subImg.id === image.id) {
+            subImg.name = image.name;
+            this.saveImage(subImg);
+            return;
+          }
+        }
+      }
+    }
+
+    this.imageService.updateNameICImage(image);
   }
 }
 

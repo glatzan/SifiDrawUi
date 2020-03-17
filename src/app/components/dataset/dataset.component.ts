@@ -119,10 +119,8 @@ export class DatasetComponent implements OnInit {
       const item = this.getControl(index, 'item');
       item.value.name = control.value;
 
-      this.imageService.updateICImage(item.value).subscribe( x=> {
+      this.workViewService.saveNameSpecificImage(item.value, (): void => {
         this.reload();
-      }, e => {
-        console.log(e)
       });
     }
   }

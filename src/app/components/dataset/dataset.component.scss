@@ -47,6 +47,7 @@
         display: grid;
         grid-template-columns: fit-content(1px) auto;
         grid-template-rows: auto;
+        white-space: nowrap;
 
         .list-icons{
           height: auto;

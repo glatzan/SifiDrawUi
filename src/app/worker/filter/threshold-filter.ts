@@ -16,7 +16,7 @@ export class ThresholdFilter extends AbstractFilter {
       if (thresholdOptions === undefined)
         thresholdOptions = {};
 
-      const [r, b, g] = this.getThreshold(thresholdOptions);
+      const [r, g, b] = this.getThreshold(thresholdOptions);
 
       if (!thresholdOptions.targetData)
         thresholdOptions.targetData = "countData";
@@ -79,7 +79,7 @@ export class ThresholdFilter extends AbstractFilter {
   }
 
   protected getThreshold(threshold: ThresholdOptions): [number, number, number] {
-    let r, g, b = -1;
+    let [r, g, b] = [-1,-1,-1];
 
     if (threshold.threshold_grey) {
       r = threshold.threshold_grey;
