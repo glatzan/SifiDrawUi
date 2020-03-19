@@ -67,11 +67,11 @@ export class ImageService {
     return this.http.post<CImage>(`${environment.backendUrl}/image/${type}`, image);
   }
 
-  public uploadImage(file, path: string, overwrite: boolean): Observable<boolean> {
+  public uploadImage(file, path: string): Observable<boolean> {
     const formData: FormData = new FormData();
     formData.append('file', file, file.name);
     console.log(`Upload ${file.name} to ${path}`)
-    return this.http.post(`${environment.backendUrl}/image/upload/${btoa(path)}&${overwrite ? 'o' : ''}`, formData).pipe(
+    return this.http.post(`${environment.backendUrl}/image/upload/${btoa(path)}?format=png`, formData).pipe(
       map(() => {
         return true;
       }), catchError(_ => of(false))

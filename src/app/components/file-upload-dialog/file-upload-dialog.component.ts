@@ -29,8 +29,7 @@ export class FileUploadDialogComponent implements OnInit {
     this.form = this.formBuilder.group({
       files: [],
       selectedProject: null,
-      selectedDataset: null,
-      overwrite: false
+      selectedDataset: null
     });
 
     this.projectService.getProjects().subscribe((data: ProjectData[]) => {
@@ -54,7 +53,7 @@ export class FileUploadDialogComponent implements OnInit {
   public upload() {
     const fileList = this.form.controls.files.value;
     for (const file of fileList._files) {
-      this.imageService.uploadImage(file, `${atob(this.form.controls.selectedDataset.value.id)}`, this.form.controls.overwrite.value).subscribe();
+      this.imageService.uploadImage(file, `${atob(this.form.controls.selectedDataset.value.id)}`).subscribe();
     }
     this.close();
   }
