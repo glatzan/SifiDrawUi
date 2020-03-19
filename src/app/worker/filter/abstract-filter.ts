@@ -35,7 +35,15 @@ export class AbstractFilter {
 
   protected getSourceAndTarget(data: FilterData, sourcePos: number, targetPos: number): [CImage, CImage] {
     const source = this.getImage(sourcePos, data);
-    const target = (targetPos) ? this.getImage(targetPos, data) : null;
+    let target = null;
+    if (targetPos != null) {
+      if (targetPos === -1) {
+        target = FilterHelper.createNewImage(source.width, source.height);
+        this.pushAndAddImageToStack(target, data);
+      } else {
+        target = this.getImage(targetPos, data)
+      }
+    }
 
     if (source === null) {
       throw new Error(`Image not found index ${sourcePos}!`);

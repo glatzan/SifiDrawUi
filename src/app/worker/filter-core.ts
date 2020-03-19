@@ -1,13 +1,8 @@
 import {CImage} from "../model/CImage";
-import {flatMap, map} from "rxjs/operators";
+import {flatMap} from "rxjs/operators";
 import {FilterData} from "./filter-data";
 import {Observable} from "rxjs";
-import {Layer} from "../model/layer";
-import {applyToPoints} from "transformation-matrix";
-import {Point} from "../model/point";
-import {LayerType} from "../model/layer-type.enum";
 import {ColorType, PNG} from "pngjs";
-import DrawUtil from "../utils/draw-util";
 import {ContrastFilter, ContrastOptions} from "./filter/contrast-filter";
 import {Services} from "./filter/abstract-filter";
 import {FilterHelper} from "./filter/filter-helper";
@@ -27,6 +22,9 @@ import {ExtractSubImageFilter} from "./filter/extract-sub-image-filter";
 import {ProcessCountedPixelsFilter, ProcessCountedPixelsOptions} from "./filter/process-counted-pixels-filter";
 import {OutputFilter} from "./filter/output-filter";
 import {InverseFilter, InverseFilterOptions} from "./filter/inverse-filter";
+import {CopyLayerData, CopyLayerToImageFilter, CopyLayerToImageOptions} from "./filter/copy-layer-to-image-filter";
+import {DrawLayerFilter} from "./filter/draw-layer-filter";
+import {ProcessThresholdSurfaces} from "./filter/process-threshold-surfaces";
 
 export class FilterCore {
 
@@ -48,81 +46,11 @@ export class FilterCore {
     return new ApplyTransformationFilter(this.services).doFilter(sourcePos, targetPos, sourceData);
   }
 
-  copyLayerToImage({sourceImgPos = null, targetImgPos = null, layerIDs = null, affineTransformation = false, affineMatrixSource = "affineMatrix"}: { sourceImgPos: number, targetImgPos: number, layerIDs: [{ oldID: string, newID: string, name: string, type?: string, color?: string }], affineTransformation?: boolean, affineMatrixSource?: string }) {
-    return flatMap((data: FilterData) => new Observable<FilterData>((observer) => {
-      if (sourceImgPos < 0 || sourceImgPos >= data.imgStack.length || targetImgPos < 0 || targetImgPos >= data.imgStack.length) {
-        observer.error(`Clone Image out of bounds source IMG ${sourceImgPos} or target img ${targetImgPos}`);
-      }
-
-      if (affineTransformation && data.getData(affineMatrixSource) === undefined) {
-        observer.error(`No affine matrix at position ${affineMatrixSource}`);
-      }
-
-      if (layerIDs === null) {
-        observer.error(`Layer ids to convert hav to be provided!`);
-      }
-
-      const getLayerType = function (type: string): LayerType {
-        switch (type) {
-          case "Dot":
-            return LayerType.Dot;
-          case "FilledPolygon":
-            return LayerType.FilledPolygon;
-          case "Polygon":
-            return LayerType.Polygon;
-          default:
-            return LayerType.Line;
-        }
-      };
-
-      const affineMatrix = data.getData(affineMatrixSource);
-      const sourceImage = data.imgStack[sourceImgPos];
-      const targetImage = data.imgStack[targetImgPos];
-
-      const layerToProcess = layerIDs.map(layerData => {
-        return {
-          layerData: layerData,
-          origLayer: FilterHelper.findLayer(sourceImage.layers, layerData.oldID)
-        }
-      });
-
-      layerToProcess.forEach(x => {
-        if (x.origLayer === null) {
-          observer.error(`Layer ID not found ${x.layerData.oldID}!`);
-        }
-      });
-
-      layerToProcess.forEach(layerData => {
-        const nLayer = Object.assign(new Layer(""), layerData.origLayer);
-        nLayer.lines = [];
-        nLayer.id = layerData.layerData.newID;
-        nLayer.name = layerData.layerData.name;
-        nLayer.type = getLayerType(layerData.layerData.type);
-        nLayer.color = layerData.layerData.color || "#fff";
-
-        for (const {item, index} of layerData.origLayer.lines.map((item, index) => ({item, index}))) {
-          if (affineTransformation) {
-            const tmp = applyToPoints(affineMatrix, item);
-            nLayer.lines.push(tmp.map(x => {
-              // @ts-ignore
-              return new Point(Math.round(x.x), Math.round(x.y));
-            }));
-          } else {
-            const objs = Object.assign([], item);
-            nLayer.lines.push(objs);
-          }
-        }
-        targetImage.layers.push(nLayer)
-      });
-
-        observer.next(data);
-        observer.complete();
-
-      }
-    ));
+  copyLayerToImage(sourcePos: number, layers: [CopyLayerData], copyLayerToImageOptions?: CopyLayerToImageOptions) {
+    return new CopyLayerToImageFilter(this.services).doFilter(sourcePos, layers, copyLayerToImageOptions);
   }
 
-  toBinary(sourceImgPos: number, binaryOptions?: BinaryOptions) {
+  toBinary(sourcePos: number, binaryOptions?: BinaryOptions) {
     if (binaryOptions) {
       const maxifyOptions = {
         targetImagePos: binaryOptions.targetPos,
@@ -130,9 +58,9 @@ export class FilterCore {
         threshold_g: binaryOptions.threshold,
         threshold_b: binaryOptions.threshold
       };
-      return this.maxifyColorChannel(sourceImgPos, maxifyOptions)
+      return this.maxifyColorChannel(sourcePos, maxifyOptions)
     } else {
-      return this.maxifyColorChannel(sourceImgPos)
+      return this.maxifyColorChannel(sourcePos)
     }
   }
 
@@ -168,38 +96,8 @@ export class FilterCore {
     return new CreateImageFilter(this.services).doFilter(createImageOptions);
   }
 
-  drawLayer({sourceImgPos = null, targetImgPos = null, layerIDs = null}: { sourceImgPos: number, targetImgPos: number, layerIDs: string[] }) {
-    return flatMap((data: FilterData) => DrawUtil.loadBase64AsCanvas(this.getImage(targetImgPos, data)).pipe(map(canvas => {
-
-      const img = this.getImage(sourceImgPos, data);
-      const targetImage = this.getImage(targetImgPos, data);
-
-      if (img === null || targetImage === null) {
-        return data;
-      }
-
-      let layers = [];
-
-      if (layerIDs === null) {
-        layers = img.layers
-      } else {
-        layerIDs.forEach(layer => {
-          const result = FilterHelper.findLayer(img.layers, layer);
-          if (result !== undefined) {
-            layers.push(result);
-          }
-        })
-      }
-
-      const cx = canvas.getContext("2d");
-
-      layers.forEach(layer => {
-        DrawUtil.drawLayer(cx, layer);
-      });
-
-      FilterHelper.canvasToImage(canvas,targetImage);
-      return data;
-    })));
+  drawLayer(sourcePos: number, layerIDs: [string], targetPos: number = sourcePos) {
+    return new DrawLayerFilter(this.services).doFilter(sourcePos, layerIDs, targetPos);
   }
 
   extractSubImage(sourcePos: number, extractionLayerID: string, targetPos: number) {
@@ -209,17 +107,17 @@ export class FilterCore {
   public toColorType(sourceImgPos: number, colorType: string, colorTypeOptions?: ColorTypeOptions) {
     return flatMap((data: FilterData) => new Observable<FilterData>((observer) => {
 
-        const source = this.getImage(sourceImgPos, data);
-        const target = (colorTypeOptions && colorTypeOptions.targetImagePos) ? this.getImage(colorTypeOptions.targetImagePos, data) : source
+      const source = this.getImage(sourceImgPos, data);
+      const target = (colorTypeOptions && colorTypeOptions.targetImagePos) ? this.getImage(colorTypeOptions.targetImagePos, data) : source
 
-        if (source == null || target == null) {
-          observer.error(`Image not found index source ${source} or target ${target}!`);
-        }
+      if (source == null || target == null) {
+        observer.error(`Image not found index source ${source} or target ${target}!`);
+      }
 
-        const buff = new Buffer(data.img.data, 'base64');
-        const png = PNG.sync.read(buff);
-        const buffer = PNG.sync.write(png, {colorType: FilterCore.getColorType(colorType)});
-        target.data = buffer.toString('base64');
+      const buff = new Buffer(data.img.data, 'base64');
+      const png = PNG.sync.read(buff);
+      const buffer = PNG.sync.write(png, {colorType: FilterCore.getColorType(colorType)});
+      target.data = buffer.toString('base64');
 
         observer.next(data);
         observer.complete();
@@ -235,12 +133,16 @@ export class FilterCore {
     return new ProcessCountedPixelsFilter(this.services).doFilter(processCountedPixelsOptions);
   }
 
+  processThresholdSurfaces(sourceData = "countData") {
+    return new ProcessThresholdSurfaces(this.services).doFilter(sourceData);
+  }
+
   save(targetProject: string, saveOptions?: SaveOptions) {
     return new SaveFilter(this.services).doFilter(targetProject, saveOptions);
   }
 
-  invertColors(sourcePos: number, targetPos: number = sourcePos, inverseFilterOptions?: InverseFilterOptions){
-    return new InverseFilter(this.services).doFilter(sourcePos,targetPos,inverseFilterOptions);
+  invertColors(sourcePos: number, targetPos: number = sourcePos, inverseFilterOptions?: InverseFilterOptions) {
+    return new InverseFilter(this.services).doFilter(sourcePos, targetPos, inverseFilterOptions);
   }
 
   outputData() {

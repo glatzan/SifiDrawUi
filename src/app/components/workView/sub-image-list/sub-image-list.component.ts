@@ -42,6 +42,7 @@ export class SubImageListComponent implements OnInit {
 
     this.workViewService.onAddNewFilteredImage.subscribe(img => {
       this.imageArray = [...this.imageArray, new ImageContainer(ImageType.Filtered, img)];
+      this.flickerService.setFlickerPossible(this.imageArray.length > 1);
     });
   }
 
