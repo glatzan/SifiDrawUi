@@ -23,6 +23,10 @@ export namespace FilterHelper {
     return image;
   }
 
+  export function cloneImage(image: CImage): CImage {
+    return Object.assign(new CImage(), image);
+  }
+
   export function findLayer(layers: Layer[], id: string): Layer {
     for (let layer of layers) {
       if (layer.id == id) {
@@ -85,6 +89,10 @@ export namespace FilterHelper {
 
   export function get2DContext(canvas: HTMLCanvasElement) {
     return canvas.getContext("2d");
+  }
+
+  export function imageToCanvas(image: CImage): HTMLCanvasElement {
+    return FilterHelper.base64StringToCanvas(image.data)
   }
 
   export function base64StringToCanvas(base64: string): HTMLCanvasElement {

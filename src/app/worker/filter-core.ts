@@ -25,6 +25,9 @@ import {InverseFilter, InverseFilterOptions} from "./filter/inverse-filter";
 import {CopyLayerData, CopyLayerToImageFilter, CopyLayerToImageOptions} from "./filter/copy-layer-to-image-filter";
 import {DrawLayerFilter} from "./filter/draw-layer-filter";
 import {ProcessThresholdSurfaces} from "./filter/process-threshold-surfaces";
+import {CloneImageFilter} from "./filter/clone-image-filter";
+import {HostParabolaFilter} from "./filter/vaa/host-parabola-filter";
+import {FlaskFilter} from "./filter/flask-filter";
 
 export class FilterCore {
 
@@ -104,25 +107,37 @@ export class FilterCore {
     return new ExtractSubImageFilter(this.services).doFilter(sourcePos, extractionLayerID, targetPos);
   }
 
+  cloneImage(sourcePos: number) {
+    return new CloneImageFilter(this.services).doFilter(sourcePos);
+  }
+
+  hostParabola(sourcePos: number, target: number = null) {
+    return new HostParabolaFilter(this.services).doFilter(sourcePos, target);
+  }
+
   public toColorType(sourceImgPos: number, colorType: string, colorTypeOptions?: ColorTypeOptions) {
     return flatMap((data: FilterData) => new Observable<FilterData>((observer) => {
 
-      const source = this.getImage(sourceImgPos, data);
-      const target = (colorTypeOptions && colorTypeOptions.targetImagePos) ? this.getImage(colorTypeOptions.targetImagePos, data) : source
+        const source = this.getImage(sourceImgPos, data);
+        const target = (colorTypeOptions && colorTypeOptions.targetImagePos) ? this.getImage(colorTypeOptions.targetImagePos, data) : source;
 
-      if (source == null || target == null) {
-        observer.error(`Image not found index source ${source} or target ${target}!`);
-      }
+        if (source == null || target == null) {
+          observer.error(`Image not found index source ${source} or target ${target}!`);
+        }
 
-      const buff = new Buffer(data.img.data, 'base64');
-      const png = PNG.sync.read(buff);
-      const buffer = PNG.sync.write(png, {colorType: FilterCore.getColorType(colorType)});
-      target.data = buffer.toString('base64');
+        const buff = new Buffer(data.img.data, 'base64');
+        const png = PNG.sync.read(buff);
+        const buffer = PNG.sync.write(png, {colorType: FilterCore.getColorType(colorType)});
+        target.data = buffer.toString('base64');
 
         observer.next(data);
         observer.complete();
       }
     ));
+  }
+
+  flask(sourcePos: number, endpoint: string, targetPos = sourcePos) {
+    return new FlaskFilter(this.services).doFilter(sourcePos, endpoint, targetPos);
   }
 
   display(sourcePos: number = -1) {

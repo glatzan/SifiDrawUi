@@ -5,7 +5,7 @@
 export const environment = {
   production: false,
   backendUrl: 'http://127.0.0.1:8080',
-  flaskServer: 'http://127.0.0.1:8080',
+  flaskServer: 'http://127.0.0.1:5000',
   jImageService: 'http://127.0.0.1:8080'
 };
 

@@ -113,6 +113,7 @@ export class FilterService {
     const services = new Services(env.processCallback, env.displayCallback);
     services.imageGroupService = this.imageGroupService;
     services.imageService = this.imageService;
+    services.flaskService = this.flaskService;
 
     const filterCore = new FilterCore(services);
 
@@ -198,27 +199,7 @@ console.log(e)
   // }
 
 
-  public cloneImage({index = null, displayCallback = null}: { index?: number, displayCallback?: DisplayCallback } = {}) {
-    return flatMap((data: FilterData) => new Observable<FilterData>((observer) => {
-      console.log(`Cloning IMG Index ${index} to ${data.imgStack.length}`);
 
-      if (index && index < 0 && index >= data.imgStack.length) {
-        observer.error(`Clone Image out of bounds ${index}`);
-      }
-
-      const imToCopy = index ? data.imgStack[index] : data.img;
-      const copy = Object.assign(new CImage(), imToCopy);
-      copy.layers = imToCopy.layers;
-      data.pushIMG(copy);
-
-      if (displayCallback !== null) {
-        displayCallback.addImage(copy);
-      }
-
-      observer.next(data);
-      observer.complete();
-    }));
-  }
 
   public activeImage(index: number) {
     return flatMap((data: FilterData) => new Observable<FilterData>((observer) => {
@@ -238,9 +219,7 @@ console.log(e)
   public flask(endpoint: string) {
     return flatMap((data: FilterData) => this.flaskService.processImage(data.img, endpoint).pipe(map(cimg => {
       console.log('Fask img' + atob(cimg.id));
-
       data.img.data = cimg.data;
-
       return data;
     })));
   }
@@ -487,22 +466,6 @@ console.log(e)
     );
   }
 
-  public hostParabola(options?: { drawParabola?: true }) {
-    return flatMap((data: FilterData) => DrawUtil.loadBase64AsCanvas(data.img).pipe(map(canvas => {
-
-        const hostEpithelialValues = HostEpithelial.scanHost(data, canvas);
-        const meanHostEpithelialValues = HostEpithelial.reduceMeanValues(hostEpithelialValues);
-        const epithelialTopPoint = HostEpithelial.findTopPoint(meanHostEpithelialValues, canvas);
-        const parabola = new HostParabola(epithelialTopPoint);
-        parabola.optimize(meanHostEpithelialValues);
-        parabola.drawParabola(canvas);
-        data.setData('hostParabola', parabola);
-        data.img.data = DrawUtil.canvasAsBase64(canvas);
-        return data;
-      }))
-    );
-  }
-
   public findGraftGap({color = 'red', sourceIndex = 1, sourceHostColor = 'red', sourceGraftColor = 'green'}: { color?: string, sourceIndex?: number, sourceHostColor?: string, sourceGraftColor?: string } = {}) {
     return flatMap((data: FilterData) => DrawUtil.loadBase64AsCanvas(data.img).pipe(map(canvas => {
 
@@ -677,20 +640,7 @@ console.log(e)
   }
 
 
-  public color(color: string, x = 0, y = 0, height: number = -1, width: number = -1) {
-    return flatMap((data: FilterData) => DrawUtil.loadBase64AsCanvas(data.img).pipe(
-      map(canvas => {
-        console.log(`Color img ${color}`);
 
-        height = height < 0 ? canvas.height - y : height;
-        width = width < 0 ? canvas.width - x : width;
-        const cx = canvas.getContext("2d");
-        DrawUtil.drawRect(cx, x, y, width, height, color);
-        data.img.data = DrawUtil.canvasAsBase64(canvas);
-
-        return data;
-      })));
-  }
 
 
   public prepareClasses(color: boolean = false) {

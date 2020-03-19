@@ -5,6 +5,7 @@ import {DisplayCallback} from "../display-callback";
 import {CImage} from "../../model/CImage";
 import {FilterData} from "../filter-data";
 import {FilterHelper} from "./filter-helper";
+import {FlaskService} from "../../service/flask.service";
 
 export class AbstractFilter {
 
@@ -62,6 +63,8 @@ export class Services {
   public processCallback: ProcessCallback;
 
   public displayCallback: DisplayCallback;
+
+  public flaskService: FlaskService;
 
   constructor(processCallback?: ProcessCallback, displayCallback?: DisplayCallback) {
 

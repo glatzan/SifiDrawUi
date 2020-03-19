@@ -65,8 +65,16 @@ export class WindowingFilter extends AbstractFilter {
     });
   }
 
-  private static calcValue(value: number, minValue: number, maxValue: number, aMin: number, aMax: number) {
-    const result = maxValue * ((value - aMin) / (aMax - aMin));
+  /**
+   *
+   * @param value
+   * @param minValue
+   * @param maxValue
+   * @param aMin min of new window
+   * @param aMax max of new window
+   */
+  static calcValue(value: number, minValue: number, maxValue: number, aMin: number, aMax: number) {
+    const result = ((maxValue-minValue)/(aMax-aMin))*(value-aMin)
     if (result > maxValue)
       return maxValue;
     else if (result < minValue)
