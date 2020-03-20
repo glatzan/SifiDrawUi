@@ -174,7 +174,6 @@ export default class DrawUtil {
     cx.fillStyle = color;
     points.forEach(point => {
       cx.fillRect(point.x, point.y, size, size);
-      cx.fillRect(point.x, point.y, size, size);
     })
   }
 

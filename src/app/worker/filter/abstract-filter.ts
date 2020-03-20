@@ -6,6 +6,7 @@ import {CImage} from "../../model/CImage";
 import {FilterData} from "../filter-data";
 import {FilterHelper} from "./filter-helper";
 import {FlaskService} from "../../service/flask.service";
+import {ImageJService} from "../../service/image-j.service";
 
 export class AbstractFilter {
 
@@ -65,6 +66,8 @@ export class Services {
   public displayCallback: DisplayCallback;
 
   public flaskService: FlaskService;
+
+  public imageJService: ImageJService;
 
   constructor(processCallback?: ProcessCallback, displayCallback?: DisplayCallback) {
 

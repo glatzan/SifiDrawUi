@@ -44,7 +44,7 @@ export class HostParabola {
       const y = this.getY(answers[0]);
       return new Vector(answers[0], y);
     } catch (e) {
-      console.error("error");
+      console.error(e);
     }
   }
 

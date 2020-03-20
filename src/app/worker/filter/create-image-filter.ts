@@ -24,7 +24,7 @@ export class CreateImageFilter extends AbstractFilter {
         createImageOptions.colorType = 2;
 
 
-      if (createImageOptions.referenceImagePos) {
+      if (createImageOptions.referenceImagePos != null) {
         const refIMG = this.getImage(createImageOptions.referenceImagePos, data);
         if (refIMG) {
           createImageOptions.width = refIMG.width || 1000;

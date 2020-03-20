@@ -17,13 +17,11 @@ import {ImageJService} from './image-j.service';
 import {FlaskService} from './flask.service';
 import CImageUtil from '../utils/cimage-util';
 import {DatasetService} from './dataset.service';
-import {error, isNumber} from 'util';
+import {isNumber} from 'util';
 import {ProcessCallback} from '../worker/processCallback';
 import {DisplayCallback} from '../worker/display-callback';
 import {Equation, parse} from 'algebra.js';
 import VectorUtils from '../utils/vector-utils';
-import {HostEpithelial} from '../utils/vaa/host-epithelial';
-import {SimpleLine} from '../utils/vaa/model/simple-line';
 import {Vector} from '../utils/vaa/model/vector';
 import {ComplexLine} from '../utils/vaa/model/complex-line';
 import {HostParabola} from '../utils/vaa/host-parabola';
@@ -114,6 +112,7 @@ export class FilterService {
     services.imageGroupService = this.imageGroupService;
     services.imageService = this.imageService;
     services.flaskService = this.flaskService;
+    services.imageJService = this.imageJService;
 
     const filterCore = new FilterCore(services);
 
@@ -133,7 +132,8 @@ export class FilterService {
           env.processCallback.displayData("Error:<br> " + e);
         });
     } catch (e) {
-console.log(e)
+      env.processCallback.displayData("Error:<br> " + e);
+      console.log(e)
     }
   }
 
@@ -214,62 +214,6 @@ console.log(e)
       observer.next(data);
       observer.complete();
     }));
-  }
-
-  public flask(endpoint: string) {
-    return flatMap((data: FilterData) => this.flaskService.processImage(data.img, endpoint).pipe(map(cimg => {
-      console.log('Fask img' + atob(cimg.id));
-      data.img.data = cimg.data;
-      return data;
-    })));
-  }
-
-  public findCenterLines({targetName = 'lines'}: { targetName?: string } = {}) {
-    return flatMap((data: FilterData) =>
-      this.imageJService.getLines(data.img).pipe(
-        map(json => {
-            console.log(`Searching for Lines ..`);
-            const map = new Map<string, SimpleLine>();
-
-            for (const res of json) {
-              let contour = map.get(res['Contour ID']);
-              // @ts-ignore
-              const point = new Vector(Math.round(res.X), Math.round(res.Y), res['Pos.']);
-
-              if (!contour) {
-                // @ts-ignore
-                contour = map.set(res['Contour ID'], new SimpleLine(res['Contour ID'], res.Length)).get(res['Contour ID']);
-              }
-
-              contour.addPoint(point);
-            }
-            const dis = new ComplexLine();
-            dis.addLines(Array.from(map.values()));
-
-
-            for (const line of dis.lines) {
-              if (line.getFirstPoint().x > line.getLastPoint().x) {
-                line.reverse();
-              }
-            }
-
-
-            dis.lines.sort((n1, n2) => {
-              if (n1.getFirstPoint().x > n2.getFirstPoint().x) {
-                return 1;
-              } else if (n1.getFirstPoint().x < n2.getFirstPoint().x) {
-                return -1;
-              } else {
-                return 0;
-              }
-            });
-
-            data.setData(targetName, dis);
-            return data;
-          }
-        )
-      )
-    );
   }
 
   public sortLines(sourceName: string = 'lines', targetName: string = 'sortedLines') {
@@ -379,60 +323,6 @@ console.log(e)
     // this.prepareGraft({eraseMap: [{x: 1, y: 2, height: 100, width: 100}]})
   }
 
-  public reducePoints({modulo = 10, sourceName = 'lines'}: { modulo?: number, sourceName?: string } = {}) {
-    return flatMap((data: FilterData) => new Observable<FilterData>((observer) => {
-      const sortedLines = data.getData(sourceName);
-
-      if (sortedLines instanceof ComplexLine) {
-        console.log('Reduce Points');
-
-        for (let i = 0; i < sortedLines.countLines(); i++) {
-          const line = sortedLines.getLine(i);
-
-          if (line instanceof SimpleLine) {
-            const p = new SimpleLine();
-
-            p.id = line.id;
-            p.length = line.length;
-
-            p.addPoint(line.getFirstPoint());
-
-            for (let y = 1; y < line.points.length; y = y + modulo) {
-              if (p.getLastPoint().x != line.points[y].x) {
-                p.addPoint(line.points[y]);
-              }
-            }
-
-            if (p.getLastPoint().x != line.getLastPoint().x) {
-              p.points[p.points.length - 1] = line.getLastPoint();
-              // p.addPoint(line.getLastPoint())
-            }
-
-            if (p.points.length < 2) {
-              p.addPoint(line.getLastPoint());
-            }
-
-            sortedLines.setLine(i, p);
-          }
-        }
-      }
-      observer.next(data);
-      observer.complete();
-    }));
-  }
-
-  public reducePointsByDistance({distance = 10, sourceName = 'lines'}: { distance?: number, sourceName?: string } = {}) {
-    return flatMap((data: FilterData) => new Observable<FilterData>((observer) => {
-      const sortedLines = data.getData(sourceName);
-
-      if (sortedLines instanceof ComplexLine) {
-        console.log('Reduce Points');
-        VectorUtils.reduceLinePoints(sortedLines, distance);
-      }
-      observer.next(data);
-      observer.complete();
-    }));
-  }
 
   public drawLines({color = '', size = 1, drawStartEndPoints = true, sourceName = 'sortedLines', drawPoints = false, drawSingleLines = false}: { color?: string, size?: number, drawStartEndPoints?: boolean, sourceName?: string, drawPoints?: boolean, drawSingleLines?: boolean } = {}) {
     return flatMap((data: FilterData) => DrawUtil.loadBase64AsCanvas(data.img).pipe(map(canvas => {

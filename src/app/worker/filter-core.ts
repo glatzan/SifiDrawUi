@@ -28,6 +28,13 @@ import {ProcessThresholdSurfaces} from "./filter/process-threshold-surfaces";
 import {CloneImageFilter} from "./filter/clone-image-filter";
 import {HostParabolaFilter} from "./filter/vaa/host-parabola-filter";
 import {FlaskFilter} from "./filter/flask-filter";
+import {FindCenterLineFilter} from "./filter/vaa/find-center-line-filter";
+import {ReducePointsFilter} from "./filter/vaa/reduce-points-filter";
+import {DetectHostLineFilter} from "./filter/vaa/detect-host-line-filter";
+import {ReducePointsByDistanceFilter} from "./filter/vaa/reduce-points-by-distance-filter";
+import {DetectGraftLineFilter} from "./filter/vaa/detect-graft-line-filter";
+import {DrawHostAndGraftLineFilter, DrawHostAndGraftLineOptions} from "./filter/vaa/draw-host-and-graft-line-filter";
+import {FindGraftGapFilter, FindGraftGapOptions} from "./filter/vaa/find-graft-gap-filter";
 
 export class FilterCore {
 
@@ -160,8 +167,36 @@ export class FilterCore {
     return new InverseFilter(this.services).doFilter(sourcePos, targetPos, inverseFilterOptions);
   }
 
+  findCenterLine(sourcePos: number, centerLineData: string = "lines") {
+    return new FindCenterLineFilter(this.services).doFilter(sourcePos, centerLineData);
+  }
+
+  reducePoints(modulo: number, lineData: string = "lines") {
+    return new ReducePointsFilter(this.services).doFilter(modulo, lineData);
+  }
+
+  detectHostLine(targetPos: number = -1, lineSource = "lines", hostParabola = "hostParabola") {
+    return new DetectHostLineFilter(this.services).doFilter(targetPos, lineSource, hostParabola);
+  }
+
+  detectGraftLine(targetPos = -1, lineSource = "graftLines", hostParabola = "hostParabola") {
+    return new DetectGraftLineFilter(this.services).doFilter(targetPos, lineSource, hostParabola);
+  }
+
+  reducePointsByDistance(distance: number = 10, lineData: string = "lines") {
+    return new ReducePointsByDistanceFilter(this.services).doFilter(distance, lineData)
+  }
+
   outputData() {
     return new OutputFilter(this.services).doFilter();
+  }
+
+  drawHostAndGraftLine(sourceName: string, drawHostAndGraftLineOptions?: DrawHostAndGraftLineOptions) {
+    return new DrawHostAndGraftLineFilter(this.services).doFilter(sourceName, drawHostAndGraftLineOptions)
+  }
+
+  findGraftGap(sourcePos: number, findGraftGapOption?: FindGraftGapOptions) {
+    return new FindGraftGapFilter(this.services).doFilter(sourcePos, findGraftGapOption);
   }
 
   private pushAndAddImageToStack(img: CImage, data: FilterData) {

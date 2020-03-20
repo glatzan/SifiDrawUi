@@ -24,6 +24,9 @@ export class GraftFinder {
   public static joinLines(lines: ComplexLine, parabola: HostParabola, canvas) {
     const resultLine = new ComplexLine();
 
+    if(lines.length === 0)
+      return resultLine;
+
     let countedLiens = 1;
 
     let tmp = new ComplexLine();
