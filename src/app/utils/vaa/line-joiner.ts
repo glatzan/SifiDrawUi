@@ -42,7 +42,7 @@ export class LineJoiner {
         const startSecond = classificationLines[y].line.getFirstPoint();
         const endSecond = classificationLines[y].line.getLastPoint();
 
-        if ((startFirst.x <= startSecond.x && startSecond.x < endFirst.x) || (startFirst.x < endSecond.x && endSecond.x < endFirst.x)) {
+        if ((startFirst.x <= startSecond.x && endFirst.x > startSecond.x ) || (startFirst.x < endSecond.x && endFirst.x > endSecond.x )) {
           if (classificationLines[i].distanceToParabola > classificationLines[y].distanceToParabola)
             classificationLines[i].stepsToParabola++;
           else

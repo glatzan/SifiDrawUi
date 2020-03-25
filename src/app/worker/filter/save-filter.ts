@@ -21,11 +21,11 @@ export class SaveFilter extends AbstractFilter {
 
       if (data.originalImage instanceof CImageGroup) {
         // remove last /
-        fullImgName = fullImgName.slice(0, -1);
+        fullImgName = fullImgName.slice(0, -4);
         fullImgName = fullImgName.slice(0, fullImgName.lastIndexOf("/") + 1);
         fullImgName += data.originalImage.name
       } else {
-        imgName = fullImgName.slice(fullImgName.lastIndexOf("/") + 1, -1);
+        imgName = fullImgName.slice(fullImgName.lastIndexOf("/") + 1,-4);
       }
 
       const dataset = fullImgName.substr(0, fullImgName.lastIndexOf("/") + 1);

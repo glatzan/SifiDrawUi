@@ -62,9 +62,9 @@ export class ImageService {
   }
 
 
-  public createImage(image: CImage, type: string): Observable<any> {
-    console.log(`${environment.backendUrl}}/image/${type}`);
-    return this.http.post<CImage>(`${environment.backendUrl}/image/${type}`, image);
+  public createImage(image: CImage, type: string): Observable<string> {
+    console.log(`${environment.backendUrl}/image/${type}`);
+    return this.http.post<string>(`${environment.backendUrl}/image/${type}`, image);
   }
 
   public uploadImage(file, path: string): Observable<boolean> {
