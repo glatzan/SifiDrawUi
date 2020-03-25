@@ -12,6 +12,8 @@ export class Layer {
 
   type: number;
 
+  interpolationPointDistance: number = 10;
+
   constructor(id: string)
   constructor(id: string, points?: Point[][])
   constructor(id: string, points?: Point[][], name?: string) {

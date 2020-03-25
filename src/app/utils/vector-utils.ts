@@ -92,7 +92,7 @@ export default class VectorUtils {
     return removedPoints;
   }
 
-  static movePointListsToCircleBoundaries(points: Point[][], origin: Point, radius: number, addHelperPoints: boolean = true): { lineIndex: number, oldPoints: Point[], newPoints: Point[] }[] {
+  static movePointListsToCircleBoundaries(points: Point[][], origin: Point, radius: number, addHelperPoints: number): { lineIndex: number, oldPoints: Point[], newPoints: Point[] }[] {
     const movedPoints: { lineIndex: number, oldPoints: Point[], newPoints: Point[] }[] = [];
     for (let i = 0; i < points.length; i++) {
       const result = this.movePointsToCircleBoundaries(points[i], origin, radius);

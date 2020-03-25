@@ -13,10 +13,10 @@
   display: grid;
   width: 90%;
   grid-template-columns: repeat(4, 4fr);
-  grid-template-rows: repeat(6, 70px) auto;
+  grid-template-rows: repeat(7, 60px) auto;
   grid-column-gap: 5px;
   align-content: center;
-  grid-template-areas: "mode mode hide copyLayer" "labelSelectText labelSelect labelSelect labelSelect" ". layerid name name" "labelSettingsText labelSettings layerType layerType" "sublinesText sublines sublines sublinesHelp" "eraserText eraser eraserHelp eraserHelp";
+  grid-template-areas: "mode mode hide copyLayer" "labelSelectText labelSelect labelSelect labelSelect" ". layerid name name" "labelSettingsText labelSettings layerType layerType" "sublinesText sublines sublines sublinesHelp" "eraserText eraser eraserHelp eraserHelp" "interpolationText interpolation interpolationN interpolationN";
 
   .modus {
     grid-area: mode;
@@ -127,5 +127,20 @@
     grid-area: eraserHelp;
     align-self: center;
     justify-self: right;
+  }
+
+  .interpolationText{
+    grid-area: interpolationText;
+    align-self: center;
+  }
+
+  .interpolation{
+    grid-area: interpolation;
+    align-self: center;
+  }
+
+  .interpolationN{
+    grid-area: interpolationN;
+    align-self: center;
   }
 }

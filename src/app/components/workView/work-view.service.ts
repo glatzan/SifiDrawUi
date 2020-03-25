@@ -69,6 +69,8 @@ export class WorkViewService implements OnInit {
 
   private pngImageBuffer: CImage[] = [];
 
+  layerClipboard: Layer[];
+
   constructor(private imageService: ImageService,
               private imageGroupService: ImageGroupService,
               private snackBar: MatSnackBar) {
@@ -246,6 +248,20 @@ export class WorkViewService implements OnInit {
 
     this.imageService.updateNameICImage(image);
   }
+
+  isLayerClipboardEmpty() {
+    return this.layerClipboard != null
+  }
+
+  copyLayersToClipboard(layer: Layer[]) {
+    this.layerClipboard = layer
+  }
+
+  copyLayersFromClipboardToImage(image: CImage) {
+    image.layers = this.layerClipboard;
+  }
+
+
 }
 
 export class DataSaveStatusContainer {

@@ -24,8 +24,6 @@ export class DrawControlComponent implements OnInit {
 
   layerTypes = LayerType;
 
-  layerClipboard: Layer[];
-
   constructor(private workViewService: WorkViewService,
               private authenticationService: AuthenticationService) {
   }
@@ -51,6 +49,16 @@ export class DrawControlComponent implements OnInit {
   onChange($event) {
     this.workViewService.onDisplayImageRedraw.emit();
     this.workViewService.saveContent();
+  }
+
+  onChangeLineType($event) {
+    if (this.currentLayer.type == LayerType.Dot)
+      this.currentLayer.interpolationPointDistance = 0
+    this.onChange($event);
+  }
+
+  isDisableInterpolation() {
+    return (this.currentLayer.type == LayerType.Dot)
   }
 
   onAddLayer($event) {
@@ -90,15 +98,15 @@ export class DrawControlComponent implements OnInit {
   }
 
   isLayerClipboardEmpty() {
-    return this.layerClipboard != null
+    return this.workViewService.isLayerClipboardEmpty()
   }
 
   copyLayersToClipboard($event) {
-    this.layerClipboard = this.workViewService.getActiveImage().getLayers()
+    this.workViewService.copyLayersToClipboard(this.workViewService.getActiveImage().getLayers());
   }
 
   copyLayersFromClipboardToImage($event) {
-    this.workViewService.getActiveImage().setLayers(this.layerClipboard);
+    this.workViewService.copyLayersFromClipboardToImage(this.workViewService.getActiveImage());
     this.onChange(null);
     this.workViewService.restoreLastSelectedLayer()
   }

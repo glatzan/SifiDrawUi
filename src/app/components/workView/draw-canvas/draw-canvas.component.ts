@@ -193,7 +193,7 @@ export class DrawCanvasComponent implements AfterViewInit, OnInit {
                   this.canvasRedraw();
                 }
               } else {
-                if (VectorUtils.movePointListsToCircleBoundaries(this.currentLayer.lines, new Point(pt.x, pt.y), this.displaySettings.eraserSize, this.currentLayer.type !== LayerType.Dot)) {
+                if (VectorUtils.movePointListsToCircleBoundaries(this.currentLayer.lines, new Point(pt.x, pt.y), this.displaySettings.eraserSize, this.currentLayer.interpolationPointDistance)) {
                   this.saveAndUpdate();
                 }else{
                   this.canvasRedraw();
@@ -311,6 +311,13 @@ export class DrawCanvasComponent implements AfterViewInit, OnInit {
           this.flickerService.toggleImage();
         } else if ($event.key === 'z') {
           this.undoLastAction();
+        } else if ($event.key === 'c') {
+          this.workViewService.copyLayersToClipboard(this.workViewService.getActiveImage().getLayers());
+        } else if ($event.key === 'v') {
+          this.workViewService.copyLayersFromClipboardToImage(this.workViewService.getActiveImage());
+          this.workViewService.onDisplayImageRedraw.emit();
+          this.workViewService.saveContent();
+          this.workViewService.restoreLastSelectedLayer()
         } else {
           console.log($event.key);
         }

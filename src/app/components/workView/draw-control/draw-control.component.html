@@ -84,7 +84,7 @@
   <div class="layerType">
     Typ:
     <mat-form-field class="settingElement" style="margin-left: 5px">
-      <mat-select [(ngModel)]="currentLayer.type" (ngModelChange)="onChange($event)">
+      <mat-select [(ngModel)]="currentLayer.type" (ngModelChange)="onChangeLineType($event)">
         <mat-option *ngFor="let layerType of layerTypes | enumToArrayPipe" [value]="layerType.index">
           {{layerType.name}}
         </mat-option>
@@ -121,6 +121,16 @@
     <span style="white-space: nowrap; float: right">(Rechtsklick: <b>verschieben</b>)</span><br>
     <span style="white-space: nowrap">(Rechtsklick+strg: <b>löschen</b>)</span>
   </label>
+
+  <div class="interpolationText">
+    Interpolation
+  </div>
+  <mat-slider min="0" max="100" step="1" value="10" style="width: 60px" class="interpolation" [disabled]="isDisableInterpolation()"
+              [(ngModel)]="currentLayer.interpolationPointDistance" (ngModelChange)="onChange($event)"></mat-slider>
+  <div class="interpolationN">
+    {{currentLayer.interpolationPointDistance}}
+  </div>
+
 </div>
 
 <div class="selectImage" *ngIf="!renderComponent">
