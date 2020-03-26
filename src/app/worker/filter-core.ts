@@ -35,6 +35,8 @@ import {ReducePointsByDistanceFilter} from "./filter/vaa/reduce-points-by-distan
 import {DetectGraftLineFilter} from "./filter/vaa/detect-graft-line-filter";
 import {DrawHostAndGraftLineFilter, DrawHostAndGraftLineOptions} from "./filter/vaa/draw-host-and-graft-line-filter";
 import {FindGraftGapFilter, FindGraftGapOptions} from "./filter/vaa/find-graft-gap-filter";
+import {ProcessColorThreshold} from "./filter/process-color-threshold";
+import {ColorThresholdFilter, ColorThresholdOptions} from "./filter/color-threshold-filter";
 
 export class FilterCore {
 
@@ -120,6 +122,14 @@ export class FilterCore {
 
   hostParabola(sourcePos: number, target: number = null) {
     return new HostParabolaFilter(this.services).doFilter(sourcePos, target);
+  }
+
+  processColorThreshold(sourceData = "countData") {
+    return new ProcessColorThreshold(this.services).doFilter(sourceData);
+  }
+
+  colorThresholdFilter(sourcePos: number, colorThresholdOptions?: ColorThresholdOptions) {
+    return new ColorThresholdFilter(this.services).doFilter(sourcePos, colorThresholdOptions);
   }
 
   public toColorType(sourceImgPos: number, colorType: string, colorTypeOptions?: ColorTypeOptions) {
