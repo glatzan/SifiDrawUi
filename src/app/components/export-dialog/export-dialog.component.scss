@@ -14,22 +14,25 @@
   grid-gap: 5px;
   grid-column-gap: 15px;
   grid-template-columns: fit-content(200px) auto;
-  grid-template-rows: fit-content(40px) fit-content(40px) fit-content(500px);
+  grid-template-rows: fit-content(40px) fit-content(500px);
+  grid-template-areas: "projectObj datasetObj" "filter filter";
 
   .projectObj {
-    grid-column: 1;
-    grid-row: 1;
+    grid-area: projectObj;
   }
 
   .datasetObj {
-    grid-column: 2;
-    grid-row: 1;
+    grid-area: datasetObj;
     width: 300px;
   }
 
-  .targetProjectObj {
-    grid-column: 1;
-    grid-row: 3;
+  .filterTabs {
+    grid-area: filter;
+
+    .filter {
+      margin-top: 10px;
+      width: 100%;
+    }
   }
 
   .targetDatasetObj {
@@ -42,117 +45,41 @@
     grid-column: 1/3;
     grid-row: 4;
   }
-
-  .simpleTabGrid {
-    width: 100%;
-    display: grid;
-    grid-row-gap: 10px;
-    grid-column-gap: 30px;
-    grid-template-columns: fit-content(200px) auto;
-    grid-template-rows: fit-content(30px) fit-content(30px) fit-content(30px) fit-content(30px) fit-content(30px) fit-content(500px);
-
-    .origImgObj {
-      align-self: center;
-    }
-
-    .colorObj {
-      width: 100px;
-    }
-
-    .copyLayerObj {
-    }
-
-    .keepLayerSettingsObj {
-      grid-row: 3;
-    }
-
-    .flattenColorSpaceObj {
-      grid-row: 4;
-    }
-
-    .imageSuffixObj {
-      grid-row: 3/5;
-      width: 200px;
-    }
-
-    .layerListObj {
-      grid-row: 6;
-      grid-column: 1/3;
-      grid-column-gap: 15px;
-      margin-left: 20px;
-
-      .layerGrid {
-        width: 100%;
-        display: grid;
-        grid-gap: 10px;
-        grid-column-gap: 20px;
-        grid-template-columns: fit-content(200px) fit-content(200px) fit-content(200px) fit-content(200px) auto;
-
-        .layerLabel {
-          align-self: center;
-        }
-
-        .selectLayer {
-          align-self: center;
-        }
-
-        .layerColorInput {
-          align-self: center;
-          width: 50px;
-        }
-
-        .widthInput {
-          width: 50px;
-        }
-
-        .layerIdInput {
-          width: 100px;
-        }
-      }
-    }
-  }
 }
 
 .btnContainer {
   width: 100%;
   display: grid;
   grid-column-gap: 15px;
-  grid-template-columns: fit-content(200px) fit-content(100px) auto fit-content(100px) fit-content(100px) fit-content(200px);
+  grid-template-columns: fit-content(200px) auto fit-content(100px) fit-content(100px) fit-content(100px) fit-content(200px);
   grid-template-rows: auto;
+  grid-template-areas: "filterSelect . spinner progressBar exportBtn closeBtn";
+
+  .filterSelect {
+    grid-area: filterSelect;
+    height: 40px;
+    padding-bottom: 0px;
+  }
 
   .spinner {
     align-self: center;
     justify-self: right;
-    grid-column: 3;
   }
 
   .progressBar {
     align-self: center;
     justify-self: right;
     width: 200px;
-    grid-column: 4;
   }
 
   .exportBtn {
     justify-self: right;
     width: 100px;
-    grid-column: 5;
   }
 
   .closeBtn {
     justify-self: right;
     width: 100px;
-    grid-column: 6;
-  }
-
-  .addBtn {
-    width: 100px;
-    justify-self: left;
-  }
-
-  .removeBtn {
-    width: 130px;
-    justify-self: left;
   }
 }
 

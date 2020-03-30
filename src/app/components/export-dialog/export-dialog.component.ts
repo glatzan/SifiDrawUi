@@ -2,12 +2,13 @@ import {Component, Inject, OnInit} from '@angular/core';
 import {ProjectData} from '../../model/project-data';
 import {ProjectService} from '../../service/project.service';
 import {Dataset} from '../../model/dataset';
-import {Layer} from '../../model/layer';
-import {DatasetService} from '../../service/dataset.service';
 import {ImageService} from '../../service/image.service';
 import {MAT_DIALOG_DATA, MatDialogRef, MatSnackBar} from '@angular/material';
 import {FilterService} from "../../service/filter.service";
 import {ProcessCallback} from "../../worker/processCallback";
+import {FilterSet} from "../../model/FilterSet";
+import {FilterSetService} from "../../service/filter-set.service";
+import {CImage} from "../../model/CImage";
 
 @Component({
   selector: 'app-export-dialog',
@@ -15,11 +16,8 @@ import {ProcessCallback} from "../../worker/processCallback";
   styleUrls: ['./export-dialog.component.scss']
 })
 export class ExportDialogComponent implements OnInit, ProcessCallback {
-    displayData(data: string): void {
-        throw new Error("Method not implemented.");
-    }
 
-   projects: ProjectData[];
+  projects: ProjectData[];
 
   selectedProject: ProjectData;
 
@@ -27,27 +25,21 @@ export class ExportDialogComponent implements OnInit, ProcessCallback {
 
   selectedDatasets: Dataset[];
 
-  targetProject: ProjectData;
+  filterSetList: FilterSet[];
 
-  targetDataset: string;
+  selectedFilter: FilterSet;
 
-  simpleMode: boolean = true;
+  filterValue: string;
 
-  simpleCopyOrigImage: boolean = false;
+  filterValueChanged = false;
 
-  simpleCustomBackgroundColor: string = "#000000"
+  filterIsRunning = false;
 
-  simpleKeepLayerSettings: boolean = false;
+  filterResultData: any;
 
-  simpleLayerSettings: { selected: boolean, layer: Layer }[];
+  filteredDataUpdate = false;
 
-  simpleCopyLayersToNewImage: boolean = false;
-
-  simpleFlattenColorSpace: boolean = true;
-
-  simpleImageSuffix: string = "";
-
-  complexFilters: string = "";
+  tabIndex = 0;
 
   exportIsRunning: boolean = false;
 
@@ -59,20 +51,16 @@ export class ExportDialogComponent implements OnInit, ProcessCallback {
 
   constructor(public dialogRef: MatDialogRef<ExportDialogComponent>,
               @Inject(MAT_DIALOG_DATA) public data: string,
-              public projectService: ProjectService,
-              public datasetService: DatasetService,
-              public imageService: ImageService,
-              public filterService: FilterService,
+              private projectService: ProjectService,
+              private filterService: FilterService,
+              private filterSetService: FilterSetService,
+              private imageService: ImageService,
               private snackBar: MatSnackBar) {
   }
 
   ngOnInit() {
     const me = this;
-    me.targetDataset = "";
-    me.targetProject = null;
-    me.simpleLayerSettings = [];
-    me.addLayer();
-
+    this.loadFilters();
     me.maxRunCount = 0;
     me.percentRun = 0;
     me.exportIsRunning = false;
@@ -99,119 +87,53 @@ export class ExportDialogComponent implements OnInit, ProcessCallback {
 
   }
 
-  public onSelectProject() {
-    this.datasets = this.selectedProject.datasets
-    this.selectedDatasets = [this.datasets[0]] || null;
-  }
-
-  public addLayer() {
-    this.simpleLayerSettings.push({selected: true, layer: new Layer(String(this.simpleLayerSettings.length + 1))});
-    this.generateFilters();
-  }
-
-  public removeLayer() {
-    if (this.simpleLayerSettings.length > 0)
-      this.simpleLayerSettings.pop();
-
-    this.generateFilters();
-  }
-
-  public generateFilters() {
-    const result = [];
-    let startVar = "";
-
-    result.push(`m.load(),`);
-
-    if (!this.simpleCopyOrigImage) {
-      result.push(`m.color("${this.simpleCustomBackgroundColor}"),`);
-      startVar = "v1";
-    }
-
-    for (let layer of this.simpleLayerSettings) {
-      if (layer.selected) {
-        if (this.simpleKeepLayerSettings)
-          result.push(`m.layer('${layer.layer.id}'),`);
-        else
-          result.push(`m.layer('${layer.layer.id}','${layer.layer.color}',${layer.layer.size}, false),`);
-      }
-    }
-
-    if (this.simpleFlattenColorSpace) {
-      result.push(`m.prepareClasses(),`);
-    }
-
-    let targetSetsArr = "[]";
-
-    let addDatasetAsPrefix = false;
-
-    if (this.targetDataset && this.selectedDatasets) {
-      const targetSets = this.targetDataset.trim().split(",");
-
-      if (targetSets.length == 1) {
-        targetSetsArr = `[{dataset : '*', mapping : '${targetSets[0]}'}]`;
-        if (this.selectedDatasets.length > 1)
-          addDatasetAsPrefix = true;
-      } else {
-        if (targetSetsArr.length !== this.selectedDatasets.length) {
-          while (targetSets.length < this.selectedDatasets.length) {
-            targetSets.push(targetSets[0]);
-          }
-          addDatasetAsPrefix = true;
-        }
-
-        targetSetsArr = "[";
-        for (let i = 0; i < targetSets.length; i++) {
-          const dataSetID = atob(this.selectedDatasets[i].id);
-          targetSetsArr += `{dataset : '${dataSetID.substring(dataSetID.lastIndexOf("/") + 1)}', mapping : '${targetSets[i]}'}`;
-        }
-
-        targetSetsArr += "]";
-      }
-    }
-
-    const targetProject = this.targetProject ? this.targetProject.id : "";
-
-    result.push(`m.save('${targetProject}', ${targetSetsArr}, ${addDatasetAsPrefix}, ${this.simpleCopyLayersToNewImage}, '${this.simpleImageSuffix}')`);
-
-    this.complexFilters = result.join("\r\n");
-  }
-
-
-  public export() {
-
-    if (this.targetProject == null) {
-      this.snackBar.open("Keine Ziel Projekt ausgewählt");
-      return;
-    }
-
-    if (this.selectedDatasets.length == 0) {
-      this.snackBar.open("Keine Datasets ausgewählt");
-      return;
-    }
-
-    const targetSets = this.targetDataset.trim().split(",");
-
-    if (this.selectedDatasets.length != targetSets.length && targetSets.length != 1) {
-      this.snackBar.open("Ziel-Datasets nicht richtig definiert, Anzahl = 1 oder Anzahl der ausgewählten Datasets. (Trennung mit ,");
-      return;
-    }
-
-    const reqDatasets = []
-
-    for (let d of this.selectedDatasets) {
-      reqDatasets.push(d.id)
-    }
-
-    this.filterService.runFilterOnDatasetID(reqDatasets, this.complexFilters, {
-      processCallback: this
+  private loadFilters() {
+    this.filterSetService.getFilters().subscribe(x => {
+      this.filterSetList = x;
+      this.onFilterValueChange();
     });
   }
 
-  public callback(): void {
-    this.percentRun = Math.round(++this.completedRunCount * 100 / this.maxRunCount);
+  public onSelectProject() {
+    this.datasets = this.selectedProject.datasets;
+    this.selectedDatasets = [this.datasets[0]] || null;
   }
+
+
+  onFilterValueChange() {
+    if (this.filterValue) {
+      this.filterValueChanged = (this.selectedFilter == null || this.selectedFilter.filters != this.filterValue)
+    } else {
+      this.filterValueChanged = false;
+    }
+  }
+
+  onChangeFilterSet() {
+    this.filterValue = this.selectedFilter.filters;
+    this.tabIndex = 0;
+    this.onFilterValueChange();
+  }
+
+  public export() {
+    this.filterService.runFilterOnDatasets(this.selectedDatasets, this.filterValue, {
+      processCallback: this, displayCallback: {
+        displayCallBack: function (image: CImage) {
+        },
+        addImage: function (image: CImage) {
+        }
+      }
+    })
+  }
+
 
   public close(): void {
     this.dialogRef.close();
+  }
+
+  callback(): void {
+  }
+
+  displayData(data: string): void {
+    console.log("")
   }
 }

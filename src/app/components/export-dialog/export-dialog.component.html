@@ -2,9 +2,10 @@
 
 <div mat-dialog-content>
   <div class="formGrid">
+
     <mat-form-field class="projectObj">
       <mat-select [(ngModel)]="selectedProject" placeholder="Projekt"
-                  (selectionChange)="onSelectProject();generateFilters();">
+                  (selectionChange)="onSelectProject();">
         <mat-option *ngFor="let project of projects" [value]="project">
           {{project.id}}
         </mat-option>
@@ -13,102 +14,41 @@
 
     <mat-form-field class="datasetObj">
       <mat-label>Datasets</mat-label>
-      <mat-select [(ngModel)]="selectedDatasets" multiple (selectionChange)="generateFilters()">
+      <mat-select [(ngModel)]="selectedDatasets" multiple>
         <mat-option *ngFor="let dataset of datasets" [value]="dataset">{{dataset.name}}</mat-option>
       </mat-select>
     </mat-form-field>
 
-    <mat-form-field class="targetProjectObj">
-      <mat-select [(ngModel)]="targetProject" placeholder="Ziel Projekt" (selectionChange)="generateFilters()">
-        <mat-option *ngFor="let project of projects" [value]="project">
-          {{project.id}}
-        </mat-option>
-      </mat-select>
-    </mat-form-field>
-
-    <mat-form-field class="targetDatasetObj">
-      <input matInput placeholder="Ziel Dataset" [(ngModel)]="targetDataset" (change)="generateFilters()">
-    </mat-form-field>
-
-    <mat-tab-group class="modeTabs" dynamicHeight>
-      <mat-tab label="Einfach">
-        <div class="simpleTabGrid">
-
-          <section class="origImgObj">
-            <mat-checkbox [(ngModel)]="simpleCopyOrigImage" (change)="generateFilters()">Original Bild als Hintergrund
-            </mat-checkbox>
-          </section>
-
-          <input matInput [disabled]="simpleCopyOrigImage" [(ngModel)]="simpleCustomBackgroundColor" class="colorObj"
-                 (change)="generateFilters()"
-                 placeholder="Hintergrundfarbe" type="color"/>
-
-          <section class="copyLayerObj">
-            <mat-checkbox [(ngModel)]="simpleCopyLayersToNewImage" (change)="generateFilters()">Layer-Punkte in das neue
-              Bild kopieren
-            </mat-checkbox>
-          </section>
-
-          <section class="keepLayerSettingsObj">
-            <mat-checkbox [(ngModel)]="simpleKeepLayerSettings" (change)="generateFilters()">Original Layer settings
-              verwenden
-            </mat-checkbox>
-          </section>
-
-          <section class="flattenColorSpaceObj">
-            <mat-checkbox [(ngModel)]="simpleFlattenColorSpace" (change)="generateFilters()">Klassen auf sw reduzieren
-            </mat-checkbox>
-          </section>
-
-          <mat-form-field class="imageSuffixObj">
-            <input matInput placeholder="Bild-Suffix" [(ngModel)]="simpleImageSuffix" (change)="generateFilters()">
-          </mat-form-field>
-
-          <div class="layerListObj">
-            <div *ngFor="let layer of simpleLayerSettings;let even = even" class="layerGrid">
-
-              <section class="selectLayer">
-                <mat-checkbox [(ngModel)]="layer.selected" (change)="generateFilters()"></mat-checkbox>
-              </section>
-
-              <mat-label class="layerLabel">Layer {{layer.layer.id}}</mat-label>
-
-              <input matInput [disabled]="simpleKeepLayerSettings" [(ngModel)]="layer.layer.color"
-                     (change)="generateFilters()"
-                     class="layerColorInput"
-                     placeholder="Farbe" type="color"/>
-
-              <mat-form-field class="widthInput">
-                <input matInput [(ngModel)]="layer.layer.size" placeholder="Dicke" (change)="generateFilters()"
-                       type="number" min="1"/>
-              </mat-form-field>
-
-              <mat-form-field class="layerIdInput">
-                <input matInput placeholder="ID" [(ngModel)]="layer.layer.id" (change)="generateFilters()">
-              </mat-form-field>
-
-            </div>
-
-          </div>
-        </div>
-      </mat-tab>
-
-
-      <mat-tab label="Experte">
-        <mat-form-field floatLabel="always" style=" width: 100%">
-          <textarea matInput placeholder="Filter" rows="21" style="white-space: nowrap;"
-                    [(ngModel)]="complexFilters"></textarea>
+    <mat-tab-group class="filterTabs" dynamicHeight [(selectedIndex)]="tabIndex">
+      <mat-tab label="Filter">
+        <mat-form-field floatLabel="always" class="filter">
+        <textarea matInput placeholder="Filter" style="white-space: nowrap;" [(ngModel)]="filterValue" rows="24"
+                  (keyup)="onFilterValueChange()"></textarea>
         </mat-form-field>
       </mat-tab>
+      <mat-tab label="Ausgabe">
+        <p [innerHtml]="filterResultData"></p>
+      </mat-tab>
+      <mat-tab label="Info">
+        {{selectedFilter ? selectedFilter.comment : ""}}
+      </mat-tab>
     </mat-tab-group>
+
   </div>
 </div>
 
 <div mat-dialog-actions>
   <div class="btnContainer">
-    <button mat-stroked-button class="addBtn" (click)="addLayer()" [disabled]="exportIsRunning">Add Layer</button>
-    <button mat-stroked-button class="removeBtn" (click)="removeLayer()" [disabled]="exportIsRunning">Remove Layer
-    </button>
+    <div class="filterSelect">
+      <mat-form-field>
+        <mat-select [(ngModel)]="selectedFilter" placeholder="Skripte" (selectionChange)="onChangeFilterSet()">
+          <mat-option value="null">Neuen Filter erstellen</mat-option>
+          <mat-option *ngFor="let filterSet of filterSetList" [value]="filterSet">
+            {{filterSet.name}}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
     <mat-spinner class="spinner" *ngIf="exportIsRunning" [diameter]="20"></mat-spinner>
     <mat-progress-bar mode="determinate" [value]="percentRun" class="progressBar"></mat-progress-bar>
     <button mat-stroked-button class="exportBtn" (click)="export()" [disabled]="exportIsRunning">Export</button>

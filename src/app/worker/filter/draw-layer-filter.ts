@@ -10,10 +10,14 @@ export class DrawLayerFilter extends AbstractFilter {
     super(services);
   }
 
-  doFilter(sourcePos: number, layerIDs: [string], targetPos: number = sourcePos) {
+  doFilter(sourcePos: number, layerIDs: [string], targetPos: number = sourcePos, drawLayerOptions?: DrawLayerOptions) {
     return map((data: FilterData) => {
 
         const [source, target] = this.getSourceAndTarget(data, sourcePos, targetPos);
+
+        if (!drawLayerOptions)
+          drawLayerOptions = {};
+
 
         if (!target)
           throw new Error(`DrawLayerFilter: TargetImage not found index ${targetPos}!`);
@@ -25,7 +29,7 @@ export class DrawLayerFilter extends AbstractFilter {
         } else {
           layerIDs.forEach(layer => {
             const result = FilterHelper.findLayer(source.layers, layer);
-            if (result !== undefined) {
+            if (result) {
               layers.push(result);
             }
           })
@@ -38,7 +42,7 @@ export class DrawLayerFilter extends AbstractFilter {
         const cx = FilterHelper.get2DContext(canvas);
 
         layers.forEach(layer => {
-          DrawUtil.drawLayer(cx, layer);
+          DrawUtil.drawLayer(cx, layer, false, drawLayerOptions.color ? drawLayerOptions.color : layer.color, drawLayerOptions.size ? drawLayerOptions.size : layer.size);
         });
 
         FilterHelper.canvasToImage(canvas, target);
@@ -48,3 +52,8 @@ export class DrawLayerFilter extends AbstractFilter {
   }
 }
 
+
+export interface DrawLayerOptions {
+  color?: string;
+  size?: number;
+}

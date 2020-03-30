@@ -16,9 +16,9 @@ export class DatasetService {
   constructor(private http: HttpClient) {
   }
 
-  public getDataset(id: string): Observable<Dataset> {
+  public getDataset(id: string, minimize = true): Observable<Dataset> {
     console.log(`${environment.backendUrl}/dataset/${id}`);
-    return this.http.get<Dataset>(`${environment.backendUrl}/dataset/${id}?minimize=true`).pipe(
+    return this.http.get<Dataset>(`${environment.backendUrl}/dataset/${id}?minimize=${minimize ? 'true' : 'false'}`).pipe(
       map(x => {
         let i = 0;
         for (const img of x.images) {

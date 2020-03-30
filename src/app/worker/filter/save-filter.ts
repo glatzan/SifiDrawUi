@@ -30,14 +30,14 @@ export class SaveFilter extends AbstractFilter {
 
       const dataset = fullImgName.substr(0, fullImgName.lastIndexOf("/") + 1);
 
-      let targetDataset = targetProject + "/filtered";
+      let targetDataset = targetProject + "/processed";
 
-      if (saveOptions.datasetMapping !== undefined) {
-        targetDataset = targetProject + saveOptions.datasetMapping;
-      } else if (saveOptions.datasetsMapping !== undefined) {
+      if (saveOptions.datasetMapping) {
+        targetDataset = targetProject + "/" + saveOptions.datasetMapping;
+      } else if (saveOptions.datasetsMapping) {
         for (let i = 0; i < saveOptions.datasetsMapping.length; i++) {
           if (dataset === saveOptions.datasetsMapping[i].dataset) {
-            targetDataset = targetProject + saveOptions.datasetsMapping[i].mapping;
+            targetDataset = targetProject + "/" + saveOptions.datasetsMapping[i].mapping;
             break;
           }
         }
@@ -51,7 +51,7 @@ export class SaveFilter extends AbstractFilter {
       let targetImgName = targetDataset;
 
       if (saveOptions.addDatasetAsPrefix) {
-        targetImgName += dataset.replace('/', '-') + '-';
+        targetImgName += dataset.split('/').join('-');
       }
 
       targetImgName += imgName;
@@ -70,7 +70,7 @@ export class SaveFilter extends AbstractFilter {
 
       const saveImage = Object.assign(new CImage(), sourceImage);
       saveImage.id = btoa(targetImgName);
-      saveImage.name = imgName;
+      saveImage.name = targetImgName;
 
       if (!saveOptions.saveLayers) {
         saveImage.layers = [];
@@ -85,7 +85,6 @@ export class SaveFilter extends AbstractFilter {
 }
 
 export interface SaveOptions {
-  targetProject?: string
   datasetsMapping?: [{ dataset: string, mapping: string }]
   datasetMapping?: string
   addDatasetAsPrefix?: boolean

@@ -256,21 +256,21 @@ export default class DrawUtil {
     });
   }
 
-  static drawLayer(cx: CanvasRenderingContext2D, layer: Layer, drawPoint: boolean = true) {
+  static drawLayer(cx: CanvasRenderingContext2D, layer: Layer, drawPoint: boolean = true, color? : string, size?: number) {
     switch (layer.type) {
       case LayerType.Dot:
         layer.lines.forEach(points => {
-          this.drawPointsOnCanvas(cx, points, layer.color, layer.size)
+          this.drawPointsOnCanvas(cx, points, color ? color : layer.color, size ? size : layer.size)
         });
         break;
       case LayerType.Line:
-        this.drawPolygons(cx, layer.lines, layer.size, layer.color, false, false);
+        this.drawPolygons(cx, layer.lines, size ? size : layer.size, color ? color : layer.color, false, false);
         break;
       case LayerType.Polygon:
-        this.drawPolygons(cx, layer.lines, layer.size, layer.color, true, false);
+        this.drawPolygons(cx, layer.lines, size ? size : layer.size, color ? color : layer.color, true, false);
         break;
       case LayerType.FilledPolygon:
-        this.drawPolygons(cx, layer.lines, layer.size, layer.color, true, true);
+        this.drawPolygons(cx, layer.lines, size ? size : layer.size, color ? color : layer.color, true, true);
         break;
     }
   }

@@ -4,11 +4,10 @@ import {CImage} from '../model/CImage';
 import {ImageService} from './image.service';
 import {Dataset} from '../model/dataset';
 import {from, Observable, OperatorFunction} from 'rxjs';
-import {concatMap, flatMap, map, mergeMap} from 'rxjs/operators';
+import {concatMap, flatMap, map} from 'rxjs/operators';
 import {FilterData} from '../worker/filter-data';
 import {ColorType, PNG} from 'pngjs';
 import DrawUtil from '../utils/draw-util';
-import {Layer} from '../model/layer';
 import {Point} from '../model/point';
 import {CPolygon} from '../utils/cpolygon';
 import {SplineUtil} from '../utils/spline-util';
@@ -54,50 +53,28 @@ export class FilterService {
     }
   }
 
+  public runFilterOnDatasets(datasets: Dataset[], func: string, env: { processCallback?: ProcessCallback, displayCallback?: DisplayCallback }) {
+    const ops = this.getFilterArray(func, env);
 
-  public runFilterOnDatasetID(datasets: string[], func: string, env: { processCallback?: ProcessCallback, displayCallback?: DisplayCallback }) {
+    const filterCore = this.getFilterCore(env);
 
-    const tFrom = from;
-    const tConcatMap = concatMap;
-    const tMergeMap = mergeMap;
-    const obs = Observable;
-    const im = CImage;
-    const m = this;
-    const display = env.displayCallback;
-    const process = env.processCallback;
-
-
-    const exe = 'tFrom(datasets).pipe(tConcatMap(' +
-      'x => this.datasetService.getDataset(x).pipe(' +
-      'tMergeMap(dataset =>' +
-      'tFrom(dataset.images).pipe(' +
-      'tMergeMap(image =>' +
-      'new obs((observer) => { observer.next(image); observer.complete()}).pipe(' +
-      func +
-      ')' +
-      ',10)' +
-      ')' +
-      ')' +
-      ')' +
-      ')).subscribe(x => console.log(\'test\'));';
-
-    eval(exe);
-    // tFrom(datasets).pipe(tConcatMap(
-    //   x => this.datasetService.getDataset(x).pipe(
-    //     tMergeMap(dataset =>
-    //       tFrom(dataset.images).pipe(
-    //         tMergeMap(image =>
-    //           new Observable<CImage>((observer) => { observer.next(image); observer.complete()}).pipe(
-    //             m.load(),
-    //             m.save('tmp', [{dataset : '*', mapping : 'ttt'}], false, false, '')
-    //           )
-    //         ,10)
-    //       )
-    //     )
-    //   )
-    // )).subscribe(x => console.log('test'));
-
-    // console.log(exe);
+    try {
+      from(datasets).pipe(
+        flatMap(d =>
+          this.datasetService.getDataset(d.id, false)
+        ), concatMap(dataset =>
+          this.runFilters(ops, dataset)
+        )
+      ).subscribe(
+        data => console.log('Ende'),
+        e => {
+          env.processCallback.displayData("Error:<br> " + e);
+          console.error(e)
+        });
+    } catch (e) {
+      env.processCallback.displayData("Error:<br> " + e);
+      console.log(e)
+    }
   }
 
   public runFilterOnDataset(dataset: Dataset, func: string, env: { processCallback?: ProcessCallback, displayCallback?: DisplayCallback }) {
@@ -105,27 +82,9 @@ export class FilterService {
     const display = env.displayCallback;
     const process = env.processCallback;
 
-    const splittedString = func.split('\n');
-    const ops = [];
-
-    const services = new Services(env.processCallback, env.displayCallback);
-    services.imageGroupService = this.imageGroupService;
-    services.imageService = this.imageService;
-    services.flaskService = this.flaskService;
-    services.imageJService = this.imageJService;
-
-    const filterCore = new FilterCore(services);
+    const ops = this.getFilterArray(func, env);
 
     try {
-      for (const c of splittedString) {
-        if (c !== '') {
-          console.log('filterCore.' + c);
-          ops.push(eval('filterCore.' + c));
-        } else {
-          console.log('skip');
-        }
-      }
-
       this.runFilters(ops, dataset).subscribe(
         data => console.log('Ende'),
         e => {
@@ -141,7 +100,45 @@ export class FilterService {
     return filters.reduce((ob: Observable<{}>, op: OperatorFunction<{}, {}>) => ob.pipe(op), from(dataset.images));
   }
 
-  // public runWorkers(datasets: Dataset[], filterChain: string, env: { processCallback?: ProcessCallback, displayCallback?: DisplayCallback }) {
+  private getFilterArray(func: string, env: { processCallback?: ProcessCallback, displayCallback?: DisplayCallback }): any[] {
+    const display = env.displayCallback;
+    const process = env.processCallback;
+
+    const splittedString = func.split('\n');
+    const ops = [];
+
+    const filterCore = this.getFilterCore(env);
+
+    try {
+      for (const c of splittedString) {
+        if (c !== '') {
+          console.log('filterCore.' + c);
+          ops.push(eval('filterCore.' + c));
+        } else {
+          console.log('skip');
+        }
+      }
+    } catch (e) {
+      env.processCallback.displayData("Error:<br> " + e);
+      console.log(e)
+    }
+
+    return ops;
+  }
+
+  private getFilterCore(env: { processCallback?: ProcessCallback, displayCallback?: DisplayCallback }): FilterCore {
+    const services = new Services(env.processCallback, env.displayCallback);
+    services.imageGroupService = this.imageGroupService;
+    services.imageService = this.imageService;
+    services.flaskService = this.flaskService;
+    services.imageJService = this.imageJService;
+    services.datasetService = this.datasetService;
+
+    return new FilterCore(services);
+  }
+
+
+// public runWorkers(datasets: Dataset[], filterChain: string, env: { processCallback?: ProcessCallback, displayCallback?: DisplayCallback }) {
   //   try {
   //
   //     const f = this;
@@ -579,49 +576,6 @@ export class FilterService {
     ));
   }
 
-  // public checkXProgression(color: string) {
-  //   return flatMap((data: FilterData) => DrawUtil.loadBase64AsCanvas(data.getImg().data).pipe(map(canvas => {
-  //     if (data.additionalData != null) {
-  //       console.log("X Progression");
-  //
-  //       let lastX = 0;
-  //       for (let i = 0; i < data.additionalData.length; i++) {
-  //         for (let y = 0; y < data.additionalData[i].points; y++) {
-  //
-  //           if (lastX < data.additionalData[i].points[y].x) {
-  //             console.error("Double Point");
-  //           }
-  //
-  //           DrawUtil.drawPoint(canvas, data.additionalData[i].points[y], color, 2);
-  //         }
-  //       }
-  //       return data;
-  //     }
-  //   })));
-  // }
-
-  public layer(layerID: string, color: string, size: number, drawPoints: boolean) {
-    return flatMap((data: FilterData) => new Observable<Layer>((observer) => {
-        let layer = null;
-        for (const tmp of data.img.layers) {
-          if (tmp.id == layerID) {
-            layer = tmp;
-            break;
-          }
-        }
-        observer.next(layer);
-        observer.complete();
-      }).pipe(flatMap(layer => DrawUtil.loadBase64AsCanvas(data.img).pipe(map(canvas => {
-        if (layer != null) {
-          DrawUtil.drawManyPointLinesOnCanvas(canvas, layer.lines, color, size, drawPoints);
-          data.img.data = DrawUtil.canvasAsBase64(canvas);
-          console.log('layer img' + data.originalImage.name + ' ' + layer.id + ' ' + color);
-        }
-        return data;
-      }))))
-    );
-  }
-
   public magic(command: string) {
     return flatMap((data: FilterData) =>
       this.imageMagicService.performMagic(data.img, command).pipe(
@@ -748,21 +702,6 @@ export class FilterService {
     );
   }
 
-  public display(displayCallback: DisplayCallback, img: number = -1) {
-    return flatMap((data: FilterData) => new Observable<FilterData>((observer) => {
-      console.log(`Display img ${img} of ${data.imgStack.length}`);
-      if (displayCallback != null) {
-        if (img != -1) {
-          displayCallback.displayCallBack(data.imgStack[img]);
-        } else {
-          displayCallback.displayCallBack(data.img);
-        }
-      }
-      observer.next(data);
-      observer.complete();
-    }));
-  }
-
   public overlay(imgs: number[], imageType: ColorType = 0) {
     return flatMap((data: FilterData) => new Observable<FilterData>((observer) => {
 
@@ -822,9 +761,6 @@ export class FilterService {
     ));
   }
 
-  public showProgress(progressCallback) {
-
-  }
 
   public pushImg(index ?: number) {
     return flatMap((data: FilterData) => new Observable<FilterData>((observer) => {

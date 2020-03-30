@@ -7,6 +7,7 @@ import {FilterData} from "../filter-data";
 import {FilterHelper} from "./filter-helper";
 import {FlaskService} from "../../service/flask.service";
 import {ImageJService} from "../../service/image-j.service";
+import {DatasetService} from "../../service/dataset.service";
 
 export class AbstractFilter {
 
@@ -68,6 +69,8 @@ export class Services {
   public flaskService: FlaskService;
 
   public imageJService: ImageJService;
+
+  public datasetService: DatasetService;
 
   constructor(processCallback?: ProcessCallback, displayCallback?: DisplayCallback) {
 

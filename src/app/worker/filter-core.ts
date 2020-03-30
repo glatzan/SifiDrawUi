@@ -23,7 +23,7 @@ import {ProcessCountedPixelsFilter, ProcessCountedPixelsOptions} from "./filter/
 import {OutputFilter} from "./filter/output-filter";
 import {InverseFilter, InverseFilterOptions} from "./filter/inverse-filter";
 import {CopyLayerData, CopyLayerToImageFilter, CopyLayerToImageOptions} from "./filter/copy-layer-to-image-filter";
-import {DrawLayerFilter} from "./filter/draw-layer-filter";
+import {DrawLayerFilter, DrawLayerOptions} from "./filter/draw-layer-filter";
 import {ProcessThresholdSurfaces} from "./filter/process-threshold-surfaces";
 import {CloneImageFilter} from "./filter/clone-image-filter";
 import {HostParabolaFilter} from "./filter/vaa/host-parabola-filter";
@@ -108,8 +108,8 @@ export class FilterCore {
     return new CreateImageFilter(this.services).doFilter(createImageOptions);
   }
 
-  drawLayer(sourcePos: number, layerIDs: [string], targetPos: number = sourcePos) {
-    return new DrawLayerFilter(this.services).doFilter(sourcePos, layerIDs, targetPos);
+  drawLayer(sourcePos: number, layerIDs: [string], targetPos: number = sourcePos, drawLayerOptions?: DrawLayerOptions) {
+    return new DrawLayerFilter(this.services).doFilter(sourcePos, layerIDs, targetPos, drawLayerOptions);
   }
 
   extractSubImage(sourcePos: number, extractionLayerID: string, targetPos: number) {
