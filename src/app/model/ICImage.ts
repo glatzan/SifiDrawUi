@@ -5,6 +5,7 @@ export interface ICImage {
   name: string;
   type: string;
   concurrencyCounter: number;
+  hasLayerData: boolean
 
   getData(): string;
 

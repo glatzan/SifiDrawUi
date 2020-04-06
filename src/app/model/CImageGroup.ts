@@ -8,6 +8,7 @@ export class CImageGroup implements ICImage {
   public name: string;
   public images: CImage[];
   public type = 'group';
+  hasLayerData = false;
 
   public activeImage = 0;
   concurrencyCounter: number;
