@@ -3,6 +3,7 @@ import {map} from "rxjs/operators";
 import {FilterData} from "../filter-data";
 import {FilterHelper} from "./filter-helper";
 import DrawUtil from "../../utils/draw-util";
+import {ColorType} from "pngjs";
 
 export class DrawLayerFilter extends AbstractFilter {
 
@@ -17,7 +18,6 @@ export class DrawLayerFilter extends AbstractFilter {
 
         if (!drawLayerOptions)
           drawLayerOptions = {};
-
 
         if (!target)
           throw new Error(`DrawLayerFilter: TargetImage not found index ${targetPos}!`);

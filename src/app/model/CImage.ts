@@ -9,7 +9,7 @@ export class CImage implements ICImage {
   width: number;
   height: number;
   fileExtension: string;
-  concurrencyCounter: number;
+  concurrencyCounter: number = 0;
   hasLayerData: boolean;
 
   public type = 'img';

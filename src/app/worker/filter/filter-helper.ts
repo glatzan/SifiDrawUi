@@ -36,12 +36,12 @@ export namespace FilterHelper {
     return null
   }
 
-  export function canvasToBase64(canvas: HTMLCanvasElement, imageType: string = "image/png"): string {
-    const result = canvas.toDataURL(imageType);
+  export function canvasToBase64(canvas: HTMLCanvasElement, imageType: string = "image/png", quality = 1.0): string {
+    const result = canvas.toDataURL(imageType, quality);
     return result.substr(result.indexOf(',') + 1);
   }
 
-  export function canvasToImage(canvas: HTMLCanvasElement, image: CImage, imageType: string = "image/png") {
+  export function canvasToImage(canvas: HTMLCanvasElement, image: CImage, imageType: string = "image/png", quality = 1.0) {
     image.data = FilterHelper.canvasToBase64(canvas, imageType);
     image.width = canvas.width;
     image.height = canvas.height;

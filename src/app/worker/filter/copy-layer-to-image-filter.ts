@@ -33,6 +33,10 @@ export class CopyLayerToImageFilter extends AbstractFilter {
           copyLayerToImageOptions.affineMatrixSource = "affineMatrix";
       }
 
+      if(!copyLayerToImageOptions.silent){
+        copyLayerToImageOptions.silent = false
+      }
+
       const [source, target] = this.getSourceAndTarget(data, sourcePos, copyLayerToImageOptions.targetPos);
 
       if (!target)
@@ -54,17 +58,22 @@ export class CopyLayerToImageFilter extends AbstractFilter {
       });
 
       layerToProcess.forEach(x => {
-        if (x.origLayer === null)
+        if (x.origLayer === null && !copyLayerToImageOptions.silent)
           throw new Error(`CopyLayerToImageFilter: Layer ID not found ${x.layerData.oldID}!`);
       });
 
       layerToProcess.forEach(layerData => {
+
+        if(!layerData.origLayer)
+          return;
+
         const nLayer = Object.assign(new Layer(""), layerData.origLayer);
         nLayer.lines = [];
         nLayer.id = layerData.layerData.newID;
         nLayer.name = layerData.layerData.name;
         nLayer.type = this.getLayerType(layerData.layerData.type);
         nLayer.color = layerData.layerData.color || "#fff";
+        nLayer.size = layerData.layerData.size || layerData.origLayer.size
 
         for (const {item, index} of layerData.origLayer.lines.map((item, index) => ({item, index}))) {
           if (copyLayerToImageOptions.affineTransformation) {
@@ -106,9 +115,11 @@ export interface CopyLayerToImageOptions {
   affineTransformation?: boolean
   affineMatrixSource?: string
   colorType?: ColorType
+  silent?: boolean
 }
 
 export interface CopyLayerData {
+  size?: number,
   color?: string,
   name?: string,
   oldID: string,

@@ -2,6 +2,7 @@ import {AbstractFilter, Services} from "./abstract-filter";
 import {map} from "rxjs/operators";
 import {FilterData} from "../filter-data";
 import {FilterHelper} from "./filter-helper";
+import {ColorType} from "pngjs";
 
 export class ColorThresholdFilter extends AbstractFilter {
 
@@ -26,6 +27,9 @@ export class ColorThresholdFilter extends AbstractFilter {
       if (!colorThresholdOptions.otherChannelsDiffThreshold)
         colorThresholdOptions.otherChannelsDiffThreshold = 15;
 
+      if(!colorThresholdOptions.colorType)
+        colorThresholdOptions.colorType = 6
+
       var [channel, channel1, channel2] = [0, 1, 2];
 
       if (colorThresholdOptions.channel == 1) {
@@ -41,7 +45,7 @@ export class ColorThresholdFilter extends AbstractFilter {
       const [source, target] = this.getSourceAndTarget(data, sourcePos, colorThresholdOptions.targetImagePos);
 
       const sourceImage = FilterHelper.imageToPNG(source);
-      const targetImage = FilterHelper.createPNG(sourceImage.width, sourceImage.height);
+      const targetImage = FilterHelper.createPNG(sourceImage.width, sourceImage.height,colorThresholdOptions.colorType);
 
       let counter = 0;
 
@@ -71,7 +75,7 @@ export class ColorThresholdFilter extends AbstractFilter {
       }
 
       if (target) {
-        FilterHelper.pngToImage(targetImage, target)
+        FilterHelper.pngToImage(targetImage, target,colorThresholdOptions.colorType)
       }
 
       const entry = {tag: sourcePos.toString(), name: source.name, value: counter};
@@ -89,4 +93,5 @@ export interface ColorThresholdOptions {
   channel?: number
   channelThreshold?: number
   otherChannelsDiffThreshold?: number
+  colorType?: ColorType
 }

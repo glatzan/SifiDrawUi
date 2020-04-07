@@ -58,6 +58,7 @@ export class ImageService {
 
   public updateExistingImage(image: CImage): Observable<any> {
     console.log(`${environment.backendUrl}/image/update/checked`);
+    image.concurrencyCounter = 20;
     return this.http.put<CImage>(`${environment.backendUrl}/image/update/checked`, image, ImageService.httpJsonContent);
   }
 

@@ -37,6 +37,14 @@ import {DrawHostAndGraftLineFilter, DrawHostAndGraftLineOptions} from "./filter/
 import {FindGraftGapFilter, FindGraftGapOptions} from "./filter/vaa/find-graft-gap-filter";
 import {ProcessColorThreshold} from "./filter/process-color-threshold";
 import {ColorThresholdFilter, ColorThresholdOptions} from "./filter/color-threshold-filter";
+import {ManualAffineTransformationMatrixFilter} from "./filter/manual-affine-transformation-matrix-filter";
+import {Point} from "../model/point";
+import {
+  ApplyTransformationOnLayerFilter,
+  ApplyTransformationOnLayerOptions
+} from "./filter/apply-transformation-on-layer-filter";
+import {BinarizeColorThreshold} from "./filter/binarize-color-threshold";
+import {DrawBinaryLineFilter} from "./filter/draw-binary-line-filter";
 
 export class FilterCore {
 
@@ -165,6 +173,14 @@ export class FilterCore {
     return new ProcessCountedPixelsFilter(this.services).doFilter(processCountedPixelsOptions);
   }
 
+  manualAffineTransformationMatrix(t1: Point[], t2: Point[], targetDataName = 'manualAffineMatrix') {
+    return new ManualAffineTransformationMatrixFilter(this.services).doFilter(t1, t2, targetDataName)
+  }
+
+  applyTransformationOnLayerFilter(sourcePos: number, layers: [string], applyTransformationOnLayerOptions?: ApplyTransformationOnLayerOptions) {
+    return new ApplyTransformationOnLayerFilter(this.services).doFilter(sourcePos, layers, applyTransformationOnLayerOptions)
+  }
+
   processThresholdSurfaces(sourceData = "countData") {
     return new ProcessThresholdSurfaces(this.services).doFilter(sourceData);
   }
@@ -201,12 +217,20 @@ export class FilterCore {
     return new OutputFilter(this.services).doFilter();
   }
 
+  drawBinaryLine(sourcePos: number, layerIDs: [string], rgba: { r: number, g: number, b: number, a: number }, targetPos: number = sourcePos) {
+    return new DrawBinaryLineFilter(this.services).doFilter(sourcePos, layerIDs, rgba, targetPos)
+  }
+
   drawHostAndGraftLine(sourceName: string, drawHostAndGraftLineOptions?: DrawHostAndGraftLineOptions) {
     return new DrawHostAndGraftLineFilter(this.services).doFilter(sourceName, drawHostAndGraftLineOptions)
   }
 
   findGraftGap(sourcePos: number, findGraftGapOption?: FindGraftGapOptions) {
     return new FindGraftGapFilter(this.services).doFilter(sourcePos, findGraftGapOption);
+  }
+
+  binarizeColorThreshold(sourcePos: number, startEndColor: { r: number, g: number, b: number, a: number }, targetPos: number = sourcePos) {
+    return new BinarizeColorThreshold(this.services).doFilter(sourcePos, startEndColor, targetPos)
   }
 
   private pushAndAddImageToStack(img: CImage, data: FilterData) {
