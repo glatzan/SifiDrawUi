@@ -111,36 +111,34 @@ class ColumnData {
     }
 
     const pixelPerPercent = this.binarizedInfos.length / 100;
-    let pixelPercentCounter = pixelPerPercent;
     let percentInfoCounter = 0;
     let pix = 0;
 
-    for (let i = 0; i < this.binarizedInfos.length; i++) {
-      if (pixelPercentCounter - 1 < 0) {
-        this.percentInfos[percentInfoCounter] += (this.binarizedInfos[i] ? 1 : 0) * pixelPercentCounter;
-        this.percentInfos[percentInfoCounter] /= pixelPerPercent;
-        percentInfoCounter++;
+    for (let i = 0; i < 100; i++) {
+      let start = i * pixelPerPercent;
+      let index = Math.floor(start);
+      let tmpCounter = pixelPerPercent; //- (1 - (start - index));
+      let result = 0;
 
-        pix = Math.round(((1 - pixelPercentCounter)) * 100) / 100;
-
-        while (pix > pixelPerPercent) {
-          this.percentInfos[percentInfoCounter] += (this.binarizedInfos[i] ? 1 : 0) * pixelPerPercent;
-          this.percentInfos[percentInfoCounter] /= pixelPerPercent;
-          pix = pix - pixelPerPercent;
-          percentInfoCounter++;
+      while (tmpCounter > 0) {
+        if (start % 1 === 0) {
+          if (tmpCounter - 1 >= 1) {
+            result += (this.binarizedInfos[index] ? 1 : 0);
+            tmpCounter--;
+          } else {
+            result += (this.binarizedInfos[index] ? 1 : 0) * tmpCounter;
+            tmpCounter = 0;
+          }
+        } else {
+          let tmp = (1- (start - index) > pixelPerPercent) ? pixelPerPercent : 1 - (start - index);
+          result += (this.binarizedInfos[index] ? 1 : 0) * tmp;
+          tmpCounter -= tmp;
+          start += tmp;
         }
-
-        this.percentInfos[percentInfoCounter] += (this.binarizedInfos[i] ? 1 : 0) * pix;
-        pixelPercentCounter = pixelPerPercent - pix;
-
-      } else {
-        this.percentInfos[percentInfoCounter] += this.binarizedInfos[i] ? 1 : 0;
-        pixelPercentCounter--;
+        index++;
       }
+      this.percentInfos[i] = result / pixelPerPercent
     }
-
-    console.log(percentInfoCounter)
-
     return true;
   }
 }
