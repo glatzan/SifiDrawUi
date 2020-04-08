@@ -165,6 +165,9 @@ export class WorkViewService implements OnInit {
     return this.activeImage;
   }
 
+  getImage(){
+    return this.image
+  }
 
   resetImage() {
     this.selectActiveImage(this.activeImage, true);

@@ -31,7 +31,6 @@ export class BinarizeColorThreshold extends AbstractFilter {
           const idx = (sourceImage.width * y + x) << 2;
 
           if (sourceImage.data[idx] == startEndColor.r && sourceImage.data[idx + 1] == startEndColor.g && sourceImage.data[idx + 2] == startEndColor.b && sourceImage.data[idx + 3] == startEndColor.a) {
-            console.log(sourceImage.data[idx + 3] + " x: " +x + " y: " + y)
             if (!start) {
               start = true;
               lastWithe = y;
@@ -114,21 +113,33 @@ class ColumnData {
     const pixelPerPercent = this.binarizedInfos.length / 100;
     let pixelPercentCounter = pixelPerPercent;
     let percentInfoCounter = 0;
+    let pix = 0;
 
     for (let i = 0; i < this.binarizedInfos.length; i++) {
       if (pixelPercentCounter - 1 < 0) {
         this.percentInfos[percentInfoCounter] += (this.binarizedInfos[i] ? 1 : 0) * pixelPercentCounter;
         this.percentInfos[percentInfoCounter] /= pixelPerPercent;
         percentInfoCounter++;
-        if (percentInfoCounter != 100) {
-          this.percentInfos[percentInfoCounter] += (this.binarizedInfos[i] ? 1 : 0) * (1 - pixelPercentCounter);
-          pixelPercentCounter = pixelPerPercent - (1 - pixelPercentCounter);
+
+        pix = Math.round(((1 - pixelPercentCounter)) * 100) / 100;
+
+        while (pix > pixelPerPercent) {
+          this.percentInfos[percentInfoCounter] += (this.binarizedInfos[i] ? 1 : 0) * pixelPerPercent;
+          this.percentInfos[percentInfoCounter] /= pixelPerPercent;
+          pix = pix - pixelPerPercent;
+          percentInfoCounter++;
         }
+
+        this.percentInfos[percentInfoCounter] += (this.binarizedInfos[i] ? 1 : 0) * pix;
+        pixelPercentCounter = pixelPerPercent - pix;
+
       } else {
         this.percentInfos[percentInfoCounter] += this.binarizedInfos[i] ? 1 : 0;
         pixelPercentCounter--;
       }
     }
+
+    console.log(percentInfoCounter)
 
     return true;
   }

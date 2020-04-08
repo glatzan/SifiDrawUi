@@ -153,7 +153,7 @@ export class DatasetComponent implements OnInit {
     }
 
     for (let i = 0; i < this.dataset.images.length; i++) {
-      if (this.dataset.images[i].id === this.selectedImageId) {
+      if (this.dataset.images[i].id === this.workViewService.getImage().id) {
         if (i + 1 < this.dataset.images.length) {
           this.onSelectImage(NaN, this.dataset.images[i + 1]);
           return this.dataset.images[i + 1].id;
@@ -176,7 +176,7 @@ export class DatasetComponent implements OnInit {
     }
 
     for (let i = 0; i < this.dataset.images.length; i++) {
-      if (this.dataset.images[i].id == this.selectedImageId) {
+      if (this.dataset.images[i].id == this.workViewService.getImage().id) {
         if (i - 1 >= 0) {
           this.onSelectImage(NaN, this.dataset.images[i - 1]);
           return this.dataset.images[i + 1].id;
