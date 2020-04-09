@@ -2,7 +2,7 @@ import {Component, OnInit} from '@angular/core';
 import {MatDialogRef} from '@angular/material/dialog';
 import {FormBuilder, FormGroup} from '@angular/forms';
 import {ImageService} from '../../service/image.service';
-import {ProjectData} from '../../model/project-data';
+import {Project} from '../../model/project';
 import {Dataset} from '../../model/dataset';
 import {ProjectService} from '../../service/project.service';
 
@@ -15,7 +15,7 @@ export class FileUploadDialogComponent implements OnInit {
 
    form: FormGroup;
 
-  projects: ProjectData[];
+  projects: Project[];
 
   datasets: Dataset[];
 
@@ -32,7 +32,7 @@ export class FileUploadDialogComponent implements OnInit {
       selectedDataset: null
     });
 
-    this.projectService.getProjects().subscribe((data: ProjectData[]) => {
+    this.projectService.getProjects().subscribe((data: Project[]) => {
       this.projects = data;
       this.datasets = data[0].datasets || null;
 

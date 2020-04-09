@@ -1,9 +1,9 @@
 import {AbstractFilter, Services} from "./abstract-filter";
 import {flatMap, map} from "rxjs/operators";
-import {ICImage} from "../../model/ICImage";
+import {SAImage} from "../../model/SAImage";
 import {FilterData} from "../filter-data";
 import {Observable} from "rxjs";
-import {CImage} from "../../model/CImage";
+import {SImage} from "../../model/SImage";
 
 export class LoadFilter extends AbstractFilter {
 
@@ -12,7 +12,7 @@ export class LoadFilter extends AbstractFilter {
   }
 
   doFilter() {
-    return flatMap((data: ICImage) => this.loadICImage(data).pipe(map(cimg => {
+    return flatMap((data: SAImage) => this.loadICImage(data).pipe(map(cimg => {
       console.log(`Load img ${atob(cimg.id)}`);
       const filterData = new FilterData();
       filterData.pushICIMG(cimg);
@@ -21,8 +21,8 @@ export class LoadFilter extends AbstractFilter {
     })));
   }
 
-  private loadICImage(img: ICImage): Observable<ICImage> {
-    if (img instanceof CImage) {
+  private loadICImage(img: SAImage): Observable<SAImage> {
+    if (img instanceof SImage) {
       return this.services.imageService.getImage(img.id);
     } else {
       return this.services.imageGroupService.getImageGroup(img.id);

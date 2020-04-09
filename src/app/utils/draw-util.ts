@@ -3,7 +3,7 @@ import {Layer} from '../model/layer';
 import {Observable} from 'rxjs';
 import {flatMap} from "rxjs/operators";
 import {LayerType} from "../model/layer-type.enum";
-import {ICImage} from "../model/ICImage";
+import {SAImage} from "../model/SAImage";
 
 export default class DrawUtil {
 
@@ -23,7 +23,7 @@ export default class DrawUtil {
    * Loads a rest image to an Image Element
    * @param src
    */
-  static loadImageAsObservable(image: ICImage): Observable<HTMLImageElement> {
+  static loadImageAsObservable(image: SAImage): Observable<HTMLImageElement> {
     return new Observable<HTMLImageElement>((observer) => {
       let img = new Image();
       img.onload = () => {
@@ -48,7 +48,7 @@ export default class DrawUtil {
     return canvas;
   }
 
-  static loadBase64AsCanvas(image: ICImage, canvas?: HTMLCanvasElement): Observable<HTMLCanvasElement> {
+  static loadBase64AsCanvas(image: SAImage, canvas?: HTMLCanvasElement): Observable<HTMLCanvasElement> {
     return DrawUtil.loadImageAsObservable(image).pipe(flatMap(x => {
       return new Observable<HTMLCanvasElement>((observer) => {
         const c = DrawUtil.loadImageAsCanvas(x, canvas);
@@ -296,7 +296,7 @@ export default class DrawUtil {
     })
   }
 
-  static loadImageFromBase64(image : ICImage, callback) {
+  static loadImageFromBase64(image : SAImage, callback) {
     const img = new Image();
     img.crossOrigin = 'Anonymous';
     img.onload = function () {

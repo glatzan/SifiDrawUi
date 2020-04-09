@@ -36,7 +36,7 @@
 
         <!-- subimages -->
         <div *ngFor="let subimage of img.images; " class="listContainer">
-          <app-editable *ngIf="subimage.type === 'img'"
+          <app-editable *ngIf="subimage.type !== 'group'"
                         #imageEdit
                         (update)="updateField(getIndex(subimage), 'name')"
                         (click)="onSelectImage($event, subimage)"
@@ -70,7 +70,7 @@
     <!-- images without group-->
     <div cdkDropList (cdkDropListDropped)="drop($event,dataset)" [cdkDropListData]="dataset" style="margin-top: 15px">
       <div *ngFor="let img of dataset.images;" class="listContainer">
-        <app-editable *ngIf="img.type === 'img'"
+        <app-editable *ngIf="img.type !== 'group'"
                       #imageEdit
                       (update)="updateField(getIndex(img), 'name')"
                       (contextmenu)="openContextMenu($event,img)"
@@ -103,7 +103,7 @@
 
 <ng-template #imageMenu let-image>
   <section class="image-menu">
-    <div (click)="delete(image)">{{image.type == "img" ? "Bild löschen" : "Bildergruppe löschen"}}</div>
-    <div (click)="cloneItem(image)">{{image.type == "img" ? "Bild klonen" : "Bildergruppe klonen"}}</div>
+    <div (click)="delete(image)">{{image.type !== "group" ? "Bild löschen" : "Bildergruppe löschen"}}</div>
+    <div (click)="cloneItem(image)">{{image.type !== "group" ? "Bild klonen" : "Bildergruppe klonen"}}</div>
   </section>
 </ng-template>

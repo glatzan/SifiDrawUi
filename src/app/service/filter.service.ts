@@ -1,6 +1,6 @@
 import {Injectable} from '@angular/core';
 import {ImageMagicService} from './image-magic.service';
-import {CImage} from '../model/CImage';
+import {SImage} from '../model/SImage';
 import {ImageService} from './image.service';
 import {Dataset} from '../model/dataset';
 import {from, Observable, OperatorFunction} from 'rxjs';
@@ -26,8 +26,8 @@ import {ComplexLine} from '../utils/vaa/model/complex-line';
 import {HostParabola} from '../utils/vaa/host-parabola';
 import {LineJoiner} from '../utils/vaa/line-joiner';
 import {GraftFinder} from '../utils/vaa/graft-finder';
-import {ICImage} from '../model/ICImage';
-import {CImageGroup} from '../model/CImageGroup';
+import {SAImage} from '../model/SAImage';
+import {SImageGroup} from '../model/SImageGroup';
 import {ImageGroupService} from './image-group.service';
 import {FilterCore} from "../worker/filter-core";
 import {Services} from "../worker/filter/abstract-filter";
@@ -45,11 +45,11 @@ export class FilterService {
               private flaskService: FlaskService) {
   }
 
-  private loadICImage(img: ICImage): Observable<ICImage> {
-    if (img instanceof CImageGroup) {
+  private loadICImage(img: SAImage): Observable<SAImage> {
+    if (img instanceof SImageGroup) {
       return this.imageService.getImage(img.id);
     } else {
-      return this.imageGroupService.getImageGroup(img.id);
+      return this.imageGroupService.getImageGroup(img.id, false);
     }
   }
 
@@ -61,7 +61,7 @@ export class FilterService {
     try {
       from(datasets).pipe(
         flatMap(d =>
-          this.datasetService.getDataset(d.id, false)
+          this.datasetService.getDataset(d.id, true)
         ), concatMap(dataset =>
           this.runFilters(ops, dataset)
         )
@@ -151,7 +151,7 @@ export class FilterService {
   //       for (let i = 0; i < datasets[y].images.length; i++) {
   //         const data = new FilterData();
   //         // TODO cast!
-  //         data.pushIMG(datasets[y].images[i] as CImage);
+  //         data.pushIMG(datasets[y].images[i] as SImage);
   //         data.origName = atob(datasets[y].images[i].id);
   //
   //         data.numberInBatch = count;
@@ -767,7 +767,7 @@ export class FilterService {
       console.log(`Pushing IMG Index ${index} to ${data.imgStack.length}`);
 
       const imToCopy = index != undefined ? data.imgStack[index] : data.img;
-      const copy = Object.assign(new CImage(), imToCopy);
+      const copy = Object.assign(new SImage(), imToCopy);
       copy.layers = imToCopy.layers;
 
       data.pushIMG(copy);

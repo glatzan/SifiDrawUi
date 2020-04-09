@@ -1,8 +1,7 @@
-import {CImage} from './CImage';
-import {ICImage} from './ICImage';
+import {SImage} from './SImage';
+import {SAImage} from './SAImage';
+import {SEntity} from "./sentity";
 
-export class Dataset {
-  public id: string;
-  public name: string;
-  public images: ICImage[];
+export class Dataset extends SEntity{
+  public images: SAImage[];
 }

@@ -1,5 +1,5 @@
 import {Component, Inject, OnInit} from '@angular/core';
-import {ProjectData} from '../../model/project-data';
+import {Project} from '../../model/project';
 import {ProjectService} from '../../service/project.service';
 import {Dataset} from '../../model/dataset';
 import {ImageService} from '../../service/image.service';
@@ -8,7 +8,7 @@ import {FilterService} from "../../service/filter.service";
 import {ProcessCallback} from "../../worker/processCallback";
 import {FilterSet} from "../../model/FilterSet";
 import {FilterSetService} from "../../service/filter-set.service";
-import {CImage} from "../../model/CImage";
+import {SImage} from "../../model/SImage";
 
 @Component({
   selector: 'app-export-dialog',
@@ -17,9 +17,9 @@ import {CImage} from "../../model/CImage";
 })
 export class ExportDialogComponent implements OnInit, ProcessCallback {
 
-  projects: ProjectData[];
+  projects: Project[];
 
-  selectedProject: ProjectData;
+  selectedProject: Project;
 
   datasets: Dataset[];
 
@@ -66,7 +66,7 @@ export class ExportDialogComponent implements OnInit, ProcessCallback {
     me.exportIsRunning = false;
     me.completedRunCount = 0;
 
-    this.projectService.getProjects().subscribe((data: ProjectData[]) => {
+    this.projectService.getProjects().subscribe((data: Project[]) => {
       this.projects = data;
 
       for (let p of this.projects) {
@@ -77,7 +77,7 @@ export class ExportDialogComponent implements OnInit, ProcessCallback {
       }
 
       if (this.selectedProject == null)
-        this.selectedProject = this.projects[0]
+        this.selectedProject = this.projects[0];
 
       me.onSelectProject();
 
@@ -117,9 +117,9 @@ export class ExportDialogComponent implements OnInit, ProcessCallback {
   public export() {
     this.filterService.runFilterOnDatasets(this.selectedDatasets, this.filterValue, {
       processCallback: this, displayCallback: {
-        displayCallBack: function (image: CImage) {
+        displayCallBack: function (image: SImage) {
         },
-        addImage: function (image: CImage) {
+        addImage: function (image: SImage) {
         }
       }
     })

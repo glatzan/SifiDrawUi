@@ -1,5 +1,5 @@
 import {Component, Input, OnInit} from '@angular/core';
-import {ProjectData} from '../../model/project-data';
+import {Project} from '../../model/project';
 import {ProjectService} from '../../service/project.service';
 import {DatasetComponent} from '../dataset/dataset.component';
 import {WorkViewService} from "../workView/work-view.service";
@@ -12,7 +12,7 @@ import {Dataset} from "../../model/dataset";
 })
 export class ProjectListComponent implements OnInit {
 
-  projectData: ProjectData[];
+  projectData: Project[];
 
   selectedDataset: Dataset;
 
@@ -27,14 +27,14 @@ export class ProjectListComponent implements OnInit {
     this.workViewService.reloadProjectList.subscribe(x => {
       this.loadData();
       if (this.selectedDataset != null) {
-        this.workViewService.selectDataset.emit(this.selectedDataset);
+        this.workViewService.selectDataset(this.selectedDataset)
       }
     });
   }
 
   private loadData() {
     this.projectData = [];
-    this.projectService.getProjects().subscribe((data: ProjectData[]) => {
+    this.projectService.getProjects().subscribe((data: Project[]) => {
       this.projectData = data;
     }, error1 => {
       console.log('Fehler beim laden der Project Datein');
@@ -44,7 +44,7 @@ export class ProjectListComponent implements OnInit {
 
   public onSelectDataset(event, dataset) {
     this.selectedDataset = dataset;
-    this.workViewService.selectDataset.emit(dataset);
+    this.workViewService.selectDataset(this.selectedDataset)
   }
 }
 

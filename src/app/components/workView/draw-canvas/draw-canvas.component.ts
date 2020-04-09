@@ -12,10 +12,10 @@ import {MousePosition} from "../../../helpers/mouse-position";
 import {LayerType} from "../../../model/layer-type.enum";
 import {CanvasDisplaySettings, CanvasDrawMode} from "../../../helpers/canvas-display-settings";
 import {FlickerService} from "../flicker.service";
-import {CImageGroup} from "../../../model/CImageGroup";
+import {SImageGroup} from "../../../model/SImageGroup";
 import {AuthenticationService} from "../../../service/authentication.service";
 import {CanvasDrawAction, CanvasHistory} from "./canvas-hisotry";
-import {CImage} from "../../../model/CImage";
+import {SImage} from "../../../model/SImage";
 
 @Component({
   selector: 'app-draw-canvas',
@@ -31,7 +31,7 @@ export class DrawCanvasComponent implements AfterViewInit, OnInit {
   /**
    * Image Data from Backend, display image
    */
-  private image: CImage;
+  private image: SImage;
 
   /**
    * Current layer
@@ -361,7 +361,7 @@ export class DrawCanvasComponent implements AfterViewInit, OnInit {
     }
   }
 
-  private prepareImage(image: CImage) {
+  private prepareImage(image: SImage) {
     // save manually if image should be changed
     this.image = image;
     this.currentLayer = new Layer('-');
@@ -382,7 +382,7 @@ export class DrawCanvasComponent implements AfterViewInit, OnInit {
       }
 
     } else {
-      if (image instanceof CImageGroup)
+      if (image instanceof SImageGroup)
         this.drawImage.src = "assets/emptyImageGroup.jpg";
       else
         this.drawImage.src = "assets/selectImage.jpg";

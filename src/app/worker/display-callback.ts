@@ -1,6 +1,6 @@
-import {CImage} from "../model/CImage";
+import {SImage} from "../model/SImage";
 
 export interface DisplayCallback {
-  displayCallBack(image: CImage): void;
-  addImage(image : CImage) : void;
+  displayCallBack(image: SImage): void;
+  addImage(image : SImage) : void;
 }

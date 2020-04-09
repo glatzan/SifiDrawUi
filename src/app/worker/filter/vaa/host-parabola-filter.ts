@@ -2,7 +2,7 @@ import {AbstractFilter, Services} from "../abstract-filter";
 import {map} from "rxjs/operators";
 import {FilterData} from "../../filter-data";
 import {FilterHelper} from "../filter-helper";
-import {CImage} from "../../../model/CImage";
+import {SImage} from "../../../model/SImage";
 import {WindowingFilter} from "../windowing-filter";
 import {HostEpithelial} from "../../../utils/vaa/host-epithelial";
 import {HostParabola} from "../../../utils/vaa/host-parabola";
@@ -34,7 +34,7 @@ export class HostParabolaFilter extends AbstractFilter {
   }
 
 
-  public static scanHost(image: CImage, canvas, scanAtX: number = 375, scanWidth: number = 600, scanAtY: number = 6, scanHeight: number = 400, filterSize: number = 3): Array<Vector> {
+  public static scanHost(image: SImage, canvas, scanAtX: number = 375, scanWidth: number = 600, scanAtY: number = 6, scanHeight: number = 400, filterSize: number = 3): Array<Vector> {
 
     const img = FilterHelper.imageToPNG(image);
     const resultArr: Vector[] = [];

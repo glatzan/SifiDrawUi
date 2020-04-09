@@ -4,15 +4,15 @@ import {DatasetService} from '../../service/dataset.service';
 import {WorkViewService} from '../workView/work-view.service';
 import {ImageGroupService} from '../../service/image-group.service';
 import {FormArray, FormBuilder, FormControl, FormGroup, Validators} from '@angular/forms';
-import {ICImage} from '../../model/ICImage';
+import {SAImage} from '../../model/SAImage';
 import {ImageService} from '../../service/image.service';
-import {CImageGroup} from '../../model/CImageGroup';
+import {SImageGroup} from '../../model/SImageGroup';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {Overlay, OverlayRef} from "@angular/cdk/overlay";
 import {TemplatePortal} from "@angular/cdk/portal";
 import {fromEvent, Subscription} from "rxjs";
 import {filter, take} from "rxjs/operators";
-import {CImage} from "../../model/CImage";
+import {SImage} from "../../model/SImage";
 
 @Component({
   selector: 'app-dataset',
@@ -56,7 +56,7 @@ export class DatasetComponent implements OnInit {
       this.snackBar.open('Vorheriges Bild');
     });
 
-    this.workViewService.selectDataset.subscribe(x => {
+    this.workViewService.onDatasetChange.subscribe(x => {
       this.loadDataset(x.id);
     });
 
@@ -68,7 +68,7 @@ export class DatasetComponent implements OnInit {
         if(data.images.length > 0) {
           this.onSelectImage(null, data.images[0]);
         }else{
-          this.onSelectImage(null, new CImage());
+          this.onSelectImage(null, new SImage());
         }
       }
       this.dataset = data;
@@ -85,13 +85,13 @@ export class DatasetComponent implements OnInit {
     this.loadDataset(this.dataset.id);
   }
 
-  onSelectImage($event, image: ICImage) {
+  onSelectImage($event, image: SAImage) {
     this.selectedImageId = image.id;
     this.workViewService.selectImage(image);
   }
 
 
-  private addFormGroups(data: ICImage[]): FormGroup[] {
+  private addFormGroups(data: SAImage[]): FormGroup[] {
     let result = [];
     if (data === undefined) {
       return result;
@@ -103,7 +103,7 @@ export class DatasetComponent implements OnInit {
         }
       ));
       if (x.type === 'group') {
-        result = result.concat(this.addFormGroups((x as CImageGroup).images));
+        result = result.concat(this.addFormGroups((x as SImageGroup).images));
       }
     });
     return result;
@@ -117,15 +117,17 @@ export class DatasetComponent implements OnInit {
     const control = this.getControl(index, field);
     if (control.valid) {
       const item = this.getControl(index, 'item');
-      item.value.name = control.value;
+      if (item.value.name != control.value) {
+        item.value.name = control.value;
 
-      this.workViewService.saveNameSpecificImage(item.value, (): void => {
-        this.reload();
-      });
+        this.workViewService.saveNameSpecificImage(item.value, (): void => {
+          this.reload();
+        });
+      }
     }
   }
 
-  getIndex(element: ICImage) {
+  getIndex(element: SAImage) {
     let counter = 0;
     for (const img of this.dataset.images) {
       if (img.id === element.id) {
@@ -133,7 +135,7 @@ export class DatasetComponent implements OnInit {
       }
       counter++;
       if (img.type === 'group') {
-        for (const subimg of (img as CImageGroup).images) {
+        for (const subimg of (img as SImageGroup).images) {
           if (subimg.id === element.id) {
             return counter;
           }
@@ -205,19 +207,19 @@ export class DatasetComponent implements OnInit {
       return;
     }
 
-    this.imageGroupService.addImageToGroup(imageGroup, $event.item.data).subscribe(_ => {
+    this.imageService.moveImageToParent($event.item.data.id, imageGroup.id).subscribe(_ => {
       this.reload();
     });
   }
 
   public createImageGroup() {
-    this.imageGroupService.createImageGroup(this.dataset, 'New Group').subscribe(_ => {
+    this.imageGroupService.createImageGroup('New Group', this.dataset.id).subscribe(_ => {
       this.reload();
     });
   }
 
 
-  openContextMenu(event: MouseEvent, image: ICImage) {
+  openContextMenu(event: MouseEvent, image: SAImage) {
     this.closeOverlayMenu();
     event.preventDefault();
     const x = event.pageX;
@@ -263,18 +265,18 @@ export class DatasetComponent implements OnInit {
     }
   }
 
-  public delete(item: ICImage) {
+  public delete(item: SAImage) {
     this.workViewService.forceSave((): void => {
-      this.imageService.deleteICImage(item).subscribe(x => {
+      this.imageGroupService.delete(item).subscribe(x => {
         this.reload();
       });
     });
     this.closeOverlayMenu();
   }
 
-  public cloneItem(item: ICImage) {
+  public cloneItem(item: SAImage) {
     this.workViewService.forceSave((): void => {
-      this.imageService.cloneICImage(item).subscribe(x => {
+      this.imageGroupService.clone(item).subscribe(x => {
         this.reload();
       });
     });

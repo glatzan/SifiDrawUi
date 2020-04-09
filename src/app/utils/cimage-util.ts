@@ -1,8 +1,8 @@
-import {CImage} from '../model/CImage';
+import {SImage} from '../model/SImage';
 import {Layer} from '../model/layer';
 import {Point} from '../model/point';
-import {ICImage} from '../model/ICImage';
-import {CImageGroup} from '../model/CImageGroup';
+import {SAImage} from '../model/SAImage';
+import {SImageGroup} from '../model/SImageGroup';
 import {LayerType} from "../model/layer-type.enum";
 import {CanvasHistory, LineHistory} from "../components/workView/draw-canvas/canvas-hisotry";
 import VectorUtils from "./vector-utils";
@@ -20,23 +20,23 @@ export default class CImageUtil {
     '#FF3380', '#CCCC00', '#66E64D', '#4D80CC', '#9900B3',
     '#E64D66', '#4DB380', '#FF4D4D', '#99E6E6', '#6666FF'];
 
-  static prepare(img: ICImage): ICImage {
-    if (img instanceof CImageGroup)
+  static prepare(img: SAImage): SAImage {
+    if (img instanceof SImageGroup)
       return this.prepareImageGroup(img);
-    else if (img instanceof CImage)
+    else if (img instanceof SImage)
       return this.prepareImage(img);
     else
       return img
   }
 
-  static prepareImageGroup(group: CImageGroup): CImageGroup {
+  static prepareImageGroup(group: SImageGroup): SImageGroup {
     for (const img of group.images) {
       CImageUtil.prepareImage(img);
     }
     return group;
   }
 
-  static prepareImage(image: CImage): CImage {
+  static prepareImage(image: SImage): SImage {
     if (!CImageUtil.hasLayer(image)) {
       CImageUtil.addLayer(image);
     }
@@ -157,7 +157,7 @@ export default class CImageUtil {
     //const movedPoints = VectorUtils.movePointListsToCircleBoundaries(this.currentLayer.lines, new Point(pt.x, pt.y), this.displaySettings.eraserSize, this.currentLayer.type !== LayerType.Dot)
   }
 
-  static findOrAddLayer(image: ICImage, layerID: string, layerPresets?: Layer[]) {
+  static findOrAddLayer(image: SAImage, layerID: string, layerPresets?: Layer[]) {
     if (!CImageUtil.hasLayer(image)) {
       return CImageUtil.addLayer(image, layerPresets, layerID);
     } else {
@@ -183,7 +183,7 @@ export default class CImageUtil {
     return -1;
   }
 
-  static findLayer(image: ICImage, layerID: string) {
+  static findLayer(image: SAImage, layerID: string) {
     for (const layer of image.getLayers()) {
       if (layer.id == layerID) {
         return layer;
@@ -192,7 +192,7 @@ export default class CImageUtil {
     return null;
   }
 
-  static removeLayer(img: ICImage, layerID: string): boolean {
+  static removeLayer(img: SAImage, layerID: string): boolean {
     let i = 0;
     for (const layer of img.getLayers()) {
       if (layer.id === layerID) {
@@ -209,7 +209,7 @@ export default class CImageUtil {
     return true;
   }
 
-  static addLayer(img: ICImage, layerPresets?: Layer[], layerID?: string): Layer {
+  static addLayer(img: SAImage, layerPresets?: Layer[], layerID?: string): Layer {
     if (!CImageUtil.hasLayer(img)) {
       img.setLayers([new Layer(layerID ? layerID : '1')]);
       return img.getLayers()[0];
@@ -238,7 +238,7 @@ export default class CImageUtil {
     return img.getLayers()[img.getLayers().length - 1];
   }
 
-  static hasLayer(img: ICImage) {
+  static hasLayer(img: SAImage) {
     return img.getLayers() !== undefined && img.getLayers().length !== 0;
   }
 
@@ -251,7 +251,7 @@ export default class CImageUtil {
     return null
   }
 
-  static getNewLayerName(image: ICImage) {
+  static getNewLayerName(image: SAImage) {
     let layerName = image.getLayers().length + 1;
 
     while (this.findLayer(image, String(layerName))) {

@@ -4,16 +4,20 @@
     <div *cdkVirtualFor="let pD of projectData">
       <div class="projectDiv">
         <div class="box">
-          {{pD.id}}
+          {{pD.name}}
+          <button class="addImgGroup" mat-icon-button style="transform: scale(0.6)">
+            <mat-icon>queue icon</mat-icon>
+          </button>
         </div>
       </div>
-
-      <ul>
-        <li *ngFor="let dataset of pD.datasets" (click)="onSelectDataset($event,dataset)" class="clickAble"
-            [ngClass]="selectedDataset === dataset ? 'selectedElement' : ''">
-          {{dataset.name}}
-        </li>
-      </ul>
+      <div>
+        <ul>
+          <li *ngFor="let dataset of pD.datasets" (click)="onSelectDataset($event,dataset)" class="clickAble"
+              [ngClass]="selectedDataset === dataset ? 'selectedElement' : ''">
+            <label>{{dataset.name}}</label>
+          </li>
+        </ul>
+      </div>
       <mat-divider></mat-divider>
     </div>
   </cdk-virtual-scroll-viewport>

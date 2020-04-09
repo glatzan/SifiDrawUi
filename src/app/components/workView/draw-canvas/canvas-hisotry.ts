@@ -1,6 +1,6 @@
 import {Layer} from "../../../model/layer";
 import {Point} from "../../../model/point";
-import {CImage} from "../../../model/CImage";
+import {SImage} from "../../../model/SImage";
 import CImageUtil from "../../../utils/cimage-util";
 
 export class CanvasHistory {
@@ -58,7 +58,7 @@ export class CanvasHistory {
     return this.history.pop();
   }
 
-  undoLastAction(image: CImage) : boolean{
+  undoLastAction(image: SImage) : boolean{
     const lastAction = this.getLastAction();
     if (lastAction) {
       switch (lastAction.action) {

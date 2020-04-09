@@ -1,11 +1,11 @@
-import {CImage} from "../../model/CImage";
+import {SImage} from "../../model/SImage";
 import {FilterHelper} from "./filter-helper";
 import {WindowingFilter} from "./windowing-filter";
 
 export class LaplaceFilter {
 
 
-  public static scanHost(image: CImage, target: CImage): Array<Array<number>> {
+  public static scanHost(image: SImage, target: SImage): Array<Array<number>> {
 
     const sourceImg = FilterHelper.imageToPNG(image);
     const targetIMG = FilterHelper.createPNG(sourceImg.width, sourceImg.height);

@@ -1,4 +1,4 @@
-import {CImage} from "../model/CImage";
+import {SImage} from "../model/SImage";
 import {flatMap} from "rxjs/operators";
 import {FilterData} from "./filter-data";
 import {Observable} from "rxjs";
@@ -233,12 +233,12 @@ export class FilterCore {
     return new BinarizeColorThreshold(this.services).doFilter(sourcePos, startEndColor, targetPos)
   }
 
-  private pushAndAddImageToStack(img: CImage, data: FilterData) {
+  private pushAndAddImageToStack(img: SImage, data: FilterData) {
     data.pushIMG(img);
     this.services.displayCallback.addImage(img);
   }
 
-  private getImage(index: number, data: FilterData): CImage {
+  private getImage(index: number, data: FilterData): SImage {
     if (index < -1 || index >= data.imgStack.length) {
       return null;
     }

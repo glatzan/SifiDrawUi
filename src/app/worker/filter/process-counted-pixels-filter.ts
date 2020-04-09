@@ -1,6 +1,6 @@
 import {AbstractFilter, Services} from "./abstract-filter";
 import {map} from "rxjs/operators";
-import {ICImage} from "../../model/ICImage";
+import {SAImage} from "../../model/SAImage";
 import {FilterData} from "../filter-data";
 
 export class ProcessCountedPixelsFilter extends AbstractFilter {

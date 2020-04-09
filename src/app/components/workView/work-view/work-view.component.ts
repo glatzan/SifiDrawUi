@@ -1,12 +1,12 @@
 import {Component, OnInit} from '@angular/core';
 import {DataSaveStatus, WorkViewService} from '../work-view.service';
-import {ICImage} from '../../../model/ICImage';
+import {SAImage} from '../../../model/SAImage';
 import {MousePosition} from "../../../helpers/mouse-position";
 import {CanvasDisplaySettings} from "../../../helpers/canvas-display-settings";
 import {MatSnackBar} from "@angular/material/snack-bar";
 import {FlickerService} from "../flicker.service";
 import {ContrastFilter} from "../../../worker/filter/contrast-filter";
-import {CImage} from "../../../model/CImage";
+import {SImage} from "../../../model/SImage";
 import {MatSliderChange} from "@angular/material/slider";
 import {Dataset} from "../../../model/dataset";
 import {FilterService} from "../../../service/filter.service";
@@ -32,9 +32,9 @@ export class WorkViewComponent implements OnInit {
               private snackBar: MatSnackBar) {
   }
 
-  parentImage: ICImage;
+  parentImage: SAImage;
 
-  activeImage: ICImage;
+  activeImage: SAImage;
 
   displaySettings: CanvasDisplaySettings;
 
@@ -124,7 +124,7 @@ export class WorkViewComponent implements OnInit {
       this.workViewService.selectActiveImage(this.activeImage);
     } else {
 
-      const img = Object.assign(new CImage(), this.activeImage);
+      const img = Object.assign(new SImage(), this.activeImage);
       img.id = "contrast";
       const dataset = new Dataset();
       dataset.images = [img];
@@ -137,9 +137,9 @@ export class WorkViewComponent implements OnInit {
         displayData(data: string): void {
         }
       } as ProcessCallback, {
-        displayCallBack(image: CImage): void {
+        displayCallBack(image: SImage): void {
           me.workViewService.onChangeDisplayImage.emit(image);
-        }, addImage(image: CImage): void {
+        }, addImage(image: SImage): void {
 
         }
       } as DisplayCallback);

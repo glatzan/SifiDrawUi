@@ -2,7 +2,7 @@ import {ImageService} from "../../service/image.service";
 import {ImageGroupService} from "../../service/image-group.service";
 import {ProcessCallback} from "../processCallback";
 import {DisplayCallback} from "../display-callback";
-import {CImage} from "../../model/CImage";
+import {SImage} from "../../model/SImage";
 import {FilterData} from "../filter-data";
 import {FilterHelper} from "./filter-helper";
 import {FlaskService} from "../../service/flask.service";
@@ -17,7 +17,7 @@ export class AbstractFilter {
     this.services = services;
   }
 
-  protected getImage(index: number, data: FilterData): CImage {
+  protected getImage(index: number, data: FilterData): SImage {
     if (index < -1 || index >= data.imgStack.length) {
       return null;
     }
@@ -31,12 +31,12 @@ export class AbstractFilter {
     return data.imgStack[index];
   }
 
-  protected pushAndAddImageToStack(img: CImage, data: FilterData) {
+  protected pushAndAddImageToStack(img: SImage, data: FilterData) {
     data.pushIMG(img);
     this.services.displayCallback.addImage(img);
   }
 
-  protected getSourceAndTarget(data: FilterData, sourcePos: number, targetPos: number): [CImage, CImage] {
+  protected getSourceAndTarget(data: FilterData, sourcePos: number, targetPos: number): [SImage, SImage] {
     const source = this.getImage(sourcePos, data);
     let target = null;
     if (targetPos != null) {
@@ -80,10 +80,10 @@ export class Services {
     } as ProcessCallback;
 
     this.displayCallback = displayCallback || {
-      displayCallBack(image: CImage): void {
+      displayCallBack(image: SImage): void {
 
       },
-      addImage(image: CImage): void {
+      addImage(image: SImage): void {
 
       }
     } as DisplayCallback

@@ -1,12 +1,12 @@
-import {CImage} from './CImage';
-import {ICImage} from './ICImage';
+import {SImage} from './SImage';
+import {SAImage} from './SAImage';
 import {Layer} from "./layer";
 import CImageUtil from "../utils/cimage-util";
 
-export class CImageGroup implements ICImage {
+export class SImageGroup implements SAImage {
   public id: string;
   public name: string;
-  public images: CImage[];
+  public images: SImage[];
   public type = 'group';
   hasLayerData = false;
 
@@ -67,7 +67,7 @@ export class CImageGroup implements ICImage {
     if (this.activeImage >= 0 && this.activeImage < this.images.length) {
       return this.images[this.activeImage];
     } else {
-      return  CImageUtil.prepareImage(new CImage());
+      return  CImageUtil.prepareImage(new SImage());
     }
   }
 }

@@ -1,20 +1,21 @@
 import {Injectable} from '@angular/core';
 import {HttpClient} from "@angular/common/http";
 import {Observable} from "rxjs";
-import {ProjectData} from "../model/project-data";
+import {Project} from "../model/project";
 import {environment} from "../../environments/environment";
+import {AbstractHttpService} from "./abstract-http-service";
 
 @Injectable({
   providedIn: 'root'
 })
-export class ProjectService {
+export class ProjectService extends AbstractHttpService {
 
   constructor(private http: HttpClient) {
+    super();
   }
 
-  public getProjects(): Observable<ProjectData[]> {
-    console.log(`${environment.backendUrl}/projects`);
-    return this.http.get<ProjectData[]>(`${environment.backendUrl}/projects`);
+  public getProjects(): Observable<Project[]> {
+    return this.http.get<Project[]>(`${environment.backendUrl}/projects`);
   }
 
   public createProject(dir: string): Observable<any> {

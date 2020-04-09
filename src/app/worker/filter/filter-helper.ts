@@ -1,4 +1,4 @@
-import {CImage} from "../../model/CImage";
+import {SImage} from "../../model/SImage";
 import {ColorType, PNG} from "pngjs";
 import DrawUtil from "../../utils/draw-util";
 import CImageUtil from "../../utils/cimage-util";
@@ -12,7 +12,7 @@ export namespace FilterHelper {
     canvas.height = height;
     DrawUtil.drawRect(canvas.getContext("2d"), 0, 0, width, height, background);
 
-    const image = new CImage();
+    const image = new SImage();
     image.id = name;
     image.name = name;
     image.fileExtension = "png";
@@ -23,8 +23,8 @@ export namespace FilterHelper {
     return image;
   }
 
-  export function cloneImage(image: CImage): CImage {
-    return Object.assign(new CImage(), image);
+  export function cloneImage(image: SImage): SImage {
+    return Object.assign(new SImage(), image);
   }
 
   export function findLayer(layers: Layer[], id: string): Layer {
@@ -41,7 +41,7 @@ export namespace FilterHelper {
     return result.substr(result.indexOf(',') + 1);
   }
 
-  export function canvasToImage(canvas: HTMLCanvasElement, image: CImage, imageType: string = "image/png", quality = 1.0) {
+  export function canvasToImage(canvas: HTMLCanvasElement, image: SImage, imageType: string = "image/png", quality = 1.0) {
     image.data = FilterHelper.canvasToBase64(canvas, imageType);
     image.width = canvas.width;
     image.height = canvas.height;
@@ -49,7 +49,7 @@ export namespace FilterHelper {
     return image;
   }
 
-  export function imageToPNG(image: CImage): PNG {
+  export function imageToPNG(image: SImage): PNG {
     const sourceBuffer = new Buffer(image.data, 'base64');
     return PNG.sync.read(sourceBuffer);
   }
@@ -63,7 +63,7 @@ export namespace FilterHelper {
     return targetBuff.toString('base64');
   }
 
-  export function pngToImage(png: PNG, image: CImage, colorType: ColorType = 2) {
+  export function pngToImage(png: PNG, image: SImage, colorType: ColorType = 2) {
     image.data = FilterHelper.pngToBase64(png,colorType);
     image.width = png.width;
     image.height = png.height;
@@ -91,7 +91,7 @@ export namespace FilterHelper {
     return canvas.getContext("2d");
   }
 
-  export function imageToCanvas(image: CImage): HTMLCanvasElement {
+  export function imageToCanvas(image: SImage): HTMLCanvasElement {
     return FilterHelper.base64StringToCanvas(image.data)
   }
 

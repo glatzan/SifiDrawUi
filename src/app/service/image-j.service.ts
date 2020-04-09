@@ -1,6 +1,6 @@
 import {Injectable} from '@angular/core';
 import {HttpClient, HttpHeaders} from "@angular/common/http";
-import {CImage} from "../model/CImage";
+import {SImage} from "../model/SImage";
 import {Observable} from "rxjs";
 import {environment} from "../../environments/environment";
 
@@ -12,7 +12,7 @@ export class ImageJService {
   constructor(private _http: HttpClient) {
   }
 
-  public getLines(image: CImage): Observable<string> {
+  public getLines(image: SImage): Observable<string> {
 
     const httpOptions = {
       headers: new HttpHeaders({})

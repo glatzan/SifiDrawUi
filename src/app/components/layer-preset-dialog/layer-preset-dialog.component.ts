@@ -4,7 +4,7 @@ import {UserSettings} from "../../model/user-settings";
 import {AuthenticationService} from "../../service/authentication.service";
 import {Layer} from "../../model/layer";
 import CImageUtil from "../../utils/cimage-util";
-import {CImage} from "../../model/CImage";
+import {SImage} from "../../model/SImage";
 import {LayerType} from "../../model/layer-type.enum";
 
 @Component({
@@ -50,7 +50,7 @@ export class LayerPresetDialogComponent implements OnInit {
   }
 
   newLayer() {
-    const tmp = new CImage();
+    const tmp = new SImage();
     tmp.setLayers(this.userSettings.defaultLayerSettings);
     const layer = CImageUtil.addLayer(tmp);
     this.userSettings.defaultLayerSettings = tmp.getLayers();
@@ -59,7 +59,7 @@ export class LayerPresetDialogComponent implements OnInit {
   }
 
   delete() {
-    const tmp = new CImage();
+    const tmp = new SImage();
     tmp.setLayers(this.userSettings.defaultLayerSettings);
     CImageUtil.removeLayer(tmp, this.selectedLayerSetting.id);
     this.userSettings.defaultLayerSettings = tmp.getLayers();

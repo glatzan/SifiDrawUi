@@ -1,118 +1,63 @@
 import {Injectable} from '@angular/core';
-import {HttpClient, HttpHeaders} from '@angular/common/http';
-import {Observable, of} from 'rxjs';
-import {CImage} from '../model/CImage';
+import {HttpClient} from '@angular/common/http';
+import {Observable} from 'rxjs';
+import {SImage} from '../model/SImage';
 import {environment} from "../../environments/environment";
-import {catchError, map} from "rxjs/operators";
+import {map} from "rxjs/operators";
 import {CImageMapper} from "../utils/cimage-mapper";
-import {CImageGroup} from "../model/CImageGroup";
-import {ICImage} from "../model/ICImage";
-import {ImageGroupService} from "./image-group.service";
+import {SAImage} from "../model/SAImage";
+import {AbstractHttpService} from "./abstract-http-service";
 
 @Injectable({
   providedIn: 'root'
 })
-export class ImageService {
+export class ImageService extends AbstractHttpService {
 
-  private static httpJsonContent = {
-    headers: new HttpHeaders({
-      'Content-Type': 'application/json'
-    })
-  };
-
-  constructor(private http: HttpClient,
-              private imageGroupService: ImageGroupService) {
+  constructor(private http: HttpClient) {
+    super()
   }
 
-  public getImage(id: string, format: string = "png"): Observable<CImage> {
-    return this.http.get<CImage>(`${environment.backendUrl}/image/${id}?format=${format}`, ImageService.httpJsonContent).pipe(
-      map(x => {
-        return CImageMapper.mapToTypescriptObject<CImage>(x);
-      })
+  public getImage(id: string, format: string = "png"): Observable<SImage> {
+    return this.http.get<SImage>(`${environment.backendUrl}/image/${id}?format=${format}`).pipe(
+      map(x => CImageMapper.mapICImageToTypescriptObject<SImage>(x))
     );
   }
 
-  public cloneImage(image: CImage, targetDir: string = null): Observable<CImage> {
-    return this.http.get<CImage>(`${environment.backendUrl}/image/clone/${image.id}${targetDir ? '?targetDir=' + btoa(targetDir) : ''}`, ImageService.httpJsonContent).pipe(
-      map(x => {
-        return CImageMapper.mapToTypescriptObject<CImage>(x);
-      })
+  public updateImage(image: SImage): Observable<SImage> {
+    image.concurrencyCounter++;
+    return this.http.put<SImage>(`${environment.backendUrl}/image/update`, image, ImageService.httpJsonContent).pipe(
+      map(x => CImageMapper.mapICImageToTypescriptObject<SImage>(x))
     );
   }
 
-  public updateImage(image: CImage): Observable<any> {
-    console.log(`${environment.backendUrl}/image/update`);
-    image.concurrencyCounter++;
-    return this.http.put<CImage>(`${environment.backendUrl}/image/update`, image, ImageService.httpJsonContent).pipe(
-      map(x => {
-        return CImageMapper.mapToTypescriptObject<CImage>(x);
-      }));
+  public moveImageToParent(imageID: String, parentID: string): Observable<SImage> {
+    return this.http.get<SImage>(`${environment.backendUrl}/image/moveToParent/${imageID}?parentID=${parentID}`).pipe(
+      map(x => CImageMapper.mapICImageToTypescriptObject<SImage>(x))
+    );
   }
 
-  public updateName(image: CImage): Observable<any> {
-    console.log(`${environment.backendUrl}/image/update`);
-    image.concurrencyCounter++;
-    return this.http.get<any>(`${environment.backendUrl}/image/rename?id=${image.id}&newName=${btoa(image.name)}`);
+  public deleteImage(image: SAImage): Observable<any> {
+    return this.http.delete<any>(`${environment.backendUrl}/image/delete/${image.id}`);
   }
 
-
-  public updateExistingImage(image: CImage): Observable<any> {
-    console.log(`${environment.backendUrl}/image/update/checked`);
-    image.concurrencyCounter = 20;
-    return this.http.put<CImage>(`${environment.backendUrl}/image/update/checked`, image, ImageService.httpJsonContent);
+  public cloneImage(image: SImage, parentID: string = ""): Observable<SImage> {
+    return this.http.get<SImage>(`${environment.backendUrl}/image/clone/${image.id}?parentID=${parentID}`).pipe(
+      map(x => CImageMapper.mapICImageToTypescriptObject<SImage>(x))
+    );
   }
 
-
-  public createImage(image: CImage, type: string): Observable<string> {
-    console.log(`${environment.backendUrl}/image/${type}`);
-    return this.http.post<string>(`${environment.backendUrl}/image/${type}`, image);
+  public renameImage(image: SImage): Observable<SImage> {
+    return this.http.get<SImage>(`${environment.backendUrl}/image/rename/${image.id}?parentID=${btoa(image.name)}`).pipe(
+      map(x => CImageMapper.mapICImageToTypescriptObject<SImage>(x))
+    );
   }
 
-  public uploadImage(file, path: string): Observable<boolean> {
+  public uploadImage(file, parentID: string, format = "png"): Observable<SImage> {
     const formData: FormData = new FormData();
     formData.append('file', file, file.name);
-    console.log(`Upload ${file.name} to ${path}`)
-    return this.http.post(`${environment.backendUrl}/image/upload/${btoa(path)}?format=png`, formData).pipe(
-      map(() => {
-        return true;
-      }), catchError(_ => of(false))
+
+    return this.http.post<SImage>(`${environment.backendUrl}/image/upload/${parentID}?format=${format}`, formData).pipe(
+      map(x => CImageMapper.mapICImageToTypescriptObject<SImage>(x))
     );
   }
-
-  public deleteImage(id: string): Observable<any> {
-    return this.http.delete<any>(`${environment.backendUrl}/image/delete/${id}`, ImageService.httpJsonContent);
-  }
-
-  public deleteICImage(image: ICImage): Observable<any> {
-    if (image instanceof CImage) {
-      return this.deleteImage(image.id);
-    } else {
-      return this.imageGroupService.deleteImageGroup(image.id);
-    }
-  }
-
-  public updateICImage(image: ICImage): Observable<ICImage> {
-    if (image instanceof CImage) {
-      return this.updateImage(image);
-    } else {
-      return this.imageGroupService.updateImageGroup(image as CImageGroup);
-    }
-  }
-
-  public cloneICImage(image: ICImage): Observable<ICImage> {
-    if (image instanceof CImage) {
-      return this.cloneImage(image);
-    } else {
-      return this.imageGroupService.cloneImageGroup(image as CImageGroup)
-    }
-  }
-
-  public updateNameICImage(image: ICImage){
-    if (image instanceof CImage) {
-      return this.updateName(image);
-    } else {
-      return this.imageGroupService.updateImageGroup(image as CImageGroup)
-    }
-  }
-
 }

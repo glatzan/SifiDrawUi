@@ -1,5 +1,5 @@
 import {Component, ElementRef, OnInit, ViewChild} from '@angular/core';
-import {CImage} from "../../../model/CImage";
+import {SImage} from "../../../model/SImage";
 import {HistogramData, HistogramFilter} from "../../../worker/filter/histogram-filter";
 import {WorkViewService} from "../work-view.service";
 import {ImageService} from "../../../service/image.service";
@@ -21,7 +21,7 @@ export class HistoViewComponent implements OnInit {
 
   renderHistogram: boolean = false;
 
-  displayImage: CImage;
+  displayImage: SImage;
 
   histogramData: HistogramData;
 
@@ -50,9 +50,9 @@ export class HistoViewComponent implements OnInit {
   }
 
 
-  showHistogram(image: CImage) {
+  showHistogram(image: SImage) {
     of(image).pipe(
-      flatMap((image: CImage) =>
+      flatMap((image: SImage) =>
         iif(() => image.id === "tmp",
           of(image),
           this.workViewService.getPNGFromBuffer(image.id)

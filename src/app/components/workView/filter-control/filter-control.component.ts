@@ -1,5 +1,5 @@
 import {Component, OnInit} from '@angular/core';
-import {CImage} from '../../../model/CImage';
+import {SImage} from '../../../model/SImage';
 import {ImageService} from '../../../service/image.service';
 import {ImageMagicService} from '../../../service/image-magic.service';
 import {FilterService} from '../../../service/filter.service';
@@ -10,7 +10,7 @@ import {DisplayCallback} from '../../../worker/display-callback';
 import {WorkViewService} from '../work-view.service';
 import {FilterSetService} from '../../../service/filter-set.service';
 import {FilterSet} from '../../../model/FilterSet';
-import {ICImage} from '../../../model/ICImage';
+import {SAImage} from '../../../model/SAImage';
 import {ProcessCallback} from '../../../worker/processCallback';
 import {DomSanitizer} from "@angular/platform-browser";
 
@@ -37,7 +37,7 @@ export class FilterControlComponent implements OnInit, DisplayCallback {
 
   tabIndex = 0;
 
-  private image: ICImage;
+  private image: SAImage;
 
   constructor(public imageMagicService: ImageMagicService,
               private imageService: ImageService,
@@ -134,11 +134,11 @@ export class FilterControlComponent implements OnInit, DisplayCallback {
     this.workViewService.resetImage();
   }
 
-  public displayCallBack(image: CImage): void {
+  public displayCallBack(image: SImage): void {
     this.workViewService.onChangeDisplayImage.emit(image);
   }
 
-  public addImage(image: CImage): void {
+  public addImage(image: SImage): void {
     this.workViewService.onAddNewFilteredImage.emit(image);
   }
 }

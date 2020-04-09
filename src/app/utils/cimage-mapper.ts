@@ -1,17 +1,29 @@
-import {ICImage} from '../model/ICImage';
-import {CImage} from '../model/CImage';
-import {CImageGroup} from '../model/CImageGroup';
+import {SAImage} from '../model/SAImage';
+import {SImage} from '../model/SImage';
+import {SImageGroup} from '../model/SImageGroup';
+import {Dataset} from "../model/dataset";
 
 export class CImageMapper {
-  static mapToTypescriptObject<T>(obj: ICImage): T {
+
+  static mapDatasetToTypescriptObject(obj: Dataset): Dataset {
+    const images = [];
+    for (const img of obj.images) {
+      if (img != null)
+        images.push(CImageMapper.mapICImageToTypescriptObject(img));
+    }
+    obj.images = images;
+    return obj;
+  }
+
+  static mapICImageToTypescriptObject<T>(obj: SAImage): T {
     if (obj.type === 'img') {
       // @ts-ignore
-      return Object.assign(new CImage(), obj);
+      return Object.assign(new SImage(), obj);
     } else if (obj.type === 'group') {
-      const tmp = Object.assign(new CImageGroup(), obj);
+      const tmp = Object.assign(new SImageGroup(), obj);
       let y = 0;
       for (const subImg of tmp.images) {
-        tmp.images[y] = CImageMapper.mapToTypescriptObject(subImg);
+        tmp.images[y] = CImageMapper.mapICImageToTypescriptObject(subImg);
         y++;
       }
       // @ts-ignore

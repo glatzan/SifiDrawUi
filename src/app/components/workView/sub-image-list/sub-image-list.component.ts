@@ -1,10 +1,10 @@
 import {Component, OnInit} from '@angular/core';
-import {CImage} from '../../../model/CImage';
+import {SImage} from '../../../model/SImage';
 import {WorkViewService} from '../work-view.service';
-import {CImageGroup} from '../../../model/CImageGroup';
+import {SImageGroup} from '../../../model/SImageGroup';
 import {FlickerService} from "../flicker.service";
 import CImageUtil from "../../../utils/cimage-util";
-import {ICImage} from "../../../model/ICImage";
+import {SAImage} from "../../../model/SAImage";
 
 @Component({
   selector: 'app-sub-image-list',
@@ -15,7 +15,7 @@ export class SubImageListComponent implements OnInit {
 
   imageArray: Array<ImageContainer> = [];
 
-  parentImage: ICImage;
+  parentImage: SAImage;
 
   constructor(private workViewService: WorkViewService,
               private flickerService: FlickerService) {
@@ -28,7 +28,7 @@ export class SubImageListComponent implements OnInit {
 
         this.imageArray = [];
 
-        if (change.parent instanceof CImageGroup) {
+        if (change.parent instanceof SImageGroup) {
           this.imageArray = this.imageArray.concat(change.parent.images.map(x => new ImageContainer(ImageType.Original, x)));
         } else {
           this.imageArray.push(new ImageContainer(ImageType.Original, change.parent));
@@ -62,9 +62,9 @@ export class SubImageListComponent implements OnInit {
 
 class ImageContainer {
   type: ImageType;
-  image: CImage;
+  image: SImage;
 
-  constructor(type: ImageType, image: CImage) {
+  constructor(type: ImageType, image: SImage) {
     this.type = type;
     this.image = image;
   }

@@ -1,6 +1,6 @@
 import {AbstractFilter, Services} from "../abstract-filter";
 import {map} from "rxjs/operators";
-import {ICImage} from "../../../model/ICImage";
+import {SAImage} from "../../../model/SAImage";
 import {FilterData} from "../../filter-data";
 import {ComplexLine} from "../../../utils/vaa/model/complex-line";
 import {SimpleLine} from "../../../utils/vaa/model/simple-line";

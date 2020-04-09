@@ -1,5 +1,5 @@
 import {Injectable} from '@angular/core';
-import {CImage} from "../model/CImage";
+import {SImage} from "../model/SImage";
 import CImageUtil from "../utils/cimage-util";
 import {ImageService} from "./image.service";
 import {forkJoin, Observable} from 'rxjs';
@@ -20,7 +20,7 @@ export class ScImportService {
   public processData(mapping: { maxX: number, maxY: number, checkImage: boolean, maps: [{ name: string, path: string, prefix?: string, suffix?: string }] }, idata: [{ id: number, x: number, y: number, tag: string, name: string, idimage: string, idanalysis: string }]): Observable<any> {
 
     const simpleObservable = new Observable((observer) => {
-      let arr: { [key: string]: CImage } = {};
+      let arr: { [key: string]: SImage } = {};
       let missingMappings = new Set();
 
       const colors = ['#FFFFFF', '#2919ff', '#FF33FF', '#FFFF99', '#00B3E6',
@@ -48,7 +48,7 @@ export class ScImportService {
               continue;
             }
 
-            img = new CImage();
+            img = new SImage();
             img.name = (map.prefix || "") + col.name;
             img.id = btoa(map.path + img.name + (map.suffix || ""));
             arr[col.name] = img;
@@ -81,7 +81,7 @@ export class ScImportService {
       let result = [];
       for (let imgToSave of Object.keys(arr)) {
         console.log("adding" + arr[imgToSave].name)
-        result.push(this.imageService.updateExistingImage(arr[imgToSave]));
+        result.push(this.imageService.updateImage(arr[imgToSave]));
       }
       console.log(arr);
       return forkJoin(result);

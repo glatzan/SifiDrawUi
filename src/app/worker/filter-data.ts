@@ -1,19 +1,19 @@
-import {ICImage} from '../model/ICImage';
-import {CImage} from "../model/CImage";
-import {CImageGroup} from "../model/CImageGroup";
+import {SAImage} from '../model/SAImage';
+import {SImage} from "../model/SImage";
+import {SImageGroup} from "../model/SImageGroup";
 
 export class FilterData {
   /**
    * Stack containing images to work with
    */
-  public imgStack: CImage[] = [];
+  public imgStack: SImage[] = [];
 
   /**
    * Currently selected image
    */
-  public img: CImage;
+  public img: SImage;
 
-  public originalImage: ICImage;
+  public originalImage: SAImage;
 
   public batchSize: number;
 
@@ -23,20 +23,20 @@ export class FilterData {
 
   public output: string = "";
 
-  public pushIMG(img: CImage, selectImage: boolean = true) {
+  public pushIMG(img: SImage, selectImage: boolean = true) {
     this.imgStack.push(img);
     if (selectImage) {
       this.img = img;
     }
   }
 
-  public pushICIMG(img: ICImage, selectImage: boolean = true) {
-    if (img instanceof CImageGroup) {
-      (img as CImageGroup).images.forEach(img => {
+  public pushICIMG(img: SAImage, selectImage: boolean = true) {
+    if (img instanceof SImageGroup) {
+      (img as SImageGroup).images.forEach(img => {
         this.imgStack.push(img);
       })
     } else {
-      this.imgStack.push(img as CImage);
+      this.imgStack.push(img as SImage);
     }
 
     if (selectImage) {

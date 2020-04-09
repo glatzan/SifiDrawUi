@@ -5,7 +5,7 @@ import CImageUtil from '../../../utils/cimage-util';
 import {LayerType} from "../../../model/layer-type.enum";
 import {CanvasDisplaySettings} from "../../../helpers/canvas-display-settings";
 import {AuthenticationService} from "../../../service/authentication.service";
-import {CImage} from "../../../model/CImage";
+import {SImage} from "../../../model/SImage";
 
 @Component({
   selector: 'app-draw-control',
@@ -14,7 +14,7 @@ import {CImage} from "../../../model/CImage";
 })
 export class DrawControlComponent implements OnInit {
 
-  activeImage: CImage;
+  activeImage: SImage;
 
   currentLayer: Layer;
 

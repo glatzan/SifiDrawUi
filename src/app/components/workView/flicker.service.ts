@@ -1,7 +1,7 @@
 import {Injectable} from '@angular/core';
 import {WorkViewService} from "./work-view.service";
 import {MatSnackBar} from "@angular/material/snack-bar";
-import {CImage} from "../../model/CImage";
+import {SImage} from "../../model/SImage";
 
 @Injectable({
   providedIn: 'root'
@@ -34,11 +34,11 @@ export class FlickerService {
 
   private flickerTimeout: any = undefined;
 
-  private flickerImageOne: CImage;
+  private flickerImageOne: SImage;
 
-  private flickerImageTwo: CImage;
+  private flickerImageTwo: SImage;
 
-  private currentImage: CImage;
+  private currentImage: SImage;
 
   private active = false;
 
@@ -48,7 +48,7 @@ export class FlickerService {
 
   private imageListNotEmpty: boolean;
 
-  addImage(image: CImage) {
+  addImage(image: SImage) {
     if (!this.flickerImageOne) {
       this.flickerImageOne = image;
     } else {

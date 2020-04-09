@@ -1,7 +1,7 @@
 import {Layer} from './layer';
-import {ICImage} from './ICImage';
+import {SAImage} from './SAImage';
 
-export class CImage implements ICImage {
+export class SImage implements SAImage {
   id: string;
   name: string;
   data: string;
