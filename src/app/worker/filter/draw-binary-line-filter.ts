@@ -5,6 +5,9 @@ import {FilterHelper} from "./filter-helper";
 import {Point} from "../../model/point";
 import {ColorType, PNG} from "pngjs";
 
+/**
+ * Bresenham
+ */
 export class DrawBinaryLineFilter extends AbstractFilter {
 
   image: PNG;
@@ -31,6 +34,9 @@ export class DrawBinaryLineFilter extends AbstractFilter {
 
           if (result.length) {
             for (let line of layer.lines) {
+              if(line.length < 2)
+                break;
+
               for (let i = 1; i < line.length; i++) {
                 this.drawLine(line[i-1], line[i])
               }
@@ -93,7 +99,7 @@ export class DrawBinaryLineFilter extends AbstractFilter {
     let D = 2 * dx - dy;
     let x = x0;
 
-    for (let y = y0; x <= y1; y++) {
+    for (let y = y0; y <= y1; y++) {
       this.plot(x, y);
       if (D > 0) {
         x = x + xi;
