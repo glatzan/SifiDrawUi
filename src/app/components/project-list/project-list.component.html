@@ -24,6 +24,6 @@
   <section class="project-menu">
     <div (click)="delete(data)">{{data.type == "p" ? "Projekt löschen" : "Datensatz löschen"}}</div>
     <div>{{data.type == "p" ? "Projekt umbennen" : "Datensatz umbennen"}}</div>
-    <div (click)="copyToClip(data)">Copy ID to Clipboard</div>
+    <div (click)="copyToClip(data)" >Copy ID to Clipboard</div>
   </section>
 </ng-template>

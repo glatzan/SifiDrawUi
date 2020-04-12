@@ -20,7 +20,7 @@ export class ProjectListComponent implements OnInit {
 
   selectedDataset: Dataset;
 
-  @ViewChild('projectOverlayMenu', {static: false}) projectOverlayMenu: TemplateRef<any>;
+  @ViewChild('projectOverlayMenu') projectOverlayMenu: TemplateRef<any>;
 
   overlayRef: OverlayRef | null;
 
@@ -28,7 +28,6 @@ export class ProjectListComponent implements OnInit {
 
   constructor(private projectService: ProjectService,
               private overlay: Overlay,
-              private clipboard: Clipboard,
               private datasetService: DatasetService,
               public viewContainerRef: ViewContainerRef,
               private workViewService: WorkViewService) {
@@ -123,7 +122,6 @@ export class ProjectListComponent implements OnInit {
 
 
   copyToClip(data: { type: string, data: any }) {
-    this.clipboard.writeText(data.data.id).then( x => x)
   }
 
 }

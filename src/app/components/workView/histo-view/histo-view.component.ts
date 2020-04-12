@@ -17,7 +17,7 @@ import {flatMap} from "rxjs/operators";
 export class HistoViewComponent implements OnInit {
 
   // a reference to the canvas element from our template
-  @ViewChild('histocanvas', {static: false}) public canvas: ElementRef;
+  @ViewChild('histocanvas') public canvas: ElementRef;
 
   renderHistogram: boolean = false;
 

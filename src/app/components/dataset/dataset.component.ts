@@ -21,7 +21,7 @@ import {SImage} from "../../model/SImage";
 })
 export class DatasetComponent implements OnInit {
 
-  @ViewChild('imageMenu', {static: false}) imageMenu: TemplateRef<any>;
+  @ViewChild('imageMenu') imageMenu: TemplateRef<any>;
 
   overlayRef: OverlayRef | null;
 

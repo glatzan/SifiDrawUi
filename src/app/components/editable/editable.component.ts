@@ -13,8 +13,8 @@ import {untilDestroyed} from 'ngx-take-until-destroy';
   styleUrls: ['./editable.component.css']
 })
 export class EditableComponent implements OnInit, OnDestroy {
-  @ContentChild(ViewModeDirective, {static: false}) viewModeTpl: ViewModeDirective;
-  @ContentChild(EditModeDirective, {static: false}) editModeTpl: EditModeDirective;
+  @ContentChild(ViewModeDirective) viewModeTpl: ViewModeDirective;
+  @ContentChild(EditModeDirective) editModeTpl: EditModeDirective;
   @Output() update = new EventEmitter();
 
   editMode = new Subject();

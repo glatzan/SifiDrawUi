@@ -26,7 +26,7 @@ import {SImage} from "../../../model/SImage";
 export class DrawCanvasComponent implements AfterViewInit, OnInit {
 
   // a reference to the canvas element from our template
-  @ViewChild('canvas', {static: false}) public canvas: ElementRef;
+  @ViewChild('canvas') public canvas: ElementRef;
 
   /**
    * Image Data from Backend, display image

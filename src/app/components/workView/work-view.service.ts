@@ -1,4 +1,4 @@
-import {EventEmitter, Injectable, OnInit, Output} from '@angular/core';
+import { EventEmitter, Injectable, OnInit, Output, Directive } from '@angular/core';
 import {SImage} from '../../model/SImage';
 import {ImageService} from '../../service/image.service';
 import CImageUtil from "../../utils/cimage-util";
@@ -15,6 +15,7 @@ import {MatSnackBar} from "@angular/material/snack-bar";
 import {iif, Observable, of} from "rxjs";
 import {flatMap} from "rxjs/operators";
 
+@Directive()
 @Injectable({
   providedIn: 'root'
 })
