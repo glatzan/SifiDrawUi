@@ -33,7 +33,7 @@
     "material-community-components": "^6.0.1",
     "nerdamer": "^1.0.4",
     "ng": "0.0.0",
-    "ngx-material-file-input": "^2.1.0",
+    "ngx-material-file-input": "^2.1.1",
     "ngx-take-until-destroy": "^5.4.0",
     "pngjs": "^3.4.0",
     "process": "^0.11.10",
