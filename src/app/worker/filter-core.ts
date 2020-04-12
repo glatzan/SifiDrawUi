@@ -1,11 +1,5 @@
-import {CImage} from "../model/CImage";
-import {flatMap} from "rxjs/operators";
-import {FilterData} from "./filter-data";
-import {Observable} from "rxjs";
-import {ColorType, PNG} from "pngjs";
 import {ContrastFilter, ContrastOptions} from "./filter/contrast-filter";
 import {Services} from "./filter/abstract-filter";
-import {FilterHelper} from "./filter/filter-helper";
 import {AffineTransformationMatrixFilter} from "./filter/affine-transformation-matrix-filter";
 import {CreateImageFilter, CreateImageOptions} from "./filter/create-image-filter";
 import {HistogramFilter, HistogramOptions} from "./filter/histogram-filter";
@@ -45,6 +39,7 @@ import {
 } from "./filter/apply-transformation-on-layer-filter";
 import {BinarizeColorThreshold} from "./filter/binarize-color-threshold";
 import {DrawBinaryLineFilter} from "./filter/draw-binary-line-filter";
+import {FloodGapFilter, FloodGapOptions} from "./filter/flood-gap-filter";
 
 export class FilterCore {
 
@@ -55,7 +50,7 @@ export class FilterCore {
   }
 
   load() {
-   return new LoadFilter(this.services).doFilter()
+    return new LoadFilter(this.services).doFilter()
   }
 
   createAffineTransformationMatrix(sourcePos: number, targetPos: number, sourceLayerID: string, targetLayerID: string = sourceLayerID, targetDataName = 'affineMatrix') {
@@ -68,20 +63,6 @@ export class FilterCore {
 
   copyLayerToImage(sourcePos: number, layers: [CopyLayerData], copyLayerToImageOptions?: CopyLayerToImageOptions) {
     return new CopyLayerToImageFilter(this.services).doFilter(sourcePos, layers, copyLayerToImageOptions);
-  }
-
-  toBinary(sourcePos: number, binaryOptions?: BinaryOptions) {
-    if (binaryOptions) {
-      const maxifyOptions = {
-        targetImagePos: binaryOptions.targetPos,
-        threshold_r: binaryOptions.threshold,
-        threshold_g: binaryOptions.threshold,
-        threshold_b: binaryOptions.threshold
-      };
-      return this.maxifyColorChannel(sourcePos, maxifyOptions)
-    } else {
-      return this.maxifyColorChannel(sourcePos)
-    }
   }
 
   thresholdByPercentile(sourcePos: number, targetImagePos: number, thresholdPercentileOptions?: ThresholdPercentileOptions) {
@@ -138,27 +119,6 @@ export class FilterCore {
 
   colorThresholdFilter(sourcePos: number, colorThresholdOptions?: ColorThresholdOptions) {
     return new ColorThresholdFilter(this.services).doFilter(sourcePos, colorThresholdOptions);
-  }
-
-  public toColorType(sourceImgPos: number, colorType: string, colorTypeOptions?: ColorTypeOptions) {
-    return flatMap((data: FilterData) => new Observable<FilterData>((observer) => {
-
-        const source = this.getImage(sourceImgPos, data);
-        const target = (colorTypeOptions && colorTypeOptions.targetImagePos) ? this.getImage(colorTypeOptions.targetImagePos, data) : source;
-
-        if (source == null || target == null) {
-          observer.error(`Image not found index source ${source} or target ${target}!`);
-        }
-
-        const buff = new Buffer(data.img.data, 'base64');
-        const png = PNG.sync.read(buff);
-        const buffer = PNG.sync.write(png, {colorType: FilterCore.getColorType(colorType)});
-        target.data = buffer.toString('base64');
-
-        observer.next(data);
-        observer.complete();
-      }
-    ));
   }
 
   flask(sourcePos: number, endpoint: string, targetPos = sourcePos) {
@@ -233,49 +193,7 @@ export class FilterCore {
     return new BinarizeColorThreshold(this.services).doFilter(sourcePos, startEndColor, targetPos)
   }
 
-  private pushAndAddImageToStack(img: CImage, data: FilterData) {
-    data.pushIMG(img);
-    this.services.displayCallback.addImage(img);
+  floodGap(sourcePos: number, floodGapOptions?: FloodGapOptions) {
+    return new FloodGapFilter(this.services).doFilter(sourcePos, floodGapOptions)
   }
-
-  private getImage(index: number, data: FilterData): CImage {
-    if (index < -1 || index >= data.imgStack.length) {
-      return null;
-    }
-
-    if (index === -1) {
-      const img = FilterHelper.createNewImage(1, 1);
-      this.pushAndAddImageToStack(img, data);
-      return img;
-    }
-
-    return data.imgStack[index];
-  }
-
-
-  private static getColorType(type: string): ColorType {
-    switch (type) {
-      case "rgb":
-        return 0;
-      case "greya":
-        return 4;
-      case "rgba":
-        return 6;
-      case "grey":
-      default:
-        return 0;
-    }
-  }
-
-
-}
-
-export interface BinaryOptions {
-  targetPos?: number
-  threshold?: number
-}
-
-
-export interface ColorTypeOptions {
-  targetImagePos?: number
 }
