@@ -45,6 +45,7 @@ import {
 } from "./filter/apply-transformation-on-layer-filter";
 import {BinarizeColorThreshold} from "./filter/binarize-color-threshold";
 import {DrawBinaryLineFilter} from "./filter/draw-binary-line-filter";
+import {FloodGapFilter, FloodGapOptions} from "./filter/flood-gap-filter";
 
 export class FilterCore {
 

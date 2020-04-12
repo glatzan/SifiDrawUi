@@ -4,6 +4,7 @@ import {SAImage} from './SAImage';
 export class SImage implements SAImage {
   id: string;
   name: string;
+  path: string;
   data: string;
   layers: Layer[] = [];
   width: number;
@@ -45,4 +46,5 @@ export class SImage implements SAImage {
   public getImage() {
     return this;
   }
+
 }

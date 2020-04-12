@@ -7,6 +7,7 @@ export class SImageGroup implements SAImage {
   public id: string;
   public name: string;
   public images: SImage[];
+  path: string;
   public type = 'group';
   hasLayerData = false;
 

@@ -60,4 +60,8 @@ export class ImageService extends AbstractHttpService {
       map(x => CImageMapper.mapICImageToTypescriptObject<SImage>(x))
     );
   }
+
+  public saveImageByPath(image: SImage, format: string = "png"): Observable<boolean> {
+    return this.http.post<boolean>(`${environment.backendUrl}/image/create?format=${format}`, image, ImageService.httpJsonContent);
+  }
 }

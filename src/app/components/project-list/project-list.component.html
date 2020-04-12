@@ -3,17 +3,14 @@
   <cdk-virtual-scroll-viewport itemSize="30" class="caseScroll">
     <div *cdkVirtualFor="let pD of projectData">
       <div class="projectDiv">
-        <div class="box">
+        <div class="box" (contextmenu)="openContextMenu($event,pD)">
           {{pD.name}}
-          <button class="addImgGroup" mat-icon-button style="transform: scale(0.6)">
-            <mat-icon>queue icon</mat-icon>
-          </button>
         </div>
       </div>
       <div>
         <ul>
           <li *ngFor="let dataset of pD.datasets" (click)="onSelectDataset($event,dataset)" class="clickAble"
-              [ngClass]="selectedDataset === dataset ? 'selectedElement' : ''">
+              [ngClass]="selectedDataset === dataset ? 'selectedElement' : ''" (contextmenu)="openContextMenu($event,dataset)">
             <label>{{dataset.name}}</label>
           </li>
         </ul>
@@ -22,3 +19,10 @@
     </div>
   </cdk-virtual-scroll-viewport>
 </div>
+
+<ng-template #projectOverlayMenu let-data>
+  <section class="project-menu">
+    <div (click)="delete(data)">{{data.type == "p" ? "Projekt löschen" : "Datensatz löschen"}}</div>
+    <div>{{data.type == "p" ? "Projekt umbennen" : "Datensatz umbennen"}}</div>
+  </section>
+</ng-template>

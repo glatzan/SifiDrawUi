@@ -4,6 +4,7 @@ export interface SAImage {
   id: string;
   name: string;
   type: string;
+  path: string;
   concurrencyCounter: number;
   hasLayerData: boolean
 
