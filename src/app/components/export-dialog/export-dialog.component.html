@@ -7,7 +7,7 @@
       <mat-select [(ngModel)]="selectedProject" placeholder="Projekt"
                   (selectionChange)="onSelectProject();">
         <mat-option *ngFor="let project of projects" [value]="project">
-          {{project.id}}
+          {{project.name}}
         </mat-option>
       </mat-select>
     </mat-form-field>
