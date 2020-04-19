@@ -40,6 +40,7 @@ import {
 import {BinarizeColorThreshold} from "./filter/binarize-color-threshold";
 import {DrawBinaryLineFilter} from "./filter/draw-binary-line-filter";
 import {FloodGapFilter, FloodGapOptions} from "./filter/flood-gap-filter";
+import {AddColorValuesFilter} from "./filter/add-color-values-filter";
 
 export class FilterCore {
 
@@ -190,10 +191,14 @@ export class FilterCore {
   }
 
   binarizeColorThreshold(sourcePos: number, startEndColor: { r: number, g: number, b: number, a: number }, targetPos: number = sourcePos) {
-    return new BinarizeColorThreshold(this.services).doFilter(sourcePos, startEndColor, targetPos)
+    return new BinarizeColorThreshold(this.services).doFilter(sourcePos, startEndColor, targetPos);
   }
 
   floodGap(sourcePos: number, floodGapOptions?: FloodGapOptions) {
-    return new FloodGapFilter(this.services).doFilter(sourcePos, floodGapOptions)
+    return new FloodGapFilter(this.services).doFilter(sourcePos, floodGapOptions);
+  }
+
+  addColorValues(sourcePos: number, startEndColor: { r: number, g: number, b: number, a: number }, binSize = 10, addChannel: number = 0){
+    return new AddColorValuesFilter(this.services).doFilter(sourcePos,startEndColor,binSize,addChannel)
   }
 }
