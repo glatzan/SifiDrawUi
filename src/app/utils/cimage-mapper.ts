@@ -38,10 +38,11 @@ export class CImageMapper {
   }
 
   static mapICImageToTypescriptObject<T>(obj: SAImage): T {
-    if (obj.type === 'img') {
+    // img for legacy support
+    if (obj.type == 'image' || obj.type == 'img') {
       // @ts-ignore
       return Object.assign(new SImage(), obj);
-    } else if (obj.type === 'group') {
+    } else if (obj.type == 'group') {
       const tmp = Object.assign(new SImageGroup(), obj);
       let y = 0;
       for (const subImg of tmp.images) {

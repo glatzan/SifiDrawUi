@@ -7,12 +7,12 @@ import {FormArray, FormBuilder, FormControl, FormGroup, Validators} from '@angul
 import {SAImage} from '../../model/SAImage';
 import {ImageService} from '../../service/image.service';
 import {SImageGroup} from '../../model/SImageGroup';
-import {MatSnackBar} from '@angular/material/snack-bar';
-import {Overlay, OverlayRef} from "@angular/cdk/overlay";
 import {TemplatePortal} from "@angular/cdk/portal";
 import {fromEvent, Subscription} from "rxjs";
 import {filter, take} from "rxjs/operators";
 import {SImage} from "../../model/SImage";
+import {Overlay, OverlayRef} from "@angular/cdk/overlay";
+import {MatSnackBar} from "@angular/material/snack-bar";
 
 @Component({
   selector: 'app-dataset',

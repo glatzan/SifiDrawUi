@@ -35,7 +35,7 @@ export class DrawBinaryLineFilter extends AbstractFilter {
           if (result.length) {
             for (let line of layer.lines) {
               if(line.length < 2)
-                break;
+                continue;
 
               for (let i = 1; i < line.length; i++) {
                 this.drawLine(line[i-1], line[i])

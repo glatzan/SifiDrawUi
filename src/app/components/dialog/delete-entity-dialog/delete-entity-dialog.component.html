@@ -1,0 +1,22 @@
+<div class="dialog">
+
+  <divt mat-dialog-title [ngSwitch]="entity.type">
+    <span *ngSwitchCase="'project'">Projekt löschen</span>
+    <span *ngSwitchCase="'dataset'">Datensatz löschen</span>
+    <span *ngSwitchCase="'group'">Bildgruppe löschen</span>
+    <span *ngSwitchCase="'image'">Bild löschen</span>
+    <span *ngSwitchDefault>Unbekannt löschen</span>
+  </divt>
+
+  <div mat-dialog-content class="dialogContent">
+    Sind sie sicher?
+  </div>
+
+  <div class="spacer"></div>
+
+  <div mat-dialog-actions class="btnContainer">
+    <button mat-stroked-button (click)="delete()">Delete</button>
+    <span></span>
+    <button mat-stroked-button (click)="close()">Close</button>
+  </div>
+</div>

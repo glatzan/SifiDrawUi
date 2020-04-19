@@ -1,10 +1,10 @@
 import {Component, OnInit} from '@angular/core';
 import {MatDialogRef} from '@angular/material/dialog';
 import {FormBuilder, FormGroup} from '@angular/forms';
-import {ImageService} from '../../service/image.service';
-import {Project} from '../../model/project';
-import {Dataset} from '../../model/dataset';
-import {ProjectService} from '../../service/project.service';
+import {ImageService} from '../../../service/image.service';
+import {Project} from '../../../model/project';
+import {Dataset} from '../../../model/dataset';
+import {ProjectService} from '../../../service/project.service';
 
 @Component({
   selector: 'app-file-upload-dialog',

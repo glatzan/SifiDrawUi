@@ -1,6 +1,6 @@
 import {Component, OnInit} from '@angular/core';
 import {MatDialogRef} from '@angular/material/dialog';
-import {ProjectService} from '../../service/project.service';
+import {ProjectService} from '../../../service/project.service';
 
 @Component({
   selector: 'app-create-project-dialog',

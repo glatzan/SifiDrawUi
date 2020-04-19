@@ -1,0 +1,24 @@
+<div class="dialog">
+
+  <divt mat-dialog-title [ngSwitch]="entity.type">
+    <span *ngSwitchCase="'project'">Projekt umbennen</span>
+    <span *ngSwitchCase="'dataset'">Datensatz umbennen</span>
+    <span *ngSwitchCase="'group'">Bildgruppe umbennen</span>
+    <span *ngSwitchCase="'image'">Bild umbennen</span>
+    <span *ngSwitchDefault>Unbekannt umbennen</span>
+  </divt>
+
+  <div mat-dialog-content class="dialogContent">
+    <mat-form-field>
+      <input matInput placeholder="Name" [(ngModel)]="entity.name">
+    </mat-form-field>
+  </div>
+
+  <div class="spacer"></div>
+
+  <div mat-dialog-actions class="btnContainer">
+    <button mat-stroked-button (click)="rename()">Save</button>
+    <span></span>
+    <button mat-stroked-button (click)="close()">Close</button>
+  </div>
+</div>

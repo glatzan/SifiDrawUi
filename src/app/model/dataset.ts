@@ -1,6 +1,5 @@
-import {SImage} from './SImage';
-import {SAImage} from './SAImage';
-import {SEntity} from "./sentity";
+import {SEntity} from "./SEntity";
+import {SAImage} from "./SAImage";
 
 export class Dataset extends SEntity{
   public images: SAImage[];

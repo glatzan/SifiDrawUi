@@ -1,4 +1,4 @@
-import { EventEmitter, Injectable, OnInit, Output, Directive } from '@angular/core';
+import {Directive, EventEmitter, Injectable, OnInit, Output} from '@angular/core';
 import {SImage} from '../../model/SImage';
 import {ImageService} from '../../service/image.service';
 import CImageUtil from "../../utils/cimage-util";
@@ -14,6 +14,14 @@ import {CanvasDisplaySettings} from "../../helpers/canvas-display-settings";
 import {MatSnackBar} from "@angular/material/snack-bar";
 import {iif, Observable, of} from "rxjs";
 import {flatMap} from "rxjs/operators";
+import {CreateProjectDialogComponent} from "../dialog/create-project-dialog/create-project-dialog.component";
+import {MatDialog} from "@angular/material/dialog";
+import {RenameEntityDialogComponent} from "../dialog/rename-entity-dialog/rename-entity-dialog.component";
+import {FilterSetDialogComponent} from "../dialog/filter-set-dialog/filter-set-dialog.component";
+import {SEntity} from "../../model/SEntity";
+import {DeleteEntityDialogComponent} from "../dialog/delete-entity-dialog/delete-entity-dialog.component";
+import {Project} from "../../model/project";
+import {CreateDatasetDialogComponent} from "../dialog/create-dataset-dialog/create-project-dialog.component";
 
 @Directive()
 @Injectable({
@@ -21,7 +29,6 @@ import {flatMap} from "rxjs/operators";
 })
 export class WorkViewService implements OnInit {
 
-  @Output() openFilterDialog: EventEmitter<FilterSet> = new EventEmitter();
   @Output() reloadProjectList: EventEmitter<void> = new EventEmitter();
   @Output() nextSelectImageInDataset: EventEmitter<void> = new EventEmitter();
   @Output() prevSelectImageInDataset: EventEmitter<void> = new EventEmitter();
@@ -75,6 +82,7 @@ export class WorkViewService implements OnInit {
   layerClipboard: Layer[];
 
   constructor(private imageService: ImageService,
+              private dialog: MatDialog,
               private imageGroupService: ImageGroupService,
               private snackBar: MatSnackBar) {
   }
@@ -259,8 +267,12 @@ export class WorkViewService implements OnInit {
       }
     }
 
-    this.imageGroupService.rename(image);
-  }
+     if (image.type == "group")
+       this.imageGroupService.renameImageGroup(image as SImageGroup);
+     else if (image.type == "image") {
+       this.imageService.renameImage(image as SImage)
+     }
+   }
 
   isLayerClipboardEmpty() {
     return this.layerClipboard != null
@@ -274,7 +286,64 @@ export class WorkViewService implements OnInit {
     image.layers = this.layerClipboard;
   }
 
+  openCreateProjectDialog(): void {
+    const dialogRef = this.dialog.open(CreateProjectDialogComponent, {
+      height: '240px',
+      width: '320px'
+    });
 
+    dialogRef.afterClosed().subscribe(result => {
+      this.reloadProjectList.emit();
+    });
+  }
+
+  openRenameEntityDialog(entity: SEntity): void {
+    const dialogRef = this.dialog.open(RenameEntityDialogComponent, {
+      height: '240px',
+      width: '320px',
+      data: entity
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      this.reloadProjectList.emit();
+    });
+  }
+
+  openFilterSetDialog(filter?: FilterSet): void {
+    const dialogRef = this.dialog.open(FilterSetDialogComponent, {
+      height: '768px',
+      width: '1024px',
+      data: filter
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      this.onFilterSetChanged.emit()
+    });
+  }
+
+  openDeleteEntityDialog(entity: SEntity): void {
+    const dialogRef = this.dialog.open(DeleteEntityDialogComponent, {
+      height: '240px',
+      width: '320px',
+      data: entity
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      this.reloadProjectList.emit();
+    });
+  }
+
+  openCreateDatasetDialog(parent: Project): void {
+    const dialogRef = this.dialog.open(CreateDatasetDialogComponent, {
+      height: '240px',
+      width: '320px',
+      data: parent
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      this.reloadProjectList.emit();
+    });
+  }
 }
 
 export class DataSaveStatusContainer {

@@ -1,14 +1,15 @@
 import {Component, Inject, OnInit} from '@angular/core';
-import {Project} from '../../model/project';
-import {ProjectService} from '../../service/project.service';
-import {Dataset} from '../../model/dataset';
-import {ImageService} from '../../service/image.service';
-import {MAT_DIALOG_DATA, MatDialogRef, MatSnackBar} from '@angular/material';
-import {FilterService} from "../../service/filter.service";
-import {ProcessCallback} from "../../worker/processCallback";
-import {FilterSet} from "../../model/FilterSet";
-import {FilterSetService} from "../../service/filter-set.service";
-import {SImage} from "../../model/SImage";
+import {Project} from '../../../model/project';
+import {ProjectService} from '../../../service/project.service';
+import {Dataset} from '../../../model/dataset';
+import {ImageService} from '../../../service/image.service';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import {FilterService} from "../../../service/filter.service";
+import {ProcessCallback} from "../../../worker/processCallback";
+import {FilterSet} from "../../../model/FilterSet";
+import {FilterSetService} from "../../../service/filter-set.service";
+import {SImage} from "../../../model/SImage";
 
 @Component({
   selector: 'app-export-dialog',

@@ -1,7 +1,7 @@
-import {Layer} from './layer';
-import {SAImage} from './SAImage';
+import {Layer} from "./layer";
+import {SAImage} from "./SAImage";
 
-export class SImage implements SAImage {
+export class SImage extends SAImage {
   id: string;
   name: string;
   path: string;

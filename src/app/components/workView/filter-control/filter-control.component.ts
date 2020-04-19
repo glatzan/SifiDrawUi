@@ -101,7 +101,7 @@ export class FilterControlComponent implements OnInit, DisplayCallback {
       newFilter.id = Date.now();
       newFilter.name = 'Neuer Filter';
       newFilter.filters = this.filterValue;
-      this.workViewService.openFilterDialog.emit(newFilter);
+      this.workViewService.openFilterSetDialog(newFilter);
     }
   }
 

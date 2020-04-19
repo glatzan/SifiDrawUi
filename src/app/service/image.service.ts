@@ -47,7 +47,7 @@ export class ImageService extends AbstractHttpService {
   }
 
   public renameImage(image: SImage): Observable<SImage> {
-    return this.http.get<SImage>(`${environment.backendUrl}/image/rename/${image.id}?parentID=${btoa(image.name)}`).pipe(
+    return this.http.get<SImage>(`${environment.backendUrl}/image/rename/${image.id}?newName=${btoa(image.name)}`).pipe(
       map(x => CImageMapper.mapICImageToTypescriptObject<SImage>(x))
     );
   }
@@ -61,7 +61,7 @@ export class ImageService extends AbstractHttpService {
     );
   }
 
-  public saveImageByPath(image: SImage, format: string = "png"): Observable<boolean> {
-    return this.http.post<boolean>(`${environment.backendUrl}/image/create?format=${format}`, image, ImageService.httpJsonContent);
+  public addImageToParent(image: SImage, parentID: string, format: string = "png"): Observable<boolean> {
+    return this.http.post<boolean>(`${environment.backendUrl}/image/addToParent/${parentID}?format=${format}`, image, ImageService.httpJsonContent);
   }
 }

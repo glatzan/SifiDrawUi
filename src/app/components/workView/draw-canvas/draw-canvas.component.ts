@@ -6,7 +6,7 @@ import DrawUtil from '../../../utils/draw-util';
 import {ImageService} from '../../../service/image.service';
 import CImageUtil from '../../../utils/cimage-util';
 import {PointTracker} from '../../../utils/point-tracker';
-import {MatSnackBar} from '@angular/material';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import {WorkViewService} from '../work-view.service';
 import {MousePosition} from "../../../helpers/mouse-position";
 import {LayerType} from "../../../model/layer-type.enum";

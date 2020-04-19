@@ -1,7 +1,6 @@
 import {AbstractFilter, Services} from "./abstract-filter";
 import {flatMap, map} from "rxjs/operators";
 import {FilterData} from "../filter-data";
-import {SImageGroup} from "../../model/SImageGroup";
 import {SImage} from "../../model/SImage";
 
 export class SaveFilter extends AbstractFilter {
@@ -10,60 +9,42 @@ export class SaveFilter extends AbstractFilter {
     super(services);
   }
 
-  doFilter(targetProject: string, saveOptions?: SaveOptions) {
+  doFilter(targetDatasetID: string, saveOptions?: SaveOptions) {
     return flatMap((data: FilterData) => {
 
       if (saveOptions == null)
         saveOptions = {};
 
-      let fullImgName = data.originalImage.path;
       let imgName = data.originalImage.name;
 
-      if (data.originalImage instanceof SImageGroup) {
+      if (data.originalImage.type == "group") {
         // remove last /
-        fullImgName = fullImgName.slice(0, -4);
-        fullImgName = fullImgName.slice(0, fullImgName.lastIndexOf("/") + 1);
-        fullImgName += data.originalImage.name
-      } else {
-        imgName = fullImgName.slice(fullImgName.lastIndexOf("/") + 1, -4);
+        imgName = data.originalImage.name.slice(0, data.originalImage.name.lastIndexOf("/") + 1);
       }
 
-      const dataset = fullImgName.substr(0, fullImgName.lastIndexOf("/") + 1);
+      const pathSplit = data.originalImage.path.split("/");
 
-      let targetDataset = targetProject + "/processed";
+      if (pathSplit.length > 2) {
+        if (saveOptions.addDatasetAsPrefix) {
+          imgName = pathSplit[1] + "-" + imgName;
+        }
 
-      if (saveOptions.datasetMapping) {
-        targetDataset = targetProject + "/" + saveOptions.datasetMapping;
-      } else if (saveOptions.datasetsMapping) {
-        for (let i = 0; i < saveOptions.datasetsMapping.length; i++) {
-          if (dataset === saveOptions.datasetsMapping[i].dataset) {
-            targetDataset = targetProject + "/" + saveOptions.datasetsMapping[i].mapping;
-            break;
-          }
+        if (saveOptions.addProjectAsPrefix) {
+          imgName = pathSplit[0] + "-" + imgName;
         }
       }
 
-      if (targetDataset.charAt(targetDataset.length - 1) !== '/') {
-        targetDataset += "/"
-      }
-
-
-      let targetImgName = targetDataset;
-
-      if (saveOptions.addDatasetAsPrefix) {
-        targetImgName += dataset.split('/').join('-');
-      }
-
-      targetImgName += imgName;
 
       if (saveOptions.imageSuffix !== undefined) {
-        targetImgName += saveOptions.imageSuffix;
+        imgName = saveOptions.imageSuffix + imgName;
       }
 
-      if (!targetImgName.endsWith(".png"))
-        targetImgName += ".png";
+      if (saveOptions.imagePrefix !== undefined) {
+        imgName += saveOptions.imagePrefix;
+      }
 
       let sourceImage = data.img;
+
       if (saveOptions.sourceImage !== undefined && this.getImage(saveOptions.sourceImage, data) !== null) {
         sourceImage = this.getImage(saveOptions.sourceImage, data);
       }
@@ -71,14 +52,13 @@ export class SaveFilter extends AbstractFilter {
       const saveImage = Object.assign(new SImage(), sourceImage);
       saveImage.id = null;
       saveImage.concurrencyCounter = 0;
-      saveImage.path = targetImgName;
-      saveImage.name = targetImgName.substr(targetImgName.lastIndexOf("/") + 1);
+      saveImage.name = imgName;
 
       if (!saveOptions.saveLayers) {
         saveImage.layers = [];
       }
 
-      return this.services.imageService.saveImageByPath(saveImage, 'png').pipe(
+      return this.services.imageService.addImageToParent(saveImage, targetDatasetID, 'png').pipe(
         map(newImg => {
           return data;
         }));
@@ -87,10 +67,10 @@ export class SaveFilter extends AbstractFilter {
 }
 
 export interface SaveOptions {
-  datasetsMapping?: [{ dataset: string, mapping: string }]
-  datasetMapping?: string
   addDatasetAsPrefix?: boolean
+  addProjectAsPrefix?: boolean
   saveLayers?: boolean
   imageSuffix?: string
+  imagePrefix?: string
   sourceImage?: number
 }

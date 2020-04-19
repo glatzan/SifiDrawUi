@@ -1,7 +1,7 @@
-import {AfterViewInit, Component, Inject, OnInit} from '@angular/core';
+import {Component, Inject, OnInit} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
-import {FilterSet} from '../../model/FilterSet';
-import {FilterSetService} from '../../service/filter-set.service';
+import {FilterSet} from '../../../model/FilterSet';
+import {FilterSetService} from '../../../service/filter-set.service';
 
 @Component({
   selector: 'app-filter-set-dialog',
@@ -20,7 +20,7 @@ export class FilterSetDialogComponent implements OnInit {
   disabled = true;
 
   constructor(public dialogRef: MatDialogRef<FilterSetDialogComponent>,
-              @Inject(MAT_DIALOG_DATA) public data: any,
+              @Inject(MAT_DIALOG_DATA) public data : FilterSet ,
               private filterSetService: FilterSetService) {
   }
 
@@ -32,8 +32,8 @@ export class FilterSetDialogComponent implements OnInit {
         this.selectedFilterSet = x[0];
       }
 
-      if (this.data.filter != null) {
-        this.onNewScript(this.data.filter);
+      if (this.data != null) {
+        this.onNewScript(this.data);
       }
     });
   }

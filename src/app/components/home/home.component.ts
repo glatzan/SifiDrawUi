@@ -3,18 +3,18 @@ import {FilterService} from '../../service/filter.service';
 import {ImageService} from '../../service/image.service';
 import {ImageMagicService} from '../../service/image-magic.service';
 import {DatasetService} from '../../service/dataset.service';
-import {ImportDialogComponent} from '../import-dialog/import-dialog.component';
-import {ExportDialogComponent} from '../export-dialog/export-dialog.component';
+import {ImportDialogComponent} from '../dialog/import-dialog/import-dialog.component';
+import {ExportDialogComponent} from '../dialog/export-dialog/export-dialog.component';
 import {MatDialog} from '@angular/material/dialog';
 import {User} from '../../model/user';
 import {AuthenticationService} from '../../service/authentication.service';
 import {Router} from '@angular/router';
-import {FilterSetDialogComponent} from '../filter-set-dialog/filter-set-dialog.component';
-import {CreateProjectDialogComponent} from '../create-project-dialog/create-project-dialog.component';
+import {FilterSetDialogComponent} from '../dialog/filter-set-dialog/filter-set-dialog.component';
+import {CreateProjectDialogComponent} from '../dialog/create-project-dialog/create-project-dialog.component';
 import {WorkViewService} from '../workView/work-view.service';
-import {FileUploadDialogComponent} from '../file-upload-dialog/file-upload-dialog.component';
+import {FileUploadDialogComponent} from '../dialog/file-upload-dialog/file-upload-dialog.component';
 import {FilterSet} from "../../model/FilterSet";
-import {LayerPresetDialogComponent} from "../layer-preset-dialog/layer-preset-dialog.component";
+import {LayerPresetDialogComponent} from "../dialog/layer-preset-dialog/layer-preset-dialog.component";
 
 @Component({
   selector: 'app-home',
@@ -39,9 +39,6 @@ export class HomeComponent implements OnInit {
   private selectedImageId: string;
 
   ngOnInit(): void {
-    this.workViewService.openFilterDialog.subscribe(x => {
-      this.openFilterSetDialog(x)
-    });
   }
 
   onImageSelect(id: string) {
@@ -74,28 +71,11 @@ export class HomeComponent implements OnInit {
   }
 
   openFilterSetDialog(filter?: FilterSet): void {
-    const dialogRef = this.dialog.open(FilterSetDialogComponent, {
-      height: '768px',
-      width: '1024px',
-      data: {
-        filter: filter
-      }
-    });
-
-    dialogRef.afterClosed().subscribe(result => {
-      this.workViewService.onFilterSetChanged.emit()
-    });
+    this.workViewService.openFilterSetDialog()
   }
 
   openCreateProjectDialog(): void {
-    const dialogRef = this.dialog.open(CreateProjectDialogComponent, {
-      height: '240px',
-      width: '320px'
-    });
-
-    dialogRef.afterClosed().subscribe(result => {
-      this.workViewService.reloadProjectList.emit();
-    });
+    this.workViewService.openCreateProjectDialog();
   }
 
   openFileUploadDialog(): void {

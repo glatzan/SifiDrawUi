@@ -2,33 +2,48 @@
   height: 100%;
   min-width: 200px;
   position: relative;
+  display: grid;
+  grid-template-columns: fit-content(160px) auto;
+  grid-template-rows: 35px auto;
+  grid-template-areas: "h b" "c c";
 
-  .headline{
+  .headline {
     padding-top: 5px;
     height: 30px;
     font-family: Roboto, Helvetica Neue Light, Helvetica Neue, Helvetica, Arial, Lucida Grande, sans-serif;
     font-size: 20px;
+    grid-area: h;
+  }
+
+  .addProjekt {
+    grid-area: b;
+    justify-self: right;
+    align-self: center;
+
+    mat-icon {
+      font-size: 20px;
+    }
   }
 
   .caseScroll {
     border: 1px solid LightGray;
     border-radius: 3px;
-    position: absolute;
     width: 100%;
-    bottom: 0;
-    top: 35px;
+    grid-area: c;
 
     .projectDiv {
       padding: 5px;
       font-size: 16px;
       font-weight: bold;
 
-      .icon-box {
-        height: 14px;
-        margin: -3px 0px 0px 0px;
-
-        .mat-icon {
-          transform: scale(0.5);
+      .addDataset {
+        width: 40px;
+        height: 20px;
+        mat-icon {
+          font-size: 14px;
+          width: 20px;
+          height: 20px;
+          line-height: 1;
         }
       }
     }
@@ -36,6 +51,8 @@
     ul {
       padding-left: 20px;
       list-style-type: none;
+      margin-block-start: 5px;
+      margin-block-end: 5px;
 
       li {
         margin: 3px;
@@ -104,3 +121,6 @@
   }
 }
 
+:host .mat-icon-button{
+  line-height: 1px !important;
+}

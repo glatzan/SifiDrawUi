@@ -8,6 +8,7 @@ import {TemplatePortal} from "@angular/cdk/portal";
 import {fromEvent, Subscription} from "rxjs";
 import {filter, take} from "rxjs/operators";
 import {DatasetService} from "../../service/dataset.service";
+import {SEntity} from "../../model/SEntity";
 
 @Component({
   selector: 'app-project-list',
@@ -57,7 +58,7 @@ export class ProjectListComponent implements OnInit {
     this.workViewService.selectDataset(this.selectedDataset)
   }
 
-  openContextMenu(event: MouseEvent, data: any) {
+  openContextMenu(event: MouseEvent, data: SEntity) {
     this.closeOverlayMenu();
     event.preventDefault();
     const x = event.pageX;
@@ -79,15 +80,9 @@ export class ProjectListComponent implements OnInit {
       scrollStrategy: this.overlay.scrollStrategies.close()
     });
 
-    let tmp = null;
-    if (data instanceof Project) {
-      tmp = {type: "p", data: data}
-    } else {
-      tmp = {type: "d", data: data}
-    }
 
     this.overlayRef.attach(new TemplatePortal(this.projectOverlayMenu, this.viewContainerRef, {
-      $implicit: tmp
+      $implicit: data
     }));
 
     this.sub = fromEvent<MouseEvent>(document, 'click')
@@ -110,19 +105,24 @@ export class ProjectListComponent implements OnInit {
     }
   }
 
-  delete(data: { type: string, data: any }) {
-    if (data.type == "p") {
-      this.projectService.deleteProject(data.data).subscribe(x => this.loadData());
-    } else {
-      this.datasetService.deleteDataset(data.data).subscribe(x => this.loadData());
-    }
-
+  openCreateProjectDialog(): void {
+    this.workViewService.openCreateProjectDialog();
     this.closeOverlayMenu();
   }
 
-
-  copyToClip(data: { type: string, data: any }) {
+  openRenameEntityDialog(entity: SEntity): void {
+    this.workViewService.openRenameEntityDialog(entity);
+    this.closeOverlayMenu();
   }
 
+  openDeleteEntityDialog(entity: SEntity): void {
+    this.workViewService.openDeleteEntityDialog(entity);
+    this.closeOverlayMenu();
+  }
+
+  openCreateDatasetDialog(project: Project): void {
+    this.workViewService.openCreateDatasetDialog(project);
+    this.closeOverlayMenu();
+  }
 }
 

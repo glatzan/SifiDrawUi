@@ -31,14 +31,10 @@ export class ImageGroupService extends AbstractHttpService {
     return this.http.get<SImageGroup>(fetchUrl);
   }
 
-  public rename(image: SAImage): Observable<SAImage> {
-    if (image instanceof SImage) {
-      return this.imageService.renameImage(image);
-    } else {
-      return this.http.get<SImage>(`${environment.backendUrl}/image/rename/${image.id}?parentID=${btoa(image.name)}`).pipe(
-        map(x => CImageMapper.mapICImageToTypescriptObject<SImage>(x))
-      );
-    }
+  public renameImageGroup(image: SImageGroup): Observable<SAImage> {
+    return this.http.get<SImageGroup>(`${environment.backendUrl}/image/rename/${image.id}?newName=${btoa(image.name)}`).pipe(
+      map(x => CImageMapper.mapICImageToTypescriptObject<SImage>(x))
+    );
   }
 
   public update(image: SAImage): Observable<SAImage> {

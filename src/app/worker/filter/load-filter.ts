@@ -13,7 +13,7 @@ export class LoadFilter extends AbstractFilter {
 
   doFilter() {
     return flatMap((data: SAImage) => this.loadICImage(data).pipe(map(cimg => {
-      console.log(`Load img ${atob(cimg.id)}`);
+      console.log(`Load img ${cimg.id}`);
       const filterData = new FilterData();
       filterData.pushICIMG(cimg);
       filterData.originalImage = cimg;

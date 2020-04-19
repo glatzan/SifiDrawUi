@@ -1,26 +1,27 @@
+import {SEntity} from "./SEntity";
 import {Layer} from "./layer";
 
-export interface SAImage {
+export abstract class SAImage extends SEntity {
   id: string;
   name: string;
-  type: string;
   path: string;
   concurrencyCounter: number;
-  hasLayerData: boolean
+  hasLayerData: boolean;
 
-  getData(): string;
+  abstract getData(): string;
 
-  getLayers(): Layer[];
+  abstract getLayers(): Layer[];
 
-  setLayers(layers: Layer[]);
+  abstract setLayers(layers: Layer[]);
 
-  getHeight();
+  abstract getHeight();
 
-  getWidth();
+  abstract getWidth();
 
-  getFileExtension();
+  abstract getFileExtension();
 
-  hasData();
+  abstract hasData();
 
-  getImage();
+  abstract getImage();
 }
+

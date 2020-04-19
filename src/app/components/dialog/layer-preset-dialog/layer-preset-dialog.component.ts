@@ -1,11 +1,11 @@
 import {Component, OnInit} from '@angular/core';
 import {MatDialogRef} from "@angular/material/dialog";
-import {UserSettings} from "../../model/user-settings";
-import {AuthenticationService} from "../../service/authentication.service";
-import {Layer} from "../../model/layer";
-import CImageUtil from "../../utils/cimage-util";
-import {SImage} from "../../model/SImage";
-import {LayerType} from "../../model/layer-type.enum";
+import {UserSettings} from "../../../model/user-settings";
+import {AuthenticationService} from "../../../service/authentication.service";
+import {Layer} from "../../../model/layer";
+import CImageUtil from "../../../utils/cimage-util";
+import {SImage} from "../../../model/SImage";
+import {LayerType} from "../../../model/layer-type.enum";
 
 @Component({
   selector: 'app-layer-preset-dialog',

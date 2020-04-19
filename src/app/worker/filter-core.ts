@@ -151,8 +151,8 @@ export class FilterCore {
     return new ProcessThresholdSurfaces(this.services).doFilter(sourceData);
   }
 
-  save(targetProject: string, saveOptions?: SaveOptions) {
-    return new SaveFilter(this.services).doFilter(targetProject, saveOptions);
+  save(targetDatasetID: string, saveOptions?: SaveOptions) {
+    return new SaveFilter(this.services).doFilter(targetDatasetID, saveOptions);
   }
 
   invertColors(sourcePos: number, targetPos: number = sourcePos, inverseFilterOptions?: InverseFilterOptions) {

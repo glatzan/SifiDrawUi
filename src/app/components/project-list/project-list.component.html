@@ -1,11 +1,19 @@
 <div class="caseList">
   <div class="headline">Projekte</div>
+
+  <button class="addProjekt" mat-icon-button (click)="openCreateProjectDialog()"  title="Projekt erstellen">
+    <mat-icon>add_circle</mat-icon>
+  </button>
+
   <cdk-virtual-scroll-viewport itemSize="30" class="caseScroll">
     <div *cdkVirtualFor="let pD of projectData">
       <div class="projectDiv">
         <div class="box" (contextmenu)="openContextMenu($event,pD)">
           {{pD.name}}
         </div>
+        <button class="addDataset" mat-icon-button (click)="openCreateDatasetDialog(pD)"  title="Datensatz erstellen">
+          <mat-icon>add_circle</mat-icon>
+        </button>
       </div>
       <div>
         <ul>
@@ -22,8 +30,8 @@
 
 <ng-template #projectOverlayMenu let-data>
   <section class="project-menu">
-    <div (click)="delete(data)">{{data.type == "p" ? "Projekt löschen" : "Datensatz löschen"}}</div>
-    <div>{{data.type == "p" ? "Projekt umbennen" : "Datensatz umbennen"}}</div>
-    <div (click)="copyToClip(data)" >Copy ID to Clipboard</div>
+    <div (click)="openDeleteEntityDialog(data)">{{data.type == "project" ? "Projekt löschen" : "Datensatz löschen"}}</div>
+    <div (click)="openRenameEntityDialog(data)">{{data.type == "project" ? "Projekt umbennen" : "Datensatz umbennen"}}</div>
+    <div [cdkCopyToClipboard]="data.id" (click)="closeOverlayMenu()">ID in Zwischenablage</div>
   </section>
 </ng-template>

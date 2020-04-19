@@ -1,9 +1,9 @@
-import {SImage} from './SImage';
-import {SAImage} from './SAImage';
-import {Layer} from "./layer";
 import CImageUtil from "../utils/cimage-util";
+import {SImage} from "./SImage";
+import {Layer} from "./layer";
+import {SAImage} from "./SAImage";
 
-export class SImageGroup implements SAImage {
+export class SImageGroup extends SAImage {
   public id: string;
   public name: string;
   public images: SImage[];

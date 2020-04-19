@@ -1,0 +1,17 @@
+<div class="dialog">
+  <div mat-dialog-title>Datensatz erstellen</div>
+
+  <div mat-dialog-content class="dialogContent">
+    <mat-form-field>
+      <input matInput placeholder="Projekt Name" [(ngModel)]="datasetName">
+    </mat-form-field>
+  </div>
+
+  <div class="spacer"></div>
+
+  <div mat-dialog-actions class="btnContainer">
+    <button mat-stroked-button (click)="create()">Erstellen</button>
+    <span></span>
+    <button mat-stroked-button (click)="close()">Close</button>
+  </div>
+</div>

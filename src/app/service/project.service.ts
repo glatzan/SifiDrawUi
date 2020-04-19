@@ -18,16 +18,19 @@ export class ProjectService extends AbstractHttpService {
 
   public getProjects(): Observable<Project[]> {
     return this.http.get<Project[]>(`${environment.backendUrl}/projects`).pipe(
-      map( project => CImageMapper.mapProjectsToTypescriptObject(project))
+      map(project => CImageMapper.mapProjectsToTypescriptObject(project))
     )
   }
 
-  public createProject(dir: string): Observable<any> {
-    console.log(`${environment.backendUrl}/projects/create/${btoa(dir)}`);
-    return this.http.get<any>(`${environment.backendUrl}/projects/create/${btoa(dir)}`);
+  public createProject(name: string): Observable<any> {
+    return this.http.get<any>(`${environment.backendUrl}/projects/create/${btoa(name)}`);
   }
 
   public deleteProject(project: Project): Observable<boolean> {
     return this.http.delete<boolean>(`${environment.backendUrl}/projects/delete/${project.id}`);
+  }
+
+  public renameProject(project: Project): Observable<Project> {
+    return this.http.get<Project>(`${environment.backendUrl}/projects/rename/${project.id}?newName=${btoa(project.name)}`);
   }
 }

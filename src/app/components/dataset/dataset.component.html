@@ -1,8 +1,8 @@
 <div class="imageList">
   <div class="headline">Dataset {{dataset.name}}</div>
 
-  <button class="addImgGroup" mat-icon-button (click)="createImageGroup()" *ngIf="datasetSelected">
-    <mat-icon>queue icon</mat-icon>
+  <button class="addImgGroup" mat-icon-button (click)="createImageGroup()" *ngIf="datasetSelected" title="Bildgruppe erstellen">
+    <mat-icon>add_circle</mat-icon>
   </button>
 
   <cdk-virtual-scroll-viewport itemSize="1" class="imageScroll" cdkDropListGroup>

@@ -1,6 +1,7 @@
 import {Component, OnInit} from '@angular/core';
-import {MatDialogRef, MatSnackBar} from "@angular/material";
-import {ScImportService} from "../../service/sc-import.service";
+import { MatDialogRef } from "@angular/material/dialog";
+import { MatSnackBar } from "@angular/material/snack-bar";
+import {ScImportService} from "../../../service/sc-import.service";
 
 @Component({
   selector: 'app-import-dialog',

@@ -6,7 +6,6 @@ import {environment} from '../../environments/environment';
 import {map} from 'rxjs/operators';
 import {CImageMapper} from "../utils/cimage-mapper";
 import {AbstractHttpService} from "./abstract-http-service";
-import {Project} from "../model/project";
 
 @Injectable({
   providedIn: 'root'
@@ -27,11 +26,14 @@ export class DatasetService extends AbstractHttpService {
   }
 
   public createDataset(name: string, projectID: string): Observable<any> {
-    console.log(`${environment.backendUrl}/dataset/create/${name}?projectID=${projectID}`);
-    return this.http.get(`${environment.backendUrl}/dataset/create/${name}?projectID=${projectID}`);
+    return this.http.get(`${environment.backendUrl}/dataset/create/${btoa(name)}?projectID=${projectID}`);
   }
 
   public deleteDataset(dataset: Dataset): Observable<boolean> {
     return this.http.delete<boolean>(`${environment.backendUrl}/dataset/delete/${dataset.id}`);
+  }
+
+  public renameDataset(dataset: Dataset): Observable<Dataset> {
+    return this.http.get<Dataset>(`${environment.backendUrl}/dataset/rename/${dataset.id}?newName=${btoa(dataset.name)}`);
   }
 }

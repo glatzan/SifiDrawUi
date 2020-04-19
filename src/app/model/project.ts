@@ -1,5 +1,5 @@
-import {Dataset} from './dataset';
-import {SEntity} from "./sentity";
+import {SEntity} from "./SEntity";
+import {Dataset} from "./dataset";
 
 export class Project extends SEntity {
   datasets: Dataset[];
