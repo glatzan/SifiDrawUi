@@ -5,20 +5,18 @@ import {FilterHelper} from "./filter-helper";
 import DrawUtil from "../../utils/draw-util";
 import {Point} from "../../model/point";
 
-export class BinarizeColorThreshold extends AbstractFilter {
+export class AddColorValuesFilter extends AbstractFilter {
 
   constructor(services: Services) {
     super(services);
   }
 
-  doFilter(sourcePos: number, startEndColor: { r: number, g: number, b: number, a: number },  targetPos: number = sourcePos) {
+  doFilter(sourcePos: number, startEndColor: { r: number, g: number, b: number, a: number }, binSize = 10, addChannel: number = 0) {
     return map((data: FilterData) => {
 
-      const [source, target] = this.getSourceAndTarget(data, sourcePos, targetPos);
+      const [source, target] = this.getSourceAndTarget(data, sourcePos,null);
 
       const sourceImage = FilterHelper.imageToPNG(source);
-      const targetCanvas = FilterHelper.createCanvas(sourceImage.width, sourceImage.height);
-      const targetCX = FilterHelper.get2DContext(targetCanvas);
 
       const result: ColumnData[] = [];
 
@@ -34,8 +32,7 @@ export class BinarizeColorThreshold extends AbstractFilter {
             if (!start) {
               start = true;
               lastWithe = y;
-              DrawUtil.drawPointOnCanvas(targetCX, new Point(x, y), "green");
-              const newLine = new ColumnData();
+              const newLine = new ColumnData(binSize);
               newLine.x = x;
               newLine.startY = y;
               result.push(newLine);
@@ -46,37 +43,27 @@ export class BinarizeColorThreshold extends AbstractFilter {
                 result[result.length - 1].startY = y + 1;
                 continue;
               } else {
-                DrawUtil.drawPointOnCanvas(targetCX, new Point(x, y), "blue");
                 result[result.length - 1].endY = y + 1;
                 break;
               }
             }
           }
           if (start) {
-            if (Math.max(sourceImage.data[idx], sourceImage.data[idx + 1], sourceImage.data[idx + 2]) > 0) {
-              DrawUtil.drawPointOnCanvas(targetCX, new Point(x, y), "red");
-              result[result.length - 1].binarizedInfos.push(true)
-            } else {
-              result[result.length - 1].binarizedInfos.push(false)
-            }
+            result[result.length - 1].colorValue.push(sourceImage.data[idx + addChannel])
           }
 
         }
 
         if (start) {
-          result[result.length - 1].calculatePercentInfos();
+          result[result.length - 1].calculateBins();
         }
       }
 
-      const rowData = new RowData();
+      const rowData = new RowData(binSize);
       rowData.calculateRowData(result);
 
-      if (target) {
-        FilterHelper.canvasToImage(targetCanvas, target)
-      }
-
       let resultStr = "Copy to excel: <br>";
-      for(let str of rowData.rowPercent){
+      for (let str of rowData.rowValues) {
         resultStr += `${str} `;
       }
 
@@ -97,66 +84,74 @@ class ColumnData {
   x: number = 0;
   startY: number = 0;
   endY: number = 0;
-  binarizedInfos: boolean[] = [];
-  percentInfos: number[] = new Array(100).fill(0);
+  colorValue: number[] = [];
+  binSize: number = 100;
+  binValues: number[];
+
+  constructor(binSize: number) {
+    this.binSize = binSize;
+    this.binValues = new Array(this.binSize).fill(0);
+  }
 
   isValid(): boolean {
     return this.endY != 0;
   }
 
-  calculatePercentInfos(): boolean {
+  calculateBins(): boolean {
 
     if (!this.isValid()) {
       return false;
     }
 
-    const pixelPerPercent = this.binarizedInfos.length / 100;
+    const pixelPerBin = this.colorValue.length / this.binSize;
     let percentInfoCounter = 0;
     let pix = 0;
 
-    for (let i = 0; i < 100; i++) {
-      let start = i * pixelPerPercent;
+    for (let i = 0; i < this.binSize; i++) {
+      let start = i * pixelPerBin;
       let index = Math.floor(start);
-      let tmpCounter = pixelPerPercent; //- (1 - (start - index));
+      let tmpCounter = pixelPerBin; //- (1 - (start - index));
       let result = 0;
 
       while (tmpCounter > 0) {
         if (start % 1 === 0) {
           if (tmpCounter - 1 >= 1) {
-            result += (this.binarizedInfos[index] ? 1 : 0);
+            result += this.colorValue[index];
             tmpCounter--;
           } else {
-            result += (this.binarizedInfos[index] ? 1 : 0) * tmpCounter;
+            result += this.colorValue[index] * tmpCounter;
             tmpCounter = 0;
           }
         } else {
-          let tmp = (1- (start - index) > pixelPerPercent) ? pixelPerPercent : 1 - (start - index);
-          result += (this.binarizedInfos[index] ? 1 : 0) * tmp;
+          let tmp = (1 - (start - index) > pixelPerBin) ? pixelPerBin : 1 - (start - index);
+          result += this.colorValue[index] * tmp;
           tmpCounter -= tmp;
           start += tmp;
         }
         index++;
       }
-      this.percentInfos[i] = result / pixelPerPercent
+      this.binValues[i] = result
     }
     return true;
   }
 }
 
 class RowData {
-  rowPercent: number[] = new Array(100).fill(0);
+  binSize: number = 100;
+  rowValues: number[];
+
+  constructor(binSize: number) {
+    this.binSize = binSize;
+    this.rowValues = new Array(binSize).fill(0);
+  }
 
   calculateRowData(columnData: ColumnData[]) {
-    for (let i = 0; i < this.rowPercent.length; i++) {
-      let valid = 0;
+    for (let i = 0; i < this.rowValues.length; i++) {
       for (let y = 0; y < columnData.length; y++) {
         if (columnData[y].isValid()) {
-          valid++;
-          this.rowPercent[i] += columnData[y].percentInfos[i]
+          this.rowValues[i] += columnData[y].binValues[i]
         }
       }
-
-      this.rowPercent[i] /= valid
     }
   }
 }

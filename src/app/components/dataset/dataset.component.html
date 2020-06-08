@@ -49,14 +49,14 @@
                         class="subImage">
             <ng-template appViewMode>
               <div class="holderGrid clickAble" title="{{subimage.name}}">
-                <mat-icon class="list-icons" [ngStyle]="{'color' : subimage.hasLayerData ? 'green' : '' }">image icon
+                <mat-icon class="list-icons" [ngStyle]="{'color' : subimage.hasLayerData ? 'green' : 'red' }">image icon
                 </mat-icon>
                 {{subimage.name}}
               </div>
             </ng-template>
             <ng-template appEditMode>
               <div class="holderGrid">
-                <mat-icon class="list-icons" [ngStyle]="{'color' : subimage.hasLayerData ? 'green' : '' }">image icon
+                <mat-icon class="list-icons" [ngStyle]="{'color' : subimage.hasLayerData ? 'green' : 'red' }">image icon
                 </mat-icon>
                 <input [formControl]="getControl(getIndex(subimage), 'name')" appPrefixFocusAndSelect
                        style="width:70%"/>
@@ -82,14 +82,14 @@
                       [ngClass]="selectedImageId === img.id ? 'selectedElement' : 'grey'">
           <ng-template appViewMode>
             <div class="holderGrid clickAble" title="{{img.name}}">
-              <mat-icon class="list-icons" [ngStyle]="{'color' : img.hasLayerData ? 'green' : '' }">image icon
+              <mat-icon class="list-icons" [ngStyle]="{'color' : img.hasLayerData ? 'green' : 'red' }">image icon
               </mat-icon>
-              {{img.name}} {{img.hasLayerData == true ? 'color: green' : 'color: red' }}
+              {{img.name}}
             </div>
           </ng-template>
           <ng-template appEditMode>
             <div class="holderGrid">
-              <mat-icon class="list-icons" [ngStyle]="{'color' : img.hasLayerData ? 'green' : '' }">image icon
+              <mat-icon class="list-icons" [ngStyle]="{'color' : img.hasLayerData ? 'green' : 'red' }">image icon
               </mat-icon>
               <input [formControl]="getControl(getIndex(img), 'name')" appPrefixFocusAndSelect style="width: 80%"/>
             </div>
