@@ -3,6 +3,7 @@ import {map} from "rxjs/operators";
 import DrawUtil from "../../utils/draw-util";
 import {FilterData} from "../filter-data";
 import {FilterHelper} from "./filter-helper";
+import {ColorType} from "pngjs";
 
 export class ExtractSubImageFilter extends AbstractFilter {
 
@@ -28,12 +29,20 @@ export class ExtractSubImageFilter extends AbstractFilter {
       const targetCanvas = FilterHelper.createCanvas(sourceCanvas.width, sourceCanvas.height);
       const targetCX = FilterHelper.get2DContext(targetCanvas);
       DrawUtil.drawRect(targetCX, 0, 0, sourceCanvas.width, sourceCanvas.height, "rgba(0, 0, 0, 0)");
-      DrawUtil.drawPolygons(targetCX, extractionLayer.lines, 1, "#fff", true, false, true);
-      targetCX.drawImage(sourceCanvas, 0, 0, targetCanvas.width, targetCanvas.height, 0, 0, targetCanvas.width, targetCanvas.height);
+      extractionLayer.lines.forEach(line => {
+        if (line.length > 2) {
+          targetCX.save();
+          DrawUtil.drawPolygon(targetCX, line, 1, "#fff", true, false, true);
+          targetCX.drawImage(sourceCanvas, 0, 0, targetCanvas.width, targetCanvas.height, 0, 0, targetCanvas.width, targetCanvas.height);
+          targetCX.restore();
+        }
+      })
+
+
+      // DrawUtil.drawPolygon(targetCX, extractionLayer.lines[2], 1, "#fff", true, false, true);
+      // targetCX.drawImage(sourceCanvas, 0, 0, targetCanvas.width, targetCanvas.height, 0, 0, targetCanvas.width, targetCanvas.height);
       FilterHelper.canvasToImage(targetCanvas, target);
       return data;
     });
   }
 }
-
-

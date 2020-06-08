@@ -45,6 +45,8 @@ import {
 } from "./filter/apply-transformation-on-layer-filter";
 import {BinarizeColorThreshold} from "./filter/binarize-color-threshold";
 import {DrawBinaryLineFilter} from "./filter/draw-binary-line-filter";
+import {MeanFilter} from "./filter/mean-filter";
+import {ProcessMeanFilter} from "./filter/process-mean-filter";
 
 export class FilterCore {
 
@@ -55,7 +57,7 @@ export class FilterCore {
   }
 
   load() {
-   return new LoadFilter(this.services).doFilter()
+    return new LoadFilter(this.services).doFilter()
   }
 
   createAffineTransformationMatrix(sourcePos: number, targetPos: number, sourceLayerID: string, targetLayerID: string = sourceLayerID, targetDataName = 'affineMatrix') {
@@ -86,6 +88,14 @@ export class FilterCore {
 
   thresholdByPercentile(sourcePos: number, targetImagePos: number, thresholdPercentileOptions?: ThresholdPercentileOptions) {
     return new ThresholdByPercentile(this.services).doFilter(sourcePos, targetImagePos, thresholdPercentileOptions);
+  }
+
+  mean(sourcePos: number, targetData?: string) {
+    return new MeanFilter(this.services).doFilter(sourcePos, targetData);
+  }
+
+  processMean(sourceData = "mean_data") {
+    return new ProcessMeanFilter(this.services).doFilter(sourceData);
   }
 
   maxifyColorChannel(sourcePos: number, maxifyOptions?: MaxifyOptions) {

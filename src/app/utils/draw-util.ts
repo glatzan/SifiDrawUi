@@ -199,13 +199,13 @@ export default class DrawUtil {
     if (filled) {
       cx.fillStyle = color;
       cx.fill();
-    }else{
+    } else {
       cx.strokeStyle = color;
       cx.stroke();
     }
   }
 
-  static drawText(cx: CanvasRenderingContext2D, text: string,  x: number, y: number, style: string = "20px Arial", fontColor: string = "#ff0000") {
+  static drawText(cx: CanvasRenderingContext2D, text: string, x: number, y: number, style: string = "20px Arial", fontColor: string = "#ff0000") {
     cx.fillStyle = fontColor;
     cx.font = style;
     cx.fillText(text, x, y);
@@ -256,7 +256,7 @@ export default class DrawUtil {
     });
   }
 
-  static drawLayer(cx: CanvasRenderingContext2D, layer: Layer, drawPoint: boolean = true, color? : string, size?: number) {
+  static drawLayer(cx: CanvasRenderingContext2D, layer: Layer, drawPoint: boolean = true, color?: string, size?: number) {
     switch (layer.type) {
       case LayerType.Dot:
         layer.lines.forEach(points => {
@@ -296,7 +296,7 @@ export default class DrawUtil {
     })
   }
 
-  static loadImageFromBase64(image : ICImage, callback) {
+  static loadImageFromBase64(image: ICImage, callback) {
     const img = new Image();
     img.crossOrigin = 'Anonymous';
     img.onload = function () {

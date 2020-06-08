@@ -1,7 +1,6 @@
 import {AbstractFilter, Services} from "./abstract-filter";
 import {map} from "rxjs/operators";
 import {FilterData} from "../filter-data";
-import {CImage} from "../../model/CImage";
 import {FilterHelper} from "./filter-helper";
 import CImageUtil from "../../utils/cimage-util";
 
