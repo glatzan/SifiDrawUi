@@ -34,11 +34,17 @@ export class DrawBinaryLineFilter extends AbstractFilter {
 
           if (result.length) {
             for (let line of layer.lines) {
-              if(line.length < 2)
-                break;
+              if (line.length < 2)
+                continue;
 
               for (let i = 1; i < line.length; i++) {
-                this.drawLine(line[i-1], line[i])
+                if (line[i - 1].x < 0 || line[i].x < 0 || line[i - 1].x > this.image.width || line[i].x > this.image.width)
+                  continue;
+
+                if (line[i - 1].y < 0 || line[i].y < 0 || line[i - 1].y > this.image.height || line[i].y > this.image.height)
+                  continue;
+
+                this.drawLine(line[i - 1], line[i])
               }
             }
           }
