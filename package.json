@@ -26,7 +26,7 @@
     "algebra.js": "^0.2.6",
     "buffer": "^5.4.3",
     "cardinal-spline-js": "^2.3.10",
-    "chart.js": "^2.8.0",
+    "chart.js": "^2.9.4",
     "cubic-spline": "^2.0.0",
     "font-awesome": "^4.7.0",
     "hammerjs": "^2.0.8",
